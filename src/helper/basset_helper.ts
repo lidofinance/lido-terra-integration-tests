@@ -170,15 +170,20 @@ export default class AnchorbAsset {
     }
   }
 
-  public async send_cw20_token(sender: Wallet, amount: number): Promise<void> {
+  public async send_cw20_token(
+    sender: Wallet,
+    amount: number,
+    inputMsg: string,
+    contracAddr: string
+  ): Promise<void> {
     const msg = new MsgExecuteContract(
       sender.key.accAddress,
       this.contractInfo.anchor_basset_token.contractAddress,
       {
         send: {
-          contract: `${this.contractInfo.anchor_basset_hub.contractAddress}`,
+          contract: contracAddr,
           amount: `${amount}`,
-          msg: "eyJ1bmJvbmQiOnt9fQ==",
+          msg: inputMsg,
         },
       }
     );

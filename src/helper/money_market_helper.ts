@@ -358,7 +358,7 @@ export default class MoneyMarket {
   }
 }
 
-async function instantiate(
+export async function instantiate(
   sender: Wallet,
   codeId: number,
   initMsg: object,
@@ -370,7 +370,7 @@ async function instantiate(
   ]);
 }
 
-async function execute(
+export async function execute(
   sender: Wallet,
   contract: string,
   executeMsg: object,
@@ -382,7 +382,7 @@ async function execute(
   ]);
 }
 
-async function send_transaction(
+export async function send_transaction(
   sender: Wallet,
   msgs: Msg[]
 ): ReturnType<typeof terra.tx.broadcast> {

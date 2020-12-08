@@ -42,13 +42,6 @@ async function main() {
   await bluna.update_global(test9);
   await bluna.reward(test9);
   await bluna.reward(test3);
-  await bluna.send_cw20_token(test9, 10);
-  await bluna.send_cw20_token(test9, 10);
-  await bluna.send_cw20_token(test9, 10);
-  await delay(33000);
-  await bluna.send_cw20_token(test9, 10);
-  await delay(33000);
-  await bluna.send_cw20_token(test9, 10);
   let coin = new Coin("uluna", 1000);
   await bluna.bank_send(
     test9,

@@ -16,10 +16,8 @@ async function main() {
   await bluna.instantiate(test9);
   console.log("Instantiation is done");
   await bluna.params(test9);
-  await bluna.register_validator(test9);
-  //
+  await bluna.register_validator(test9, validator);
   await bluna.bond(test9, 200, validator);
-  //
   await bluna.bond(test9, 50, validator);
   await bluna.bond(test9, 50, validator);
   await bluna.bond(test3, 50, validator);
@@ -39,14 +37,47 @@ async function main() {
     }
   );
   console.log(rew);
-  await bluna.update_global(test9);
+  await bluna.update_global_index(test9);
   await bluna.reward(test9);
   await bluna.reward(test3);
+  await bluna.send_cw20_token(
+    test9,
+    10,
+    "eyJ1bmJvbmQiOnt9fQ==",
+    bluna.contractInfo["anchor_basset_hub"].contractAddress
+  );
+  await bluna.send_cw20_token(
+    test9,
+    10,
+    "eyJ1bmJvbmQiOnt9fQ==",
+    bluna.contractInfo["anchor_basset_hub"].contractAddress
+  );
+  await bluna.send_cw20_token(
+    test9,
+    10,
+    "eyJ1bmJvbmQiOnt9fQ==",
+    bluna.contractInfo["anchor_basset_hub"].contractAddress
+  );
+  await delay(33000);
+  await bluna.send_cw20_token(
+    test9,
+    10,
+    "eyJ1bmJvbmQiOnt9fQ==",
+    bluna.contractInfo["anchor_basset_hub"].contractAddress
+  );
+  await delay(33000);
+  await bluna.send_cw20_token(
+    test9,
+    10,
+    "eyJ1bmJvbmQiOnt9fQ==",
+    bluna.contractInfo["anchor_basset_hub"].contractAddress
+  );
   let coin = new Coin("uluna", 1000);
+  const coins = new Coins([coin]);
   await bluna.bank_send(
     test9,
     bluna.contractInfo.anchor_basset_hub.contractAddress,
-    coin
+    coins
   );
   await delay(66000);
 
@@ -84,7 +115,7 @@ async function main() {
     }
   );
   console.log(index1);
-  await bluna.update_global(test9);
+  await bluna.update_global_index(test9);
   const index = await terra.wasm.contractQuery(
     bluna.contractInfo.anchor_basset_reward.contractAddress,
     {

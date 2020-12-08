@@ -5,9 +5,7 @@ import {
   Msg,
   MsgExecuteContract,
   MsgInstantiateContract,
-  MsgSend,
   MsgStoreCode,
-  StdFee,
   Wallet,
 } from "@terra-money/terra.js";
 import * as fs from "fs";

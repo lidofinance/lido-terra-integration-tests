@@ -1,6 +1,9 @@
 import {
+  Coin,
+  Coins,
   isTxError,
   LocalTerra,
+  Msg,
   MsgExecuteContract,
   MsgInstantiateContract,
   MsgSend,
@@ -113,7 +116,7 @@ export default class AnchorbAsset {
     }
   }
 
-  public async mint(
+  public async bond(
     sender: Wallet,
     amount: number,
     validator: string
@@ -167,7 +170,7 @@ export default class AnchorbAsset {
     }
   }
 
-  public async handle_burn(sender: Wallet, amount: number): Promise<void> {
+  public async send_cw20_token(sender: Wallet, amount: number): Promise<void> {
     const msg = new MsgExecuteContract(
       sender.key.accAddress,
       this.contractInfo.anchor_basset_token.contractAddress,
@@ -191,7 +194,7 @@ export default class AnchorbAsset {
     }
   }
 
-  public async transfer(
+  public async transfer_cw20_token(
     sender: Wallet,
     rcv: Wallet,
     amount: number
@@ -216,8 +219,6 @@ export default class AnchorbAsset {
     if (isTxError(result)) {
       throw new Error(`Couldn't run: ${result.raw_log}`);
     }
-    // console.log(result)
-    // console.log("TRANSFER IS DONE");
   }
 
   public async finish(sender: Wallet): Promise<void> {
@@ -280,24 +281,6 @@ export default class AnchorbAsset {
     }
   }
 
-  public async send(sender: Wallet): Promise<void> {
-    const msg = new MsgSend(
-      sender.key.accAddress,
-      this.contractInfo.anchor_basset_hub.contractAddress,
-      { uluna: 1000 }
-    );
-
-    const tx = await sender.createAndSignTx({
-      msgs: [msg],
-      fee: new StdFee(2000000, { uluna: 10000000 }),
-    });
-
-    const result = await terra.tx.broadcast(tx);
-    if (isTxError(result)) {
-      throw new Error(`Couldn't run: ${result.raw_log}`);
-    }
-  }
-
   public async slashing(sender: Wallet): Promise<void> {
     const msg = new MsgExecuteContract(
       sender.key.accAddress,
@@ -317,4 +300,83 @@ export default class AnchorbAsset {
       throw new Error(`Couldn't run: ${result.raw_log}`);
     }
   }
+
+  public async increase_allowance(
+    sender: Wallet,
+    spender: string,
+    amount: number,
+    height: number
+  ): Promise<void> {
+    const execution = await execute(
+      sender,
+      this.contractInfo.anchor_basset_token.contractAddress,
+      {
+        increase_allowance: {
+          spender: spender,
+          amount: `${amount}`,
+          expires: {
+            at_height: `${height}`,
+          },
+        },
+      }
+    );
+    if (isTxError(execution)) {
+      throw new Error(`Couldn't run: ${execution.raw_log}`);
+    }
+  }
+
+  public async bank_send(
+    sender: Wallet,
+    receiver: string,
+    amount: Coin
+  ): Promise<void> {
+    const msg = await execute_bank(sender, amount, receiver);
+    if (isTxError(msg)) {
+      throw new Error(`Couldn't run: ${msg.raw_log}`);
+    }
+  }
+}
+
+// TODO: move all transactions using the following codes.
+async function instantiate(
+  sender: Wallet,
+  codeId: number,
+  initMsg: object,
+  tokens?: Coins
+): ReturnType<typeof send_transaction> {
+  console.error(`instantiate ${codeId} w/ ${JSON.stringify(initMsg)}`);
+  return await send_transaction(sender, [
+    new MsgInstantiateContract(sender.key.accAddress, codeId, initMsg, tokens),
+  ]);
+}
+
+async function execute(
+  sender: Wallet,
+  contract: string,
+  executeMsg: object,
+  tokens?: Coins
+): ReturnType<typeof send_transaction> {
+  console.error(`execute ${contract} w/ ${JSON.stringify(executeMsg)}`);
+  return await send_transaction(sender, [
+    new MsgExecuteContract(sender.key.accAddress, contract, executeMsg, tokens),
+  ]);
+}
+
+async function execute_bank(
+  sender: Wallet,
+  amount: Coin,
+  to: string
+): ReturnType<typeof send_transaction> {
+  return await send_transaction(sender, [
+    new MsgSend(sender.key.accAddress, to, [amount]),
+  ]);
+}
+
+async function send_transaction(
+  sender: Wallet,
+  msgs: Msg[]
+): ReturnType<typeof terra.tx.broadcast> {
+  return Promise.resolve()
+    .then(() => sender.createAndSignTx({ msgs, gasAdjustment: 1.4 }))
+    .then((tx) => terra.tx.broadcast(tx));
 }

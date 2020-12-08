@@ -15,6 +15,7 @@ import * as fs from "fs";
 const terra = new LocalTerra();
 const wallet = terra.wallet;
 
+// TODO: anchor_token should be added in contracts.
 const contracts = [
   "moneymarket_custody",
   "moneymarket_interest",
@@ -261,7 +262,100 @@ export default class MoneyMarket {
     }
   }
 
-  // TODO: Add more messages
+  public async deposit_stable(sender: Wallet): Promise<void> {
+    let contract = this.contractInfo["moneymarket_market"].contractAddress;
+    const depositExecution = await execute(sender, contract, {
+      deposit_stable: {},
+    });
+    if (isTxError(depositExecution)) {
+      throw new Error(`Couldn't run: ${depositExecution.raw_log}`);
+    }
+  }
+
+  public async borrow_stable(
+    sender: Wallet,
+    borrowAmount: number,
+    to?: string
+  ): Promise<void> {
+    let contract = this.contractInfo["moneymarket_market"].contractAddress;
+    const borrowExecution = await execute(sender, contract, {
+      borrow_stable: {
+        borrow_amount: `${borrowAmount}`,
+        to: to,
+      },
+    });
+    if (isTxError(borrowExecution)) {
+      throw new Error(`Couldn't run: ${borrowExecution.raw_log}`);
+    }
+  }
+
+  public async repay_stable(sender: Wallet): Promise<void> {
+    let contract = this.contractInfo["moneymarket_market"].contractAddress;
+    const repayExecution = await execute(sender, contract, {
+      repay_stable: {},
+    });
+    if (isTxError(repayExecution)) {
+      throw new Error(`Couldn't run: ${repayExecution.raw_log}`);
+    }
+  }
+
+  public async withdraw_collateral(
+    sender: Wallet,
+    amount?: number
+  ): Promise<void> {
+    let contract = this.contractInfo["moneymarket_custody"].contractAddress;
+    const withdrawExecution = await execute(sender, contract, {
+      withdraw_collateral: {
+        amount: `${amount}`,
+      },
+    });
+    if (isTxError(withdrawExecution)) {
+      throw new Error(`Couldn't run: ${withdrawExecution.raw_log}`);
+    }
+  }
+
+  public async overseer_lock_collateral(
+    sender: Wallet,
+    collaterals: object[]
+  ): Promise<void> {
+    const contract = this.contractInfo["moneymarket_overseer"].contractAddress;
+    const lockCollaterallExecution = await execute(sender, contract, {
+      lock_collateral: {
+        collaterals: JSON.stringify(collaterals),
+      },
+    });
+    if (isTxError(lockCollaterallExecution)) {
+      throw new Error(`Couldn't run: ${lockCollaterallExecution.raw_log}`);
+    }
+  }
+
+  public async overseer_unlock_collateral(
+    sender: Wallet,
+    collaterals: object[]
+  ): Promise<void> {
+    const contract = this.contractInfo["moneymarket_overseer"].contractAddress;
+    const unlockCollaterallExecution = await execute(sender, contract, {
+      unlock_collateral: {
+        collaterals: JSON.stringify(collaterals),
+      },
+    });
+    if (isTxError(unlockCollaterallExecution)) {
+      throw new Error(`Couldn't run: ${unlockCollaterallExecution.raw_log}`);
+    }
+  }
+
+  public async execute_epoch_operations(
+    sender: Wallet,
+    collaterals: object[]
+  ): Promise<void> {
+    const contract = this.contractInfo["moneymarket_overseer"].contractAddress;
+    const epochOperationExecution = await execute(sender, contract, {
+      execute_epoch_operations: {},
+    });
+    if (isTxError(epochOperationExecution)) {
+      throw new Error(`Couldn't run: ${epochOperationExecution.raw_log}`);
+    }
+  }
 }
 
 async function instantiate(
@@ -293,6 +387,6 @@ async function send_transaction(
   msgs: Msg[]
 ): ReturnType<typeof terra.tx.broadcast> {
   return Promise.resolve()
-    .then(() => sender.createAndSignTx({ msgs }))
+    .then(() => sender.createAndSignTx({ msgs, gasAdjustment: 1.4 }))
     .then((tx) => terra.tx.broadcast(tx));
 }

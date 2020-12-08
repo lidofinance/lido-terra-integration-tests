@@ -1,4 +1,4 @@
-import { LocalTerra } from "@terra-money/terra.js";
+import { Coin, Coins, LocalTerra } from "@terra-money/terra.js";
 import basset from "./helper/basset_helper";
 
 const terra = new LocalTerra();
@@ -17,12 +17,14 @@ async function main() {
   console.log("Instantiation is done");
   await bluna.params(test9);
   await bluna.register_validator(test9);
-  await bluna.mint(test9, 200, validator);
-  await bluna.mint(test9, 50, validator);
-  await bluna.mint(test9, 50, validator);
-  await bluna.mint(test3, 50, validator);
-  await bluna.mint(test3, 50, validator);
-  await bluna.mint(test3, 50, validator);
+  //
+  await bluna.bond(test9, 200, validator);
+  //
+  await bluna.bond(test9, 50, validator);
+  await bluna.bond(test9, 50, validator);
+  await bluna.bond(test3, 50, validator);
+  await bluna.bond(test3, 50, validator);
+  await bluna.bond(test3, 50, validator);
   const b = await terra.wasm.contractQuery(
     bluna.contractInfo.anchor_basset_token.contractAddress,
     {
@@ -40,14 +42,19 @@ async function main() {
   await bluna.update_global(test9);
   await bluna.reward(test9);
   await bluna.reward(test3);
-  await bluna.handle_burn(test9, 10);
-  await bluna.handle_burn(test9, 10);
-  await bluna.handle_burn(test9, 10);
+  await bluna.send_cw20_token(test9, 10);
+  await bluna.send_cw20_token(test9, 10);
+  await bluna.send_cw20_token(test9, 10);
   await delay(33000);
-  await bluna.handle_burn(test9, 10);
+  await bluna.send_cw20_token(test9, 10);
   await delay(33000);
-  await bluna.handle_burn(test9, 10);
-  await bluna.send(test9);
+  await bluna.send_cw20_token(test9, 10);
+  let coin = new Coin("uluna", 1000);
+  await bluna.bank_send(
+    test9,
+    bluna.contractInfo.anchor_basset_hub.contractAddress,
+    coin
+  );
   await delay(66000);
 
   const block = await terra.tendermint.blockInfo();
@@ -76,7 +83,7 @@ async function main() {
     }
   );
   console.log(query2);
-  await bluna.transfer(test3, test9, 50);
+  await bluna.transfer_cw20_token(test3, test9, 50);
   const index1 = await terra.wasm.contractQuery(
     bluna.contractInfo.anchor_basset_reward.contractAddress,
     {
@@ -92,7 +99,7 @@ async function main() {
     }
   );
   console.log(index);
-  await bluna.transfer(test9, test3, 50);
+  await bluna.transfer_cw20_token(test9, test3, 50);
   const reward2 = await terra.wasm.contractQuery(
     bluna.contractInfo.anchor_basset_reward.contractAddress,
     {
@@ -139,7 +146,7 @@ async function main() {
     }
   );
   console.log(bal);
-  await bluna.transfer(test3, test2, 10);
+  await bluna.transfer_cw20_token(test3, test2, 10);
   const user = await terra.wasm.contractQuery(
     bluna.contractInfo.anchor_basset_reward.contractAddress,
     {

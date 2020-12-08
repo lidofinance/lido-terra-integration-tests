@@ -243,6 +243,25 @@ export default class MoneyMarket {
       mmCustody.logs[0].eventsByType.instantiate_contract.contract_address[0];
     this.contractInfo["moneymarket_custody"].contractAddress = custodyAddr;
   }
+
+  public async borrow(
+    sender: Wallet,
+    amount: string,
+    withdrawTo?: string
+  ): Promise<void> {
+    let contract = this.contractInfo["moneymarket_market"].contractAddress;
+    const borrowExecution = await execute(sender, contract, {
+      borrow_stable: {
+        borrow_amount: amount,
+        to: withdrawTo,
+      },
+    });
+    if (isTxError(borrowExecution)) {
+      throw new Error(`Couldn't run: ${borrowExecution.raw_log}`);
+    }
+  }
+
+  // TODO: Add more messages
 }
 
 async function instantiate(
@@ -254,6 +273,18 @@ async function instantiate(
   console.error(`instantiate ${codeId} w/ ${JSON.stringify(initMsg)}`);
   return await send_transaction(sender, [
     new MsgInstantiateContract(sender.key.accAddress, codeId, initMsg, tokens),
+  ]);
+}
+
+async function execute(
+  sender: Wallet,
+  contract: string,
+  executeMsg: object,
+  tokens?: Coins
+): ReturnType<typeof send_transaction> {
+  console.error(`execute ${contract} w/ ${JSON.stringify(executeMsg)}`);
+  return await send_transaction(sender, [
+    new MsgExecuteContract(sender.key.accAddress, contract, executeMsg, tokens),
   ]);
 }
 

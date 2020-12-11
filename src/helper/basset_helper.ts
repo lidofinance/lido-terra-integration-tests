@@ -54,14 +54,19 @@ export default class AnchorbAsset {
     }
   }
 
-  public async instantiate(sender: Wallet): Promise<void> {
+  public async instantiate(
+    sender: Wallet,
+    name: string,
+    symbol: string,
+    decimals: number
+  ): Promise<void> {
     const instantiate = new MsgInstantiateContract(
       sender.key.accAddress,
       this.contractInfo.anchor_basset_hub.codeId,
       {
-        name: "bluna",
-        symbol: "BLUNA",
-        decimals: 6,
+        name: name,
+        symbol: symbol,
+        decimals: decimals,
         reward_code_id: this.contractInfo.anchor_basset_reward.codeId,
         token_code_id: this.contractInfo.anchor_basset_token.codeId,
       }
@@ -116,8 +121,7 @@ export default class AnchorbAsset {
     validator: string
   ): Promise<void> {
     const coin = new Coin("uluna", amount);
-    const coins = [{ uluna: amount }];
-    const coi = new Coins([coin]);
+    const coins = new Coins([coin]);
     const contract = this.contractInfo["anchor_basset_hub"].contractAddress;
     const bondExecution = await execute(
       sender,
@@ -127,7 +131,7 @@ export default class AnchorbAsset {
           validator: `${validator}`,
         },
       },
-      coi
+      coins
     );
     if (isTxError(bondExecution)) {
       throw new Error(`Couldn't run: ${bondExecution.raw_log}`);
@@ -138,10 +142,10 @@ export default class AnchorbAsset {
     const contract = this.contractInfo.anchor_basset_hub.contractAddress;
     const paramsExecution = await execute(sender, contract, {
       update_params: {
-        epoch_time: 30,
+        epoch_time: 31,
         underlying_coin_denom: "uluna",
-        undelegated_epoch: 2,
-        peg_recovery_fee: "0",
+        undelegated_epoch: 7,
+        peg_recovery_fee: "0.001",
         er_threshold: "1",
         swap_denom: "uusd",
       },

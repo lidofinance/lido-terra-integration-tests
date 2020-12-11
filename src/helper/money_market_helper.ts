@@ -1,4 +1,5 @@
 import {
+  Coin,
   Coins,
   isTxError,
   LocalTerra,
@@ -107,18 +108,18 @@ export default class MoneyMarket {
   // initialize liquidation contract
   public async instantiate_liquidation(
     sender: Wallet,
-    safeRatio: string,
-    minLiquidation: string,
-    liquidationThreshold: string
+    safeRatio: number,
+    minLiquidation: number,
+    liquidationThreshold: number
   ): Promise<void> {
     const mmLiquidation = await instantiate(
       sender,
       this.contractInfo.moneymarket_liquidation.codeId,
       {
         owner: sender.key.accAddress,
-        safe_ratio: safeRatio,
-        min_liquidation: minLiquidation,
-        liquidation_threshold: liquidationThreshold,
+        safe_ratio: `${safeRatio}`,
+        min_liquidation: `${minLiquidation}`,
+        liquidation_threshold: `${liquidationThreshold}`,
       }
     );
 
@@ -260,11 +261,18 @@ export default class MoneyMarket {
     }
   }
 
-  public async deposit_stable(sender: Wallet): Promise<void> {
+  public async deposit_stable(sender: Wallet, amount: number): Promise<void> {
     let contract = this.contractInfo["moneymarket_market"].contractAddress;
-    const depositExecution = await execute(sender, contract, {
-      deposit_stable: {},
-    });
+    const coin = new Coin("uusd", amount);
+    const coins = new Coins([coin]);
+    const depositExecution = await execute(
+      sender,
+      contract,
+      {
+        deposit_stable: {},
+      },
+      coins
+    );
     if (isTxError(depositExecution)) {
       throw new Error(`Couldn't run: ${depositExecution.raw_log}`);
     }
@@ -287,11 +295,18 @@ export default class MoneyMarket {
     }
   }
 
-  public async repay_stable(sender: Wallet): Promise<void> {
+  public async repay_stable(sender: Wallet, amount: number): Promise<void> {
+    const coin = new Coin("uusd", amount);
+    const coins = new Coins([coin]);
     let contract = this.contractInfo["moneymarket_market"].contractAddress;
-    const repayExecution = await execute(sender, contract, {
-      repay_stable: {},
-    });
+    const repayExecution = await execute(
+      sender,
+      contract,
+      {
+        repay_stable: {},
+      },
+      coins
+    );
     if (isTxError(repayExecution)) {
       throw new Error(`Couldn't run: ${repayExecution.raw_log}`);
     }
@@ -342,16 +357,44 @@ export default class MoneyMarket {
     }
   }
 
-  public async execute_epoch_operations(
+  public async overseer_whitelist(
     sender: Wallet,
-    collaterals: object[]
+    collateralToken: string,
+    ltv: string
   ): Promise<void> {
+    const contract = this.contractInfo["moneymarket_overseer"].contractAddress;
+    const unlockCollaterallExecution = await execute(sender, contract, {
+      whitelist: {
+        collateral_token: collateralToken,
+        custody_contract: this.contractInfo["moneymarket_custody"]
+          .contractAddress,
+        ltv: ltv,
+      },
+    });
+    if (isTxError(unlockCollaterallExecution)) {
+      throw new Error(`Couldn't run: ${unlockCollaterallExecution.raw_log}`);
+    }
+  }
+
+  public async execute_epoch_operations(sender: Wallet): Promise<void> {
     const contract = this.contractInfo["moneymarket_overseer"].contractAddress;
     const epochOperationExecution = await execute(sender, contract, {
       execute_epoch_operations: {},
     });
     if (isTxError(epochOperationExecution)) {
       throw new Error(`Couldn't run: ${epochOperationExecution.raw_log}`);
+    }
+  }
+
+  public async liquidation(sender: Wallet, borrower: string): Promise<void> {
+    const contract = this.contractInfo["moneymarket_overseer"].contractAddress;
+    const liquidationExecution = await execute(sender, contract, {
+      liquidate_collateral: {
+        borrower: borrower,
+      },
+    });
+    if (isTxError(liquidationExecution)) {
+      throw new Error(`Couldn't run: ${liquidationExecution.raw_log}`);
     }
   }
 }

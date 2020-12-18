@@ -1,13 +1,12 @@
 {
   "compilerOptions": {
-    "target": "es2018",
+    "target": "esnext",
     "types": ["node"],
     "module": "commonjs",
-    "lib": ["es2018"],
+    "lib": ["esnext"],
     "declaration": true,
     "outDir": "lib",
     "resolveJsonModule": true,
-    "strict": true
   },
   "include": ["./src/**/*"],
   "exclude": ["./src/**/*.test.ts"]

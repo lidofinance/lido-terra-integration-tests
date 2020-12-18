@@ -2,19 +2,13 @@ import {
   Coin,
   Coins,
   isTxError,
-  LocalTerra,
-  Msg,
-  MsgExecuteContract,
-  MsgInstantiateContract,
   MsgSend,
   MsgStoreCode,
   StdFee,
   Wallet,
 } from "@terra-money/terra.js";
 import * as fs from "fs";
-import { instantiate, execute, send_transaction } from "./money_market_helper";
-
-const terra = new LocalTerra();
+import { execute, instantiate, send_transaction } from "./money_market_helper";
 
 const contracts = [
   "anchor_basset_hub",
@@ -33,15 +27,16 @@ export default class AnchorbAsset {
 
   public async storeCodes(sender: Wallet, location: string): Promise<void> {
     for (const c of contracts) {
-      const bytecode = fs.readFileSync(__dirname + `${location}/${c}.wasm`);
+      const bytecode = fs.readFileSync(`${location}/${c}.wasm`);
       const storeCode = new MsgStoreCode(
         sender.key.accAddress,
         bytecode.toString("base64")
       );
       const tx = await sender.createAndSignTx({
         msgs: [storeCode],
+        fee: new StdFee(10000000, "1000000uusd")
       });
-      const result = await terra.tx.broadcast(tx);
+      const result = await sender.lcd.tx.broadcast(tx);
       if (isTxError(result)) {
         throw new Error(`Couldn't upload ${c}: ${result.raw_log}`);
       }
@@ -221,7 +216,7 @@ export default class AnchorbAsset {
   public async send_cw20_token(
     sender: Wallet,
     amount: number,
-    inputMsg: string,
+    inputMsg: object,
     contracAddr: string
   ): Promise<void> {
     const contract = this.contractInfo.anchor_basset_token.contractAddress;
@@ -229,7 +224,7 @@ export default class AnchorbAsset {
       send: {
         contract: contracAddr,
         amount: `${amount}`,
-        msg: inputMsg,
+        msg: Buffer.from(JSON.stringify(inputMsg)).toString('base64'),
       },
     });
     if (isTxError(sendExecuttion)) {

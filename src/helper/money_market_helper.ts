@@ -1,18 +1,17 @@
 import {
+  BlockTxBroadcastResult,
   Coin,
   Coins,
   isTxError,
-  LocalTerra,
+  LCDClient,
   Msg,
   MsgExecuteContract,
   MsgInstantiateContract,
   MsgStoreCode,
+  StdFee,
   Wallet,
 } from "@terra-money/terra.js";
 import * as fs from "fs";
-
-const terra = new LocalTerra();
-const wallet = terra.wallet;
 
 // TODO: anchor_token should be added in contracts.
 const contracts = [
@@ -35,15 +34,16 @@ export default class MoneyMarket {
 
   public async storeCodes(sender: Wallet, location: string): Promise<void> {
     for (const c of contracts) {
-      const bytecode = fs.readFileSync(__dirname + `${location}/${c}.wasm`);
+      const bytecode = fs.readFileSync(`${location}/${c}.wasm`);
       const storeCode = new MsgStoreCode(
         sender.key.accAddress,
         bytecode.toString("base64")
       );
       const tx = await sender.createAndSignTx({
         msgs: [storeCode],
+        fee: new StdFee(10000000, "1000000uusd")
       });
-      const result = await terra.tx.broadcast(tx);
+      const result = await sender.lcd.tx.broadcast(tx);
       if (isTxError(result)) {
         throw new Error(`Couldn't upload ${c}: ${result.raw_log}`);
       }
@@ -100,9 +100,9 @@ export default class MoneyMarket {
         `Couldn't upload ${this.contractInfo.moneymarket_.codeId}: ${mmOracle.raw_log}`
       );
     }
-    const oracleAddr =
-      mmOracle.logs[0].eventsByType.instantiate_contract.contract_address[0];
+    const oracleAddr = mmOracle.logs[0].eventsByType.instantiate_contract.contract_address[0];
     this.contractInfo["moneymarket_oracle"].contractAddress = oracleAddr;
+    console.log("!!!!!!!!!!!!!!!!!!!!!!", oracleAddr)
   }
 
   // initialize liquidation contract
@@ -131,41 +131,41 @@ export default class MoneyMarket {
     const liquidationAddr =
       mmLiquidation.logs[0].eventsByType.instantiate_contract
         .contract_address[0];
-    this.contractInfo[
-      "moneymarket_liquidation"
-    ].contractAddress = liquidationAddr;
+    this.contractInfo["moneymarket_liquidation"].contractAddress = liquidationAddr;
   }
 
   // initialize money market contract
   public async instantiate_money(
     sender: Wallet,
+    terraswapTokenCodeId: number,
     stableDenom: string,
     reserveFactor: number,
-    anchorToken: string
   ): Promise<void> {
-    const mmInterest = this.contractInfo["moneymarket_interest"]
-      .contractAddress;
+    const mmInterest = this.contractInfo["moneymarket_interest"].contractAddress;
     const mmMarket = await instantiate(
       sender,
-      this.contractInfo.moneymarket_liquidation.codeId,
+      this.contractInfo.moneymarket_market.codeId,
       {
-        owner_addr: sender,
+        owner_addr: sender.key.accAddress,
+        anchor_token_code_id: terraswapTokenCodeId,
         interest_model: mmInterest,
         stable_denom: stableDenom,
-        reserve_factor: reserveFactor,
-        anchor_token_code_id: anchorToken,
+        reserve_factor: reserveFactor.toFixed(10),
       }
     );
 
     if (isTxError(mmMarket)) {
       throw new Error(
-        `Couldn't upload ${this.contractInfo.moneymarket_liquidation.codeId}: ${mmMarket.raw_log}`
+        `Couldn't upload ${this.contractInfo.moneymarket_market.codeId}: ${mmMarket.raw_log}`
       );
     }
-    const marketAddr =
-      mmMarket.logs[0].eventsByType.instantiate_contract.contract_address[0];
-    const anchorTokenAddr =
-      mmMarket.logs[0].eventsByType.instantiate_contract.contract_address[1];
+
+    const anchorToken = mmMarket.logs[0].eventsByType.instantiate_contract.contract_address[0];
+    const marketAddr = mmMarket.logs[0].eventsByType.instantiate_contract.contract_address[1]
+    this.contractInfo["anchorToken"] = {
+      codeId: terraswapTokenCodeId,
+      contractAddress: anchorToken,
+    }
     this.contractInfo["moneymarket_market"].contractAddress = marketAddr;
   }
 
@@ -179,11 +179,10 @@ export default class MoneyMarket {
   ): Promise<void> {
     const oracleAddr = this.contractInfo["moneymarket_oracle"].contractAddress;
     const marketAddr = this.contractInfo["moneymarket_market"].contractAddress;
-    const liquidationAddr = this.contractInfo["moneymarket_liquidation"]
-      .contractAddress;
+    const liquidationAddr = this.contractInfo["moneymarket_liquidation"].contractAddress;
     const mmOverseer = await instantiate(
       sender,
-      this.contractInfo.moneymarket_liquidation.codeId,
+      this.contractInfo.moneymarket_overseer.codeId,
       {
         owner_addr: sender.key.accAddress,
         oracle_contract: oracleAddr,
@@ -191,9 +190,9 @@ export default class MoneyMarket {
         liquidation_model: liquidationAddr,
         stable_denom: stableDenom,
         epoch_period: epochPeriod,
-        distribution_threshold: distributionThreshold,
-        target_deposit_rate: targetDepositRate,
-        buffer_distribution_rate: bufferDistributionRate,
+        distribution_threshold: distributionThreshold.toFixed(10),
+        target_deposit_rate: targetDepositRate.toFixed(10),
+        buffer_distribution_rate: bufferDistributionRate.toFixed(10),
       }
     );
     if (isTxError(mmOverseer)) {
@@ -223,7 +222,7 @@ export default class MoneyMarket {
 
     const mmCustody = await instantiate(
       sender,
-      this.contractInfo.moneymarket_liquidation.codeId,
+      this.contractInfo.moneymarket_custody.codeId,
       {
         collateral_token: bAssetToken,
         overseer_contract: overseerAddr,
@@ -281,7 +280,7 @@ export default class MoneyMarket {
   public async borrow_stable(
     sender: Wallet,
     borrowAmount: number,
-    to?: string
+    to: string | undefined
   ): Promise<void> {
     let contract = this.contractInfo["moneymarket_market"].contractAddress;
     const borrowExecution = await execute(sender, contract, {
@@ -334,7 +333,7 @@ export default class MoneyMarket {
     const contract = this.contractInfo["moneymarket_overseer"].contractAddress;
     const lockCollaterallExecution = await execute(sender, contract, {
       lock_collateral: {
-        collaterals: JSON.stringify(collaterals),
+        collaterals: collaterals,
       },
     });
     if (isTxError(lockCollaterallExecution)) {
@@ -349,8 +348,8 @@ export default class MoneyMarket {
     const contract = this.contractInfo["moneymarket_overseer"].contractAddress;
     const unlockCollaterallExecution = await execute(sender, contract, {
       unlock_collateral: {
-        collaterals: JSON.stringify(collaterals),
-      },
+        collaterals: collaterals
+      }
     });
     if (isTxError(unlockCollaterallExecution)) {
       throw new Error(`Couldn't run: ${unlockCollaterallExecution.raw_log}`);
@@ -366,8 +365,7 @@ export default class MoneyMarket {
     const unlockCollaterallExecution = await execute(sender, contract, {
       whitelist: {
         collateral_token: collateralToken,
-        custody_contract: this.contractInfo["moneymarket_custody"]
-          .contractAddress,
+        custody_contract: this.contractInfo["moneymarket_custody"].contractAddress,
         ltv: ltv,
       },
     });
@@ -395,6 +393,26 @@ export default class MoneyMarket {
     });
     if (isTxError(liquidationExecution)) {
       throw new Error(`Couldn't run: ${liquidationExecution.raw_log}`);
+    }
+  }
+
+  // anchor token only
+  public async send_cw20_token(
+    sender: Wallet,
+    amount: number,
+    inputMsg: object,
+    contracAddr: string
+  ): Promise<void> {
+    const contract = this.contractInfo.anchorToken.contractAddress;
+    const sendExecuttion = await execute(sender, contract, {
+      send: {
+        contract: contracAddr,
+        amount: `${amount}`,
+        msg: Buffer.from(JSON.stringify(inputMsg)).toString('base64'),
+      },
+    });
+    if (isTxError(sendExecuttion)) {
+      throw new Error(`Couldn't run: ${sendExecuttion.raw_log}`);
     }
   }
 }
@@ -426,8 +444,8 @@ export async function execute(
 export async function send_transaction(
   sender: Wallet,
   msgs: Msg[]
-): ReturnType<typeof terra.tx.broadcast> {
+): Promise<BlockTxBroadcastResult> {
   return Promise.resolve()
-    .then(() => sender.createAndSignTx({ msgs, gasAdjustment: 1.4 }))
-    .then((tx) => terra.tx.broadcast(tx));
+    .then(() => sender.createAndSignTx({ msgs, gasAdjustment: 1.4, fee: new StdFee(10000000, "1000000uusd") }))
+    .then((tx) => sender.lcd.tx.broadcast(tx));
 }

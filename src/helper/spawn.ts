@@ -27,9 +27,13 @@ export default class Anchor {
   }
 
   public async instantiate(): Promise<void> {
-    await this.bAsset.instantiate(admin, "Bonded LUNA Token", "UBLUNA", 6);
-    await this.bAsset.params(admin);
+    await this.bAsset.instantiate_hub(admin);
+    await this.bAsset.instantiate_reward(admin);
+    await this.bAsset.instantiate_token(admin);
+    await this.bAsset.register_contracts(admin);
+
     await this.terraswap.instantiate_terraswap(admin);
+
     await this.moneyMarket.instantiate_interest(admin, 0.02, 0.2);
     await this.moneyMarket.instantiate_oracle(admin, "uusd");
     await this.moneyMarket.instantiate_liquidation(admin, 0.8, 10, 200);

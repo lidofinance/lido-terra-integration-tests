@@ -54,50 +54,113 @@ export default class AnchorbAsset {
     }
   }
 
-  public async instantiate(
-    sender: Wallet,
-    name: string,
-    symbol: string,
-    decimals: number
-  ): Promise<void> {
-    const instantiate = new MsgInstantiateContract(
-      sender.key.accAddress,
+  public async instantiate_hub(sender: Wallet): Promise<void> {
+    const init = await instantiate(
+      sender,
       this.contractInfo.anchor_basset_hub.codeId,
       {
-        name: name,
-        symbol: symbol,
-        decimals: decimals,
-        reward_code_id: this.contractInfo.anchor_basset_reward.codeId,
-        token_code_id: this.contractInfo.anchor_basset_token.codeId,
+        epoch_time: 30,
+        underlying_coin_denom: "uluna",
+        undelegated_epoch: 2,
+        peg_recovery_fee: "0",
+        er_threshold: "1",
+        reward_denom: "uusd",
       }
     );
-    const tx = await sender.createAndSignTx({
-      msgs: [instantiate],
-    });
-    const result = await terra.tx.broadcast(tx);
-    if (isTxError(result)) {
-      throw new Error(`Couldn't instantiate: ${result.raw_log}`);
+    if (isTxError(init)) {
+      throw new Error(`Couldn't instantiate: ${init.raw_log}`);
     }
 
     const contractAddress =
-      result.logs[0].eventsByType.instantiate_contract.contract_address[2];
-    const contractAddress2 =
-      result.logs[0].eventsByType.instantiate_contract.contract_address[1];
-    const contractAddress3 =
-      result.logs[0].eventsByType.instantiate_contract.contract_address[0];
+      init.logs[0].eventsByType.instantiate_contract.contract_address[0];
     this.contractInfo.anchor_basset_hub.contractAddress = contractAddress;
-    this.contractInfo.anchor_basset_reward.contractAddress = contractAddress2;
-    this.contractInfo.anchor_basset_token.contractAddress = contractAddress3;
 
     console.log(
       `anchor_basset_hub: { codeId: ${this.contractInfo.anchor_basset_hub.codeId}, contractAddress: "${this.contractInfo.anchor_basset_hub.contractAddress}"},`
     );
-    console.log(
-      `anchor_basset_reward: { codeId: ${this.contractInfo.anchor_basset_reward.codeId},  contractAddress: "${this.contractInfo.anchor_basset_reward.contractAddress}"},`
+  }
+
+  public async instantiate_reward(sender: Wallet): Promise<void> {
+    const init = await instantiate(
+      sender,
+      this.contractInfo.anchor_basset_reward.codeId,
+      {
+        hub_contract: `${this.contractInfo["anchor_basset_hub"].contractAddress}`,
+        reward_denom: "uusd",
+      }
     );
+    if (isTxError(init)) {
+      throw new Error(`Couldn't instantiate: ${init.raw_log}`);
+    }
+
+    const contractAddress =
+      init.logs[0].eventsByType.instantiate_contract.contract_address[0];
+    this.contractInfo.anchor_basset_reward.contractAddress = contractAddress;
+
     console.log(
-      `anchor_basset_token: { codeId: ${this.contractInfo.anchor_basset_token.codeId}, contractAddress: "${this.contractInfo.anchor_basset_token.contractAddress}"}`
+      `anchor_basset_reward: { codeId: ${this.contractInfo.anchor_basset_reward.codeId}, contractAddress: "${this.contractInfo.anchor_basset_reward.contractAddress}"},`
     );
+  }
+
+  public async instantiate_token(sender: Wallet): Promise<void> {
+    const init = await instantiate(
+      sender,
+      this.contractInfo.anchor_basset_token.codeId,
+      {
+        name: "bluna",
+        symbol: "BLUNA",
+        decimals: 6,
+        initial_balances: [],
+        mint: {
+          minter: `${this.contractInfo["anchor_basset_hub"].contractAddress}`,
+          cap: null,
+        },
+        hub_contract: `${this.contractInfo["anchor_basset_hub"].contractAddress}`,
+      }
+    );
+    if (isTxError(init)) {
+      throw new Error(`Couldn't instantiate: ${init.raw_log}`);
+    }
+
+    const contractAddress =
+      init.logs[0].eventsByType.instantiate_contract.contract_address[0];
+    this.contractInfo.anchor_basset_token.contractAddress = contractAddress;
+
+    console.log(
+      `anchor_basset_token: { codeId: ${this.contractInfo.anchor_basset_token.codeId}, contractAddress: "${this.contractInfo.anchor_basset_token.contractAddress}"},`
+    );
+  }
+
+  public async register_contracts(sender: Wallet) {
+    const msg = await execute(
+      sender,
+      this.contractInfo["anchor_basset_hub"].contractAddress,
+      {
+        register_subcontracts: {
+          contract: "reward",
+          contract_address: `${this.contractInfo["anchor_basset_reward"].contractAddress}`,
+        },
+      }
+    );
+
+    if (isTxError(msg)) {
+      throw new Error(`Couldn't run: ${msg.raw_log}`);
+    }
+
+    const msg2 = await execute(
+      sender,
+      this.contractInfo["anchor_basset_hub"].contractAddress,
+      {
+        register_subcontracts: {
+          contract: "token",
+          contract_address: `${this.contractInfo["anchor_basset_token"].contractAddress}`,
+        },
+      }
+    );
+
+    if (isTxError(msg2)) {
+      throw new Error(`Couldn't run: ${msg2.raw_log}`);
+    }
   }
 
   public async register_validator(

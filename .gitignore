@@ -6,3 +6,4 @@ yarn.locke
 # IDEs
 *.iml
 .idea
+.DS_Store

@@ -1,15 +1,15 @@
 import {
   Coins,
   isTxError,
+  LCDClient,
   LocalTerra,
   MsgExecuteContract,
   MsgStoreCode,
+  StdFee,
   Wallet,
 } from "@terra-money/terra.js";
 import * as fs from "fs";
 import { instantiate, execute } from "./money_market_helper";
-const terra = new LocalTerra();
-const wallet = terra.wallet;
 
 // TODO: anchor_token should be added in contracts.
 const contracts = ["terraswap_pair", "terraswap_factory", "terraswap_token"];
@@ -25,15 +25,16 @@ export default class TerraSwap {
 
   public async storeCodes(sender: Wallet, location: string): Promise<void> {
     for (const c of contracts) {
-      const bytecode = fs.readFileSync(__dirname + `${location}/${c}.wasm`);
+      const bytecode = fs.readFileSync(`${location}/${c}.wasm`);
       const storeCode = new MsgStoreCode(
         sender.key.accAddress,
         bytecode.toString("base64")
       );
       const tx = await sender.createAndSignTx({
         msgs: [storeCode],
+        fee: new StdFee(10000000, "1000000uusd")
       });
-      const result = await terra.tx.broadcast(tx);
+      const result = await sender.lcd.tx.broadcast(tx);
       if (isTxError(result)) {
         throw new Error(`Couldn't upload ${c}: ${result.raw_log}`);
       }
@@ -61,10 +62,9 @@ export default class TerraSwap {
         `Couldn't upload ${this.contractInfo.moneymarket_interest.codeId}: ${terraswapFactory.raw_log}`
       );
     }
-    const interestAddr =
-      terraswapFactory.logs[0].eventsByType.instantiate_contract
-        .contract_address[0];
-    this.contractInfo["terraswap_factory"].contractAddress = interestAddr;
+    const factoryAddr = terraswapFactory.logs[0].eventsByType.instantiate_contract.contract_address[0];
+
+    this.contractInfo["terraswap_factory"].contractAddress = factoryAddr;
   }
 
   public async provide_liquidity(
@@ -85,7 +85,7 @@ export default class TerraSwap {
   public async send_cw20_token(
     sender: Wallet,
     amount: number,
-    inputMsg: string,
+    inputMsg: object,
     moneyMarketAddr: string
   ): Promise<void> {
     const msg = new MsgExecuteContract(
@@ -95,7 +95,7 @@ export default class TerraSwap {
         send: {
           contract: moneyMarketAddr,
           amount: `${amount}`,
-          msg: inputMsg,
+          msg: Buffer.from(JSON.stringify(inputMsg)).toString('base64'),
         },
       }
     );

@@ -48,4 +48,8 @@ export class MantleState {
             ...bluna
         }))
     }
+
+    async query(gql: string, variables: object) {
+        return this.client.request(gql, variables)
+    }
 }

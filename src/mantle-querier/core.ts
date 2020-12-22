@@ -55,7 +55,8 @@ export const getCoreState = async (
             delegatorAddr: contracts.bLunaHub,
         },
         client
-    ).then(r => r.Result).then(rs => rs.map(r => ({ denom: r.Denom, amount: r.Amount }))).catch(console.log)
+    ).then(r => r.DistributionDelegatorsDelegatorAddrRewardsValidatorAddr.Result)
+    .then(rs => rs.map(r => ({ denom: r.Denom, amount: r.Amount }))).catch(console.log)
 
     const validator_info: any = await (async () => {
         const validator_list = await makeQuery(gql`

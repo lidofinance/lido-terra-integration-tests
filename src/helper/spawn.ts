@@ -1,7 +1,8 @@
 import basset from "./basset_helper";
-import mMarket, { execute } from "./money_market_helper";
+import mMarket from "./money_market_helper";
 import terraswap from "./terraswap_helper";
 import { Wallet } from "@terra-money/terra.js";
+import { execute } from "./flow/execution";
 
 export default class Anchor {
   public bAsset: basset;

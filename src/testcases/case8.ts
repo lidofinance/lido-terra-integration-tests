@@ -1,8 +1,11 @@
-import { Coin, Coins,  Dec,  Int,  MnemonicKey, MsgAggregateExchangeRateVote, MsgExecuteContract, MsgSend, StdFee, Validator, Wallet } from "@terra-money/terra.js";
+import { Coin, Coins,  Dec,  Int,  MnemonicKey, MsgExecuteContract, MsgSend, StdFee, Validator, Wallet } from "@terra-money/terra.js";
 import * as path from 'path'
+import { mustFail, mustPass } from "../helper/flow/must";
+import { getRecord } from "../helper/flow/record";
+import { registerChainOracleVote } from "../helper/oracle/chain-oracle";
 import Anchor, { Asset } from "../helper/spawn";
 import { MantleState } from "../mantle-querier/MantleState";
-import { Testkit, TestkitInit } from '../testkit/testkit'
+import { Testkit } from '../testkit/testkit'
 
 async function main() {
     const testkit = new Testkit("http://localhost:11317")
@@ -43,18 +46,20 @@ async function main() {
         },
         auto_tx: [
             // fee generator
-            Testkit.automaticTxRequest(
-                'gasStation',
-                1,
-                [
+            Testkit.automaticTxRequest({
+                accountName: 'gasStation',
+                period: 1,
+                offset: 0,
+                startAt: 0,
+                msgs: [
                     new MsgSend(
                         gasStation.accAddress,
                         gasStation.accAddress,
                         new Coins([new Coin('uusd', 1)]),
                     )
-                ], 
-                new StdFee(1000000, "1000000uusd"),
-            ),
+                ],
+                fee: new StdFee(10000000, "1000000uusd"), 
+            })
         ]
     })
 
@@ -64,25 +69,8 @@ async function main() {
 
     // register oracle votes
     const validatorNames = ['valA', 'valB', 'valC', 'valD']
-    await Promise.all(validators.map(async (valKey: TestkitInit.Validator, i) => {
-        const vote = new MsgAggregateExchangeRateVote(
-            "1200.000000000000000000ukrw,1.000000000000000000uusd,0.750000000000000000usdr,2400.000000000000000000umnt",
-            "asdf",
-            valKey.Msg.delegator_address,
-            valKey.Msg.validator_address
-        )
-
-        const prevote = vote.getPrevote()
-
-        await testkit.registerAutomaticTx(
-            // all validators; oracle vote
-            Testkit.automaticTxRequest(
-                validatorNames[i],
-                1,
-                [vote, prevote],
-                new StdFee(100000, "100000uusd")
-            )
-        )
+    await Promise.all(registerChainOracleVote(validators, validatorNames).map(async atx => {
+        return testkit.registerAutomaticTx(atx)
     }))
 
     const a = new Wallet(lcd, aKey)
@@ -102,10 +90,10 @@ async function main() {
     await anchor.instantiate();
 
     // register oracle price feeder
-    await testkit.registerAutomaticTx(Testkit.automaticTxRequest(
-        "owner",
-        1,
-        [
+    await testkit.registerAutomaticTx(Testkit.automaticTxRequest({
+        accountName: "owner",
+        period: 1,
+        msgs: [
             new MsgExecuteContract(
                 owner.accAddress,
                 anchor.moneyMarket.contractInfo["moneymarket_oracle"].contractAddress,
@@ -119,8 +107,8 @@ async function main() {
                 },
             )
         ],
-        new StdFee(1000000, "100000uusd")
-    ))
+        fee: new StdFee(10000000, "100000uusd")
+    }))
 
     await anchor.bAsset.register_validator(ownerWallet, validators[0].validator_address)
 
@@ -130,6 +118,21 @@ async function main() {
 
 
     // create mantle state
+    console.log({
+        "bLunaHub": basset.contractInfo["anchor_basset_hub"].contractAddress,
+        "bAssetToken": basset.contractInfo["anchor_basset_token"].contractAddress,
+        "bAssetReward": basset.contractInfo["anchor_basset_reward"].contractAddress,
+        "mmInterest": moneyMarket.contractInfo["moneymarket_interest"].contractAddress,
+        "mmOracle": moneyMarket.contractInfo["moneymarket_oracle"].contractAddress,
+        "mmMarket": moneyMarket.contractInfo["moneymarket_market"].contractAddress,
+        "mmOverseer": moneyMarket.contractInfo["moneymarket_overseer"].contractAddress,
+        "mmCustody": moneyMarket.contractInfo["moneymarket_custody"].contractAddress,
+        "mmLiquidation": moneyMarket.contractInfo["moneymarket_liquidation"].contractAddress,
+        "anchorToken": moneyMarket.contractInfo["anchorToken"].contractAddress,
+        "terraswapFactory": terraswap.contractInfo["terraswap_factory"].contractAddress,
+        "terraswapPair": "whateva",
+    })
+
     const mantleState = new MantleState(
         {
             "bLunaHub": basset.contractInfo["anchor_basset_hub"].contractAddress,
@@ -155,7 +158,7 @@ async function main() {
     )
 
     // block 11
-    await basset.bond(a, 20000000, validators[0].validator_address)
+    await mustPass(basset.bond(a, 20000000, validators[0].validator_address))
 
     //block 13
     //TODO: still generate fee
@@ -174,13 +177,13 @@ async function main() {
     // TODO: still generate fee
 
     //block19
-    await basset.bond(a, 20000000, validators[0].validator_address)
+    await mustPass(basset.bond(a, 20000000, validators[0].validator_address))
 
     //block 29
-    await basset.transfer_cw20_token(a, b, 10);
+    await mustPass(basset.transfer_cw20_token(a, b, 10))
 
     //block 30
-    // await basset.update_global_index(a);
+    // await mustPass(basset.update_global_index(a);)
 
     //block 30
     await terraswap.send_cw20_token(
@@ -191,172 +194,159 @@ async function main() {
     );
 
     //block 40
-    await basset.send_cw20_token(
+    await mustPass(basset.send_cw20_token(
         a,
         1,
         {unbond:{}},
         basset.contractInfo["anchor_basset_hub"].contractAddress
-    );
+    ));
 
-    await basset.bond(a, 500, validators[0].validator_address)
-    await basset.bond(a, 500, validators[0].validator_address)
-    await basset.bond(a, 500, validators[0].validator_address)
-    await basset.bond(a, 500, validators[0].validator_address)
-    await basset.bond(a, 500, validators[0].validator_address)
-    await basset.bond(a, 500, validators[0].validator_address)
-    await basset.bond(a, 500, validators[0].validator_address)
-    await basset.bond(a, 500, validators[0].validator_address)
-    await basset.bond(a, 500, validators[0].validator_address)
-    await basset.bond(a, 500, validators[0].validator_address)
-    await basset.bond(a, 500, validators[0].validator_address)
-    await basset.bond(a, 500, validators[0].validator_address)
-    await basset.bond(a, 500, validators[0].validator_address)
-    await basset.bond(a, 500, validators[0].validator_address)
-    await basset.bond(a, 500, validators[0].validator_address)
-    await basset.bond(a, 500, validators[0].validator_address)
-    await basset.bond(a, 500, validators[0].validator_address)
-    await basset.bond(a, 500, validators[0].validator_address)
-    await basset.bond(a, 500, validators[0].validator_address)
-    await basset.bond(a, 500, validators[0].validator_address)
-    await basset.bond(a, 500, validators[0].validator_address)
-    await basset.bond(a, 500, validators[0].validator_address)
-    await basset.bond(a, 500, validators[0].validator_address)
-    await basset.bond(a, 500, validators[0].validator_address)
-    await basset.bond(a, 500, validators[0].validator_address)
-    await basset.bond(a, 500, validators[0].validator_address)
-    await basset.bond(a, 500, validators[0].validator_address)
-    await basset.bond(a, 500, validators[0].validator_address)
-    await basset.bond(a, 500, validators[0].validator_address)
-    await basset.bond(a, 500, validators[0].validator_address)
-    await basset.bond(a, 500, validators[0].validator_address)
-    await basset.bond(a, 500, validators[0].validator_address)
-    await basset.bond(a, 500, validators[0].validator_address)
-    await basset.bond(a, 500, validators[0].validator_address)
-    await basset.bond(a, 500, validators[0].validator_address)
-    await basset.bond(a, 500, validators[0].validator_address)
-    await basset.bond(a, 500, validators[0].validator_address)
-    await basset.bond(a, 500, validators[0].validator_address)
-    await basset.bond(a, 500, validators[0].validator_address)
-    await basset.bond(a, 500, validators[0].validator_address)
-    await basset.bond(a, 500, validators[0].validator_address)
-    await basset.bond(a, 500, validators[0].validator_address)
-    await basset.bond(a, 500, validators[0].validator_address)
-    await basset.bond(a, 500, validators[0].validator_address)
-    await basset.bond(a, 500, validators[0].validator_address)
-    await basset.bond(a, 500, validators[0].validator_address)
-    await basset.bond(a, 500, validators[0].validator_address)
-    await basset.bond(a, 500, validators[0].validator_address)
-    await basset.bond(a, 500, validators[0].validator_address)
-    await basset.bond(a, 500, validators[0].validator_address)
-    await basset.bond(a, 500, validators[0].validator_address)
-    await basset.bond(a, 500, validators[0].validator_address)
-    await basset.bond(a, 500, validators[0].validator_address)
-    await basset.bond(a, 500, validators[0].validator_address)
+
+    await mustPass(basset.bond(a, 500, validators[0].validator_address))
+    await mustPass(basset.bond(a, 500, validators[0].validator_address))
+    await mustPass(basset.bond(a, 500, validators[0].validator_address))
+    await mustPass(basset.bond(a, 500, validators[0].validator_address))
+    await mustPass(basset.bond(a, 500, validators[0].validator_address))
+    await mustPass(basset.bond(a, 500, validators[0].validator_address))
+    await mustPass(basset.bond(a, 500, validators[0].validator_address))
+    await mustPass(basset.bond(a, 500, validators[0].validator_address))
+    await mustPass(basset.bond(a, 500, validators[0].validator_address))
+    await mustPass(basset.bond(a, 500, validators[0].validator_address))
+    await mustPass(basset.bond(a, 500, validators[0].validator_address))
+    await mustPass(basset.bond(a, 500, validators[0].validator_address))
+    await mustPass(basset.bond(a, 500, validators[0].validator_address))
+    await mustPass(basset.bond(a, 500, validators[0].validator_address))
+    await mustPass(basset.bond(a, 500, validators[0].validator_address))
+    await mustPass(basset.bond(a, 500, validators[0].validator_address))
+    await mustPass(basset.bond(a, 500, validators[0].validator_address))
+    await mustPass(basset.bond(a, 500, validators[0].validator_address))
+    await mustPass(basset.bond(a, 500, validators[0].validator_address))
+    await mustPass(basset.bond(a, 500, validators[0].validator_address))
+    await mustPass(basset.bond(a, 500, validators[0].validator_address))
+    await mustPass(basset.bond(a, 500, validators[0].validator_address))
+    await mustPass(basset.bond(a, 500, validators[0].validator_address))
+    await mustPass(basset.bond(a, 500, validators[0].validator_address))
+    await mustPass(basset.bond(a, 500, validators[0].validator_address))
+    await mustPass(basset.bond(a, 500, validators[0].validator_address))
+    await mustPass(basset.bond(a, 500, validators[0].validator_address))
+    await mustPass(basset.bond(a, 500, validators[0].validator_address))
+    await mustPass(basset.bond(a, 500, validators[0].validator_address))
+    await mustPass(basset.bond(a, 500, validators[0].validator_address))
+    await mustPass(basset.bond(a, 500, validators[0].validator_address))
+    await mustPass(basset.bond(a, 500, validators[0].validator_address))
+    await mustPass(basset.bond(a, 500, validators[0].validator_address))
+    await mustPass(basset.bond(a, 500, validators[0].validator_address))
+    await mustPass(basset.bond(a, 500, validators[0].validator_address))
+    await mustPass(basset.bond(a, 500, validators[0].validator_address))
+    await mustPass(basset.bond(a, 500, validators[0].validator_address))
+    await mustPass(basset.bond(a, 500, validators[0].validator_address))
+    await mustPass(basset.bond(a, 500, validators[0].validator_address))
+    await mustPass(basset.bond(a, 500, validators[0].validator_address))
+    await mustPass(basset.bond(a, 500, validators[0].validator_address))
+    await mustPass(basset.bond(a, 500, validators[0].validator_address))
+    await mustPass(basset.bond(a, 500, validators[0].validator_address))
+    await mustPass(basset.bond(a, 500, validators[0].validator_address))
+    await mustPass(basset.bond(a, 500, validators[0].validator_address))
+    await mustPass(basset.bond(a, 500, validators[0].validator_address))
+    await mustPass(basset.bond(a, 500, validators[0].validator_address))
+    await mustPass(basset.bond(a, 500, validators[0].validator_address))
+    await mustPass(basset.bond(a, 500, validators[0].validator_address))
+    await mustPass(basset.bond(a, 500, validators[0].validator_address))
+    await mustPass(basset.bond(a, 500, validators[0].validator_address))
+    await mustPass(basset.bond(a, 500, validators[0].validator_address))
+    await mustPass(basset.bond(a, 500, validators[0].validator_address))
+    await mustPass(basset.bond(a, 500, validators[0].validator_address))
 
     //block 80
-    await basset.finish(a);
+    await mustPass(basset.finish(a))
 
     //block 81
-    await moneyMarket.deposit_stable(b, 1000000);
+    await mustPass(moneyMarket.deposit_stable(b, 1000000))
 
     //block 82
     const marketAddr = moneyMarket.contractInfo["moneymarket_market"].contractAddress;
-    await moneyMarket.send_cw20_token(
+    await mustPass(moneyMarket.send_cw20_token(
         b,
         30000,
         {redeem_stable:{}},
         marketAddr
-    );
+    ));
 
     //block 83
     const custody = moneyMarket.contractInfo["moneymarket_custody"].contractAddress;
 
-    await basset.send_cw20_token(
+    await mustPass(basset.send_cw20_token(
         a,
         3000000,
         {deposit_collateral:{}},
         custody
-    );
+    ))
 
     //block 84
-    await moneyMarket.overseer_lock_collateral(a, [[basset.contractInfo["anchor_basset_token"].contractAddress, "2000000"]]);
+    await mustPass(moneyMarket.overseer_lock_collateral(a, [[basset.contractInfo["anchor_basset_token"].contractAddress, "2000000"]]))
 
     //block 85; should fail
-    try {
-        await moneyMarket.overseer_lock_collateral(a, [[basset.contractInfo["anchor_basset_token"].contractAddress, "1500000"]]);
-    } catch(e) {
-
-    }
+    await mustFail(moneyMarket.overseer_lock_collateral(a, [[basset.contractInfo["anchor_basset_token"].contractAddress, "1500000"]]))
 
     //block 86
-    try {
-        await moneyMarket.borrow_stable(a, 1500000, undefined);
-    } catch(e) {
-        // noop
-    }
+    await mustFail(moneyMarket.borrow_stable(a, 1500000, undefined))
 
     //block 87
-    await moneyMarket.borrow_stable(a, 500000, undefined);
+    await mustPass(moneyMarket.borrow_stable(a, 500000, undefined))
 
     //block 88
-    // await moneyMarket.execute_epoch_operations(a);
+    await mustPass(basset.update_global_index(a))
 
-    await moneyMarket.send_cw20_token(
+    // await mustFail(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(moneyMarket.send_cw20_token(
         b,
-        400000,
+        20000,
         {redeem_stable:{}},
         marketAddr
-    );
+    ));
 
     //block 89
-    await moneyMarket.deposit_stable(a, 1000000);
-
-    // fs.writeFileSync("before", JSON.stringify(await mantleState.getState(), null, 2))
+    await mustPass(moneyMarket.deposit_stable(a, 1000000))
 
     //block 90
-    await moneyMarket.overseer_unlock_collateral(a, [[basset.contractInfo["anchor_basset_token"].contractAddress, "10000"]]);
+    await mustPass(moneyMarket.overseer_unlock_collateral(a, [[basset.contractInfo["anchor_basset_token"].contractAddress, "10000"]]))
 
     //block 91
-    try {
-        await moneyMarket.overseer_unlock_collateral(a, [[basset.contractInfo["anchor_basset_token"].contractAddress, "1000000"]]);
-    } catch(e) {
-        // should fail
-        console.log("wtf??")
-    }
+    await mustFail(moneyMarket.overseer_unlock_collateral(a, [[basset.contractInfo["anchor_basset_token"].contractAddress, "1000000"]]))
 
     //block 92
-    await moneyMarket.withdraw_collateral(a, 150000);
+    await mustPass(moneyMarket.withdraw_collateral(a, 150000))
 
     //block 93
-    try {
-        await moneyMarket.withdraw_collateral(a, 990000);
-    } catch(e) {
-
-    }
+    await mustFail(moneyMarket.withdraw_collateral(a, 990000))
 
     //block 94
-    // await basset.update_global_index(a);
+    // await mustPass(basset.update_global_index(a);)
 
     //block 111
-    // await moneyMarket.execute_epoch_operations(a);
+    // await mustPass(moneyMarket.execute_epoch_operations(a);)
 
     //block 112
-    await moneyMarket.repay_stable(a, 400000);
+    await mustPass(moneyMarket.repay_stable(a, 400000))
 
     //block 113
-    // await basset.update_global_index(a);
+    // await mustPass(basset.update_global_index(a);)
 
     //block 114
-    // await moneyMarket.execute_epoch_operations(a);
+    // await mustPass(moneyMarket.execute_epoch_operations(a);)
 
     // //block 115
-    // await moneyMarket.overseer_unlock_collateral(a, [[a, 840000]]);
+    // await mustPass(moneyMarket.overseer_unlock_collateral(a, [[a, 840000]]);)
 
     // //block 116
-    // await moneyMarket.liquidation(c, a.key.accAddress);
+    // await mustPass(moneyMarket.liquidation(c, a.key.accAddress);)
 
     // //block 118
-    // await moneyMarket.liquidation(b, a.key.accAddress);
+    // await mustPass(moneyMarket.liquidation(b, a.key.accAddress);)
+
+    console.log(getRecord())
+    console.log(JSON.stringify(await mantleState.getState(), null, 2))
 }
 
 async function delay(ms: number) {

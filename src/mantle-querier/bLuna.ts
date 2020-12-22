@@ -45,9 +45,9 @@ export const getBlunaState = async (
 
     const global_index = await makeContractStoreQuery(
         contracts.bAssetReward,
-        {global_index:{}},
+        {state:{}},
         client
-    )
+    ).then(r => r.global_index)
 
     //
     const holder_map: { [address: string]: { balance: string, index: string, pending_reward: string }} = {}
@@ -58,26 +58,38 @@ export const getBlunaState = async (
             client
         ).then(r => r.balance)
 
-        const index = await makeContractStoreQuery(
+        const indexAndPendingReward = await makeContractStoreQuery(
             contracts.bAssetReward,
-            {user_index:{address:address}},
+            {holder:{address:address}},
             client
-        ).then(r => r.index)
-
-        const pending_reward = await makeContractStoreQuery(
-            contracts.bAssetReward,
-            {pending_rewards:{address:address}},
-            client
-        ).then(r => r.reward)
+        ).then(r => ({
+            index: r.index,
+            pending_reward: r.pending_rewards
+        }))
 
         holder_map[address] = {
             balance,
-            index,
-            pending_reward
+            ...indexAndPendingReward,
         }
     })
 
     // undelegation_waitlist,
+    const undelegation_waitlist = (await Promise.all(addresses.map(address => {
+        return makeContractStoreQuery(
+            contracts.bLunaHub,
+            { unbond_requests: { address: address } },
+            client
+        )
+    }))).reduce((m, current) => {
+        const why = current.requests.reduce((m, l) => {
+            m[l[0]] = l[1]
+            return m
+        }, {} as { [epoch: string]: string })
+
+        m[current.address] = why
+        return m
+    }, {} as { [address: string]: { [epoch: string]: string } })
+
     // undelegated_so_far
 
     return {
@@ -88,6 +100,7 @@ export const getBlunaState = async (
         exchange_rate,
         balance,
         global_index,
+        undelegation_waitlist,
         holder_map
     }
 }

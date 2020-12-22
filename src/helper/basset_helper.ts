@@ -8,7 +8,7 @@ import {
   Wallet,
 } from "@terra-money/terra.js";
 import * as fs from "fs";
-import { execute, instantiate, send_transaction } from "./money_market_helper";
+import { execute, instantiate, send_transaction } from "./flow/execution";
 
 const contracts = [
   "anchor_basset_hub",
@@ -32,11 +32,8 @@ export default class AnchorbAsset {
         sender.key.accAddress,
         bytecode.toString("base64")
       );
-      const tx = await sender.createAndSignTx({
-        msgs: [storeCode],
-        fee: new StdFee(10000000, "1000000uusd")
-      });
-      const result = await sender.lcd.tx.broadcast(tx);
+
+      const result = await send_transaction(sender, [storeCode])
       if (isTxError(result)) {
         throw new Error(`Couldn't upload ${c}: ${result.raw_log}`);
       }

@@ -67,13 +67,31 @@ export async function getMoneyMarketState(
         contracts.mmMarket,
         {liabilities:{}},
         client
-    )
+    ).then(r => {
+        r.liabilities.reduce((m, entity) => {
+            m[entity.borrower] = {
+                interest_index: m.interest_index,
+                loan_amount: m.loan_amount
+            }
+
+            return m
+        }, {} as { [address: string]: { interest_index: string, loan_amount: string }})
+    })
 
     const borrowerMap = await makeContractStoreQuery(
         contracts.mmCustody,
         {borrowers:{}},
         client
-    )
+    ).then(r => {
+        r.borrowers.reduce((m, entity) => {
+            m[entity.borrower] = {
+                balance: entity.balance,
+                spendable: entity.spendable
+            }
+
+            return m
+        }, {} as { [address: string]: { balance: number, spendable: number }})
+    })
 
     const atoken_holder_map: { [address: string]: { balance: number }} = {}
     Promise.resolve()
@@ -90,7 +108,7 @@ export async function getMoneyMarketState(
                 client
             )
 
-            atoken_holder_map[holder] = { balance: balance }
+            atoken_holder_map[holder] = { balance: balance.balance }
         }))
 
     const overseerEpochState = await makeContractStoreQuery(
@@ -103,7 +121,17 @@ export async function getMoneyMarketState(
         contracts.mmOverseer,
         { all_collaterals: {} },
         client
-    )
+    ).then(r => {
+        r.all_collaterals.reduce((m, entry) => {
+            m[entry.borrower] = {
+                // NOTE: BLUNA ONLY FOR NOW
+                // if other bAssets are allowed, we need to change this reduce func
+                collateral: entry.collaterals[0][0],
+                amount: entry.collaterals[0][1]
+            }
+            return m
+        }, {} as { [address: string]: { collateral: string, amount: number }})
+    })
 
     const borrow_rate = await makeContractStoreQuery(
         contracts.mmInterest,

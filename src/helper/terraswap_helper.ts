@@ -9,7 +9,7 @@ import {
   Wallet,
 } from "@terra-money/terra.js";
 import * as fs from "fs";
-import { instantiate, execute } from "./money_market_helper";
+import { execute, instantiate, send_transaction } from "./flow/execution";
 
 // TODO: anchor_token should be added in contracts.
 const contracts = ["terraswap_pair", "terraswap_factory", "terraswap_token"];
@@ -30,11 +30,8 @@ export default class TerraSwap {
         sender.key.accAddress,
         bytecode.toString("base64")
       );
-      const tx = await sender.createAndSignTx({
-        msgs: [storeCode],
-        fee: new StdFee(10000000, "1000000uusd")
-      });
-      const result = await sender.lcd.tx.broadcast(tx);
+
+      const result = await send_transaction(sender, [storeCode])
       if (isTxError(result)) {
         throw new Error(`Couldn't upload ${c}: ${result.raw_log}`);
       }

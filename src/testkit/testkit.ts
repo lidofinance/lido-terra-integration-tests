@@ -1,5 +1,6 @@
 import { BlockTxBroadcastResult, Coin, CreateTxOptions, LCDClient, MnemonicKey, Msg, StdFee, StdTx, TxBroadcastResult, Validator, Wallet } from "@terra-money/terra.js";
 import axios, { AxiosInstance } from 'axios'
+import { startOfToday } from "date-fns";
 
 export class Testkit {
     testkit: AxiosInstance
@@ -58,15 +59,19 @@ export class Testkit {
         }
     }
 
-    static automaticTxRequest(
-        accountName: string,
-        period: number,
-        msgs: Msg[],
-        fee: StdFee
-    ): AutomaticTxRequest {
+    static automaticTxRequest({
+        accountName,
+        period,
+        msgs,
+        offset,
+        startAt,
+        fee
+    }: AutomaticTxConfig): AutomaticTxRequest {
         return {
             account_name: accountName,
-            period: `${period}`,
+            period: period.toString(),
+            offset: offset ? offset.toString() : undefined,
+            startAt: startAt ? startAt.toString() : undefined,
             msgs: msgs.map(msg => msg.toData()),
             fee: fee.toData()
         }
@@ -251,13 +256,27 @@ interface ValidatorInitRequest {
     commission: Validator.CommissionRates.Data
 }
 
-interface AutomaticTxRequest {
-    account_name: string
-    period: string
-    msgs: Msg.Data[]
-    fee: StdFee.Data
-}
 
 interface AutomaticInjectionRequest {
     validator_rounds: string[]
+}
+
+;;;;;;;;;;;;;
+
+export interface AutomaticTxConfig {
+    accountName: string,
+    period: number,
+    msgs: Msg[],
+    fee: StdFee,
+    offset?: number,
+    startAt?: number,
+}
+
+export interface AutomaticTxRequest {
+    account_name: string
+    period: string
+    msgs: Msg.Data[]
+    fee: StdFee.Data,
+    offset?: string,
+    startAt?: string,
 }

@@ -12,6 +12,7 @@ import {
   Wallet,
 } from "@terra-money/terra.js";
 import * as fs from "fs";
+import { execute, instantiate, send_transaction } from "./flow/execution";
 
 // TODO: anchor_token should be added in contracts.
 const contracts = [
@@ -39,11 +40,8 @@ export default class MoneyMarket {
         sender.key.accAddress,
         bytecode.toString("base64")
       );
-      const tx = await sender.createAndSignTx({
-        msgs: [storeCode],
-        fee: new StdFee(10000000, "1000000uusd")
-      });
-      const result = await sender.lcd.tx.broadcast(tx);
+
+      const result = await send_transaction(sender, [storeCode])
       if (isTxError(result)) {
         throw new Error(`Couldn't upload ${c}: ${result.raw_log}`);
       }
@@ -102,7 +100,6 @@ export default class MoneyMarket {
     }
     const oracleAddr = mmOracle.logs[0].eventsByType.instantiate_contract.contract_address[0];
     this.contractInfo["moneymarket_oracle"].contractAddress = oracleAddr;
-    console.log("!!!!!!!!!!!!!!!!!!!!!!", oracleAddr)
   }
 
   // initialize liquidation contract
@@ -415,37 +412,4 @@ export default class MoneyMarket {
       throw new Error(`Couldn't run: ${sendExecuttion.raw_log}`);
     }
   }
-}
-
-export async function instantiate(
-  sender: Wallet,
-  codeId: number,
-  initMsg: object,
-  tokens?: Coins
-): ReturnType<typeof send_transaction> {
-  console.error(`instantiate ${codeId} w/ ${JSON.stringify(initMsg)}`);
-  return await send_transaction(sender, [
-    new MsgInstantiateContract(sender.key.accAddress, codeId, initMsg, tokens),
-  ]);
-}
-
-export async function execute(
-  sender: Wallet,
-  contract: string,
-  executeMsg: object,
-  tokens?: Coins
-): ReturnType<typeof send_transaction> {
-  console.error(`execute ${contract} w/ ${JSON.stringify(executeMsg)}`);
-  return await send_transaction(sender, [
-    new MsgExecuteContract(sender.key.accAddress, contract, executeMsg, tokens),
-  ]);
-}
-
-export async function send_transaction(
-  sender: Wallet,
-  msgs: Msg[]
-): Promise<BlockTxBroadcastResult> {
-  return Promise.resolve()
-    .then(() => sender.createAndSignTx({ msgs, gasAdjustment: 1.4, fee: new StdFee(10000000, "1000000uusd") }))
-    .then((tx) => sender.lcd.tx.broadcast(tx));
 }

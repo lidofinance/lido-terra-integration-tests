@@ -7,7 +7,14 @@ export const makeQuery = (
     query: string,
     variables: object,
     client: GraphQLClient,
-) => client.request(query, variables)
+) => client.request(query, variables).catch((e) => {
+    console.error(
+        "!!! mantle state query failed",
+        query,
+        JSON.stringify(variables, null, 2),
+        e
+    )
+})
 
 export const makeBalanceQuery = (
     address: string,

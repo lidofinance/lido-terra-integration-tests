@@ -1,5 +1,6 @@
 import { Coin, Coins,  Dec,  Int,  MnemonicKey, MsgExecuteContract, MsgSend, StdFee, Validator, Wallet } from "@terra-money/terra.js";
 import * as path from 'path'
+import * as fs from 'fs'
 import { mustFail, mustPass } from "../helper/flow/must";
 import { getRecord } from "../helper/flow/record";
 import { registerChainOracleVote } from "../helper/oracle/chain-oracle";
@@ -49,7 +50,6 @@ async function main() {
             Testkit.automaticTxRequest({
                 accountName: 'gasStation',
                 period: 1,
-                offset: 0,
                 startAt: 0,
                 msgs: [
                     new MsgSend(
@@ -345,8 +345,9 @@ async function main() {
     // //block 118
     // await mustPass(moneyMarket.liquidation(b, a.key.accAddress);)
 
-    console.log(getRecord())
-    console.log(JSON.stringify(await mantleState.getState(), null, 2))
+    // save action records and gas
+    fs.writeFileSync("actions.json", JSON.stringify(getRecord(), null, 2))
+    fs.writeFileSync("mantleState.json", JSON.stringify(await mantleState.getState(), null, 2))
 }
 
 async function delay(ms: number) {

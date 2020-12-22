@@ -70,8 +70,7 @@ export class Testkit {
         return {
             account_name: accountName,
             period: period.toString(),
-            offset: offset ? offset.toString() : undefined,
-            startAt: startAt ? startAt.toString() : undefined,
+            start_at: startAt ? startAt.toString() : undefined,
             msgs: msgs.map(msg => msg.toData()),
             fee: fee.toData()
         }
@@ -278,5 +277,5 @@ export interface AutomaticTxRequest {
     msgs: Msg.Data[]
     fee: StdFee.Data,
     offset?: string,
-    startAt?: string,
+    start_at?: string,
 }

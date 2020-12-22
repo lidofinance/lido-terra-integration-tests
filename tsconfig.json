@@ -4,7 +4,6 @@
     "types": ["node"],
     "module": "commonjs",
     "lib": ["esnext"],
-    "declaration": true,
     "outDir": "lib",
     "resolveJsonModule": true,
   },

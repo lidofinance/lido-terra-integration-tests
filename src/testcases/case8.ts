@@ -7,6 +7,8 @@ import { registerChainOracleVote } from "../helper/oracle/chain-oracle";
 import Anchor, { Asset } from "../helper/spawn";
 import { MantleState } from "../mantle-querier/MantleState";
 import { Testkit } from '../testkit/testkit'
+import { execute, send_transaction } from "../helper/flow/execution";
+import { emptyBlockWithFixedGas } from "../helper/flow/gas-station";
 
 async function main() {
     const testkit = new Testkit("http://localhost:11317")
@@ -50,7 +52,7 @@ async function main() {
             Testkit.automaticTxRequest({
                 accountName: 'gasStation',
                 period: 1,
-                startAt: 0,
+                startAt: 2,
                 msgs: [
                     new MsgSend(
                         gasStation.accAddress,
@@ -159,6 +161,8 @@ async function main() {
 
     // block 11
     await mustPass(basset.bond(a, 20000000, validators[0].validator_address))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
 
     //block 13
     //TODO: still generate fee

@@ -1,5 +1,5 @@
 import { gql, GraphQLClient } from "graphql-request";
-import { makeQuery } from "./common";
+import { makeBalanceQuery, makeQuery } from "./common";
 import { Addresses, Contracts, Validators } from "./types";
 import * as b32 from 'bech32'
 
@@ -120,10 +120,22 @@ export const getCoreState = async (
         }, {})
     })()
 
+    // accounts balance
+    const accountBalances = await Promise.resolve()
+        .then(() => Promise.all(addresses.map(async address => ({
+            address,
+            result: await makeBalanceQuery(address, client)
+        }))))
+        .then(balances => balances.map(accbal => ({
+            address: accbal.address,
+            balance: accbal.result.Response.Result
+        })))
+
     return {
         ...block,
         oracle_price,
         reward,
         ...validator_info,
+        accountBalances,
     }
 }

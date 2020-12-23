@@ -1,5 +1,5 @@
 import { GraphQLClient } from "graphql-request";
-import { makeContractStoreQuery } from "./common";
+import { makeContractStoreQuery, makeBalanceQuery } from "./common";
 import { Addresses, Contracts, Validators } from "./types";
 
 export async function getMoneyMarketState(
@@ -11,61 +11,46 @@ export async function getMoneyMarketState(
     // total_liabilities, total_reserve, last_interest_updated, global_interest_index
     const moneyMarketState = await makeContractStoreQuery(
         contracts.mmMarket, {
-            state: {}
-        },
+        state: {}
+    },
         client
     )
 
     const aust_supply = await makeContractStoreQuery(
         contracts.anchorToken, {
-            token_info: {}
-        },
+        token_info: {}
+    },
         client
     ).then(r => r.total_supply)
 
     const oraclePrice = await makeContractStoreQuery(
         contracts.mmOracle, {
-            price: {
-                base: contracts.bAssetToken,
-                quote: 'uusd'
-            }
-        },
+        price: {
+            base: contracts.bAssetToken,
+            quote: 'uusd'
+        }
+    },
         client
     ).catch(() => 0)
 
-    const marketBalance = await makeContractStoreQuery(
-        contracts.anchorToken,
-        {
-            balance: {
-                address: contracts.mmMarket
-            }
-        },
+    const marketBalance = await makeBalanceQuery(
+        contracts.mmMarket,
         client
     )
 
-    const custodyBalance = await makeContractStoreQuery(
-        contracts.anchorToken,
-        {
-            balance: {
-                address: contracts.mmCustody
-            }
-        },
+    const custodyBalance = await makeBalanceQuery(
+        contracts.mmCustody,
         client
     )
 
-    const overseerBalance = await makeContractStoreQuery(
-        contracts.anchorToken,
-        {
-            balance: {
-                address: contracts.mmOverseer
-            }
-        },
+    const overseerBalance = await makeBalanceQuery(
+        contracts.mmOverseer,
         client
     )
 
     const liabilityMap = await makeContractStoreQuery(
         contracts.mmMarket,
-        {liabilities:{}},
+        { liabilities: {} },
         client
     ).then(r => {
         r.liabilities.reduce((m, entity) => {
@@ -75,12 +60,12 @@ export async function getMoneyMarketState(
             }
 
             return m
-        }, {} as { [address: string]: { interest_index: string, loan_amount: string }})
+        }, {} as { [address: string]: { interest_index: string, loan_amount: string } })
     })
 
     const borrowerMap = await makeContractStoreQuery(
         contracts.mmCustody,
-        {borrowers:{}},
+        { borrowers: {} },
         client
     ).then(r => {
         r.borrowers.reduce((m, entity) => {
@@ -90,10 +75,10 @@ export async function getMoneyMarketState(
             }
 
             return m
-        }, {} as { [address: string]: { balance: number, spendable: number }})
+        }, {} as { [address: string]: { balance: number, spendable: number } })
     })
 
-    const atoken_holder_map: { [address: string]: { balance: number }} = {}
+    const atoken_holder_map: { [address: string]: { balance: number } } = {}
     Promise.resolve()
         .then(() => makeContractStoreQuery(
             contracts.anchorToken,
@@ -130,14 +115,14 @@ export async function getMoneyMarketState(
                 amount: entry.collaterals[0][1]
             }
             return m
-        }, {} as { [address: string]: { collateral: string, amount: number }})
+        }, {} as { [address: string]: { collateral: string, amount: number } })
     })
 
     const borrow_rate = await makeContractStoreQuery(
         contracts.mmInterest,
         {
             borrow_rate: {
-                market_balance: marketBalance.balance,
+                market_balance: marketBalance.Response.Result[0].Amount,
                 total_liabilities: moneyMarketState.total_liabilities,
                 total_reserve: moneyMarketState.total_reserves
             }

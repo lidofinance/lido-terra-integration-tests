@@ -7,11 +7,14 @@ export const mustPass = <T>(action: Promise<T>): Promise<T> => {
 }
 
 export const mustFail = <T>(action: Promise<T>): Promise<Error> => {
-    return new Promise((resolve, reject) => {
-        action.then(r => {
-            reject(new Error(`Action should have failed but succeeded ${r}`))
-        })
-
-        action.catch(r => resolve())
+    const pathB = action.catch(r => {
+        // noop
+        return null
     })
+
+    const pathA = action.then(r => {
+        throw new Error(`Action should have failed but succeeded ${r}`)
+    })
+
+    return Promise.race([pathA, pathB])
 }

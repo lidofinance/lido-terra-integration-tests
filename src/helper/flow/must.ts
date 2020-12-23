@@ -7,12 +7,11 @@ export const mustPass = <T>(action: Promise<T>): Promise<T> => {
 }
 
 export const mustFail = <T>(action: Promise<T>): Promise<Error> => {
-    return action
-        .then(r => {
-            throw new Error(`Action should have failed but succeeded ${r}`)
+    return new Promise((resolve, reject) => {
+        action.then(r => {
+            reject(new Error(`Action should have failed but succeeded ${r}`))
         })
-        .catch(e => {
-            // noop
-            return e
-        })
+
+        action.catch(r => resolve())
+    })
 }

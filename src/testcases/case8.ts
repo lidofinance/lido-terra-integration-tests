@@ -1,4 +1,4 @@
-import { Coin, Coins,  Dec,  Int,  MnemonicKey, MsgExecuteContract, MsgSend, StdFee, Validator, Wallet } from "@terra-money/terra.js";
+import { Coin, Coins, Dec, Int, MnemonicKey, MsgExecuteContract, MsgSend, StdFee, Validator, Wallet } from "@terra-money/terra.js";
 import * as path from 'path'
 import * as fs from 'fs'
 import { mustFail, mustPass } from "../helper/flow/must";
@@ -24,7 +24,7 @@ async function main() {
     const validatorCKey = new MnemonicKey()
     const validatorDKey = new MnemonicKey()
     const gasStation = new MnemonicKey()
-    
+
     const response = await testkit.init({
         genesis: genesis,
         accounts: [
@@ -60,7 +60,7 @@ async function main() {
                         new Coins([new Coin('uusd', 1)]),
                     )
                 ],
-                fee: new StdFee(10000000, "1000000uusd"), 
+                fee: new StdFee(10000000, "1000000uusd"),
             })
         ]
     })
@@ -79,7 +79,7 @@ async function main() {
     const b = new Wallet(lcd, bKey)
     const c = new Wallet(lcd, cKey)
 
-    ;;;;;
+        ;;;;;
     // store & instantiate contracts
     ;;;;;
     const ownerWallet = new Wallet(lcd, owner)
@@ -193,7 +193,7 @@ async function main() {
     await terraswap.send_cw20_token(
         a,
         20000000,
-        {redeem_stable:{}},
+        { redeem_stable: {} },
         moneyMarket.contractInfo["moneymarket_market"].contractAddress
     );
 
@@ -201,7 +201,7 @@ async function main() {
     await mustPass(basset.send_cw20_token(
         a,
         1,
-        {unbond:{}},
+        { unbond: {} },
         basset.contractInfo["anchor_basset_hub"].contractAddress
     ));
 
@@ -272,7 +272,7 @@ async function main() {
     await mustPass(moneyMarket.send_cw20_token(
         b,
         30000,
-        {redeem_stable:{}},
+        { redeem_stable: {} },
         marketAddr
     ));
 
@@ -282,7 +282,7 @@ async function main() {
     await mustPass(basset.send_cw20_token(
         a,
         3000000,
-        {deposit_collateral:{}},
+        { deposit_collateral: {} },
         custody
     ))
 
@@ -306,7 +306,7 @@ async function main() {
     await mustPass(moneyMarket.send_cw20_token(
         b,
         20000,
-        {redeem_stable:{}},
+        { redeem_stable: {} },
         marketAddr
     ));
 

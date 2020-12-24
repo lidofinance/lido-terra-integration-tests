@@ -40,6 +40,10 @@ export class Testkit {
         return this.testkit.post<AutomaticTxRequest>(`/${this.contextId}/register_auto_tx`, opt)
     }
 
+    async registerAutomaticTxPause(opt: AutomaticTxPauseRequest) {
+        return this.testkit.post<AutomaticTxPauseRequest>(`/${this.contextId}/register_auto_tx_pause`, opt)
+    }
+
     static walletToAccountRequest(accountName: string, w: MnemonicKey): AddAccountRequest {
         return {
             account_name: accountName,
@@ -73,6 +77,12 @@ export class Testkit {
             start_at: startAt ? startAt.toString() : undefined,
             msgs: msgs.map(msg => msg.toData()),
             fee: fee.toData()
+        }
+    }
+
+    static automaticTxPauseRequest(accountName: string): AutomaticTxPauseRequest {
+        return {
+            account_name: accountName,
         }
     }
 
@@ -278,4 +288,8 @@ export interface AutomaticTxRequest {
     fee: StdFee.Data,
     offset?: string,
     start_at?: string,
+}
+
+interface AutomaticTxPauseRequest {
+    account_name: string,
 }

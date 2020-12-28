@@ -118,17 +118,17 @@ export async function getMoneyMarketState(
         }, {} as { [address: string]: { collateral: string, amount: number } })
     })
 
-    const borrow_rate = await makeContractStoreQuery(
-        contracts.mmInterest,
-        {
-            borrow_rate: {
-                market_balance: marketBalance.Response.Result[0].Amount,
-                total_liabilities: moneyMarketState.total_liabilities,
-                total_reserve: moneyMarketState.total_reserves
-            }
-        },
-        client
-    ).then(r => r.rate)
+    // const borrow_rate = await makeContractStoreQuery(
+    //     contracts.mmInterest,
+    //     {
+    //         borrow_rate: {
+    //             market_balance: marketBalance.Response.Result[0].Amount,
+    //             total_liabilities: moneyMarketState.total_liabilities,
+    //             total_reserve: moneyMarketState.total_reserves
+    //         }
+    //     },
+    //     client
+    // ).then(r => r.rate)
 
     return {
         ...moneyMarketState,
@@ -142,6 +142,6 @@ export async function getMoneyMarketState(
         atoken_holder_map,
         ...overseerEpochState,
         collateralMap,
-        borrow_rate,
+        // borrow_rate,
     }
 }

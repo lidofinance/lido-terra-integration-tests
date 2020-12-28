@@ -20,23 +20,20 @@ export const getBlunaState = async (
         client
     )
 
-    const total_bond_amount = await makeContractStoreQuery(
+    const state = await makeContractStoreQuery(
         contracts.bLunaHub,
         {state: {}},
         client
-    ).then(r => r.total_bond_amount)
+    ).then(r => ({
+        total_bond_amount: r.total_bond_amount,
+        exchange_rate: r.exchange_rate
+    }))
 
     const total_issued = await makeContractStoreQuery(
         contracts.bAssetToken,
         {token_info:{}},
         client
     )
-
-    const exchange_rate = await makeContractStoreQuery(
-        contracts.bLunaHub,
-        {exchange_rate:{}},
-        client
-    ).then(r => r.rate)
 
     const balance = await makeBalanceQuery(
         contracts.bAssetReward,
@@ -95,9 +92,8 @@ export const getBlunaState = async (
     return {
         epoch_id,
         whitelist,
-        total_bond_amount,
+        ...state,
         total_issued,
-        exchange_rate,
         balance,
         global_index,
         undelegation_waitlist,

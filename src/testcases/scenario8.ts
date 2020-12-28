@@ -117,6 +117,7 @@ async function main() {
     }))
 
 
+
     ///////////////// scenario 시작 ////////////////////
 
     // await testkit.inject(validators[0].validator_address) -> 아무 Tx 없이 지나가는 경우의 테스팅
@@ -167,6 +168,8 @@ async function main() {
         response.validators.map(val => val.validator_address),
         "http://localhost:1337",
     )
+
+    //scenario 9
     //block 29
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
 
@@ -188,8 +191,30 @@ async function main() {
     //block 49
     await mustPass(basset.transfer_cw20_token(a, b, 10000000))
 
-    //block 50 - 100
-    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 51))
+    //block 50
+    await basset.send_cw20_token(
+        a,
+        20000000000000,
+        { unbond: {} },
+        basset.contractInfo["anchor_basset_hub"].contractAddress
+    )
+
+    //block 51~59
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 60
+    await basset.send_cw20_token(
+        a,
+        1000000,
+        { unbond: {} },
+        basset.contractInfo["anchor_basset_hub"].contractAddress
+    )
+
+    //block 60 - 99
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 40))
+
+    //block 100
+    await mustPass(basset.finish(a))
 
     //block 101
     await mustPass(moneyMarket.deposit_stable(b, 1000000000000))

@@ -10,7 +10,7 @@ export const getBlunaState = async (
 ) => {
     const epoch_id = await makeContractStoreQuery(
         contracts.bLunaHub,
-        {current_epoch:{}},
+        {current_batch:{}},
         client
     ).catch(() => {})
 
@@ -22,9 +22,9 @@ export const getBlunaState = async (
 
     const total_bond_amount = await makeContractStoreQuery(
         contracts.bLunaHub,
-        {total_bonded: {}},
+        {state: {}},
         client
-    )
+    ).then(r => r.total_bond_amount)
 
     const total_issued = await makeContractStoreQuery(
         contracts.bAssetToken,

@@ -227,6 +227,9 @@ async function main() {
     //block 110 - 119
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
 
+    // pause autotx
+    await testkit.registerAutomaticTxPause(Testkit.automaticTxPauseRequest('valA'))
+
     // block 120
     await mustFail(moneyMarket.send_cw20_token(
         b,
@@ -239,6 +242,8 @@ async function main() {
     await mustPass(moneyMarket.deposit_stable(b, 1000000))
     //block 122
     await mustPass(basset.transfer_cw20_token(a, b, 10000000))
+
+    await testkit.registerAutomaticTxPause(Testkit.automaticTxPauseRequest('valA'))
 
     //block 122
     await mustPass(moneyMarket.overseer_unlock_collateral(a, [[basset.contractInfo["anchor_basset_token"].contractAddress, "100000000000"]]))

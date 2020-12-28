@@ -35,9 +35,9 @@ export default class Anchor {
 
     await this.terraswap.instantiate_terraswap(this.owner);
 
-    await this.moneyMarket.instantiate_interest(this.owner, 0.02, 0.2);
+    await this.moneyMarket.instantiate_interest(this.owner, 0.00000000381, 0.00000004);
     await this.moneyMarket.instantiate_oracle(this.owner, "uusd");
-    await this.moneyMarket.instantiate_liquidation(this.owner, 0.8, 10, 200);
+    await this.moneyMarket.instantiate_liquidation(this.owner, 0.8, 10000000, 200000000);
     await this.moneyMarket.instantiate_money(
       this.owner,
       this.terraswap.contractInfo["terraswap_token"].codeId,
@@ -47,9 +47,9 @@ export default class Anchor {
     await this.moneyMarket.instantiate_overseer(
       this.owner,
       "uusd",
-      60,
-      0.00000001585,
-      0.00000002537,
+      12,
+      0.00000000951,
+      0.00000001522,
       0.1
     );
     const bassetReward = this.bAsset.contractInfo["anchor_basset_reward"]

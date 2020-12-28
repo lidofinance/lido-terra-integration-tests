@@ -10,19 +10,19 @@ export const getBlunaState = async (
 ) => {
     const epoch_id = await makeContractStoreQuery(
         contracts.bLunaHub,
-        {current_batch:{}},
+        { current_batch: {} },
         client
-    ).catch(() => {})
+    ).catch(() => { })
 
     const whitelist = await makeContractStoreQuery(
         contracts.bLunaHub,
-        {whitelisted_validators:{}},
+        { whitelisted_validators: {} },
         client
     )
 
     const state = await makeContractStoreQuery(
         contracts.bLunaHub,
-        {state: {}},
+        { state: {} },
         client
     ).then(r => ({
         total_bond_amount: r.total_bond_amount,
@@ -31,7 +31,7 @@ export const getBlunaState = async (
 
     const total_issued = await makeContractStoreQuery(
         contracts.bAssetToken,
-        {token_info:{}},
+        { token_info: {} },
         client
     )
 
@@ -42,22 +42,22 @@ export const getBlunaState = async (
 
     const global_index = await makeContractStoreQuery(
         contracts.bAssetReward,
-        {state:{}},
+        { state: {} },
         client
     ).then(r => r.global_index)
 
     //
-    const holder_map: { [address: string]: { balance: string, index: string, pending_reward: string }} = {}
+    const holder_map: { [address: string]: { balance: string, index: string, pending_reward: string } } = {}
     addresses.forEach(async address => {
         const balance = await makeContractStoreQuery(
             contracts.bAssetToken,
-            {balance:{address: address}},
+            { balance: { address: address } },
             client
         ).then(r => r.balance)
 
         const indexAndPendingReward = await makeContractStoreQuery(
             contracts.bAssetReward,
-            {holder:{address:address}},
+            { holder: { address: address } },
             client
         ).then(r => ({
             index: r.index,
@@ -71,21 +71,21 @@ export const getBlunaState = async (
     })
 
     // undelegation_waitlist,
-    const undelegation_waitlist = (await Promise.all(addresses.map(address => {
-        return makeContractStoreQuery(
-            contracts.bLunaHub,
-            { unbond_requests: { address: address } },
-            client
-        )
-    }))).reduce((m, current) => {
-        const why = current.requests.reduce((m, l) => {
-            m[l[0]] = l[1]
-            return m
-        }, {} as { [epoch: string]: string })
+    // const undelegation_waitlist = (await Promise.all(addresses.map(address => {
+    //     return makeContractStoreQuery(
+    //         contracts.bLunaHub,
+    //         { unbond_requests: { address: address } },
+    //         client
+    //     )
+    // }))).reduce((m, current) => {
+    //     const why = current.requests.reduce((m, l) => {
+    //         m[l[0]] = l[1]
+    //         return m
+    //     }, {} as { [epoch: string]: string })
 
-        m[current.address] = why
-        return m
-    }, {} as { [address: string]: { [epoch: string]: string } })
+    //     m[current.address] = why
+    //     return m
+    // }, {} as { [address: string]: { [epoch: string]: string } })
 
     // undelegated_so_far
 
@@ -96,7 +96,7 @@ export const getBlunaState = async (
         total_issued,
         balance,
         global_index,
-        undelegation_waitlist,
+        // undelegation_waitlist,
         holder_map
     }
 }

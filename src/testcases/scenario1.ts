@@ -42,10 +42,10 @@ async function main() {
             Testkit.walletToAccountRequest('gasStation', gasStation),
         ],
         validators: [
-            Testkit.validatorInitRequest('valA', new Coin('uluna', new Int(1000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
-            Testkit.validatorInitRequest('valB', new Coin('uluna', new Int(1000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
-            Testkit.validatorInitRequest('valC', new Coin('uluna', new Int(1000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
-            Testkit.validatorInitRequest('valD', new Coin('uluna', new Int(1000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
+            Testkit.validatorInitRequest('valA', new Coin('uluna', new Int(1000000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
+            Testkit.validatorInitRequest('valB', new Coin('uluna', new Int(1000000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
+            Testkit.validatorInitRequest('valC', new Coin('uluna', new Int(1000000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
+            Testkit.validatorInitRequest('valD', new Coin('uluna', new Int(1000000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
         ],
         auto_inject: {
             validator_rounds: ['valB', 'valC', 'valD', 'valA']

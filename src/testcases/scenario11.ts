@@ -9,8 +9,11 @@ import { MantleState } from "../mantle-querier/MantleState";
 import { Testkit } from '../testkit/testkit'
 import { execute, send_transaction } from "../helper/flow/execution";
 import { emptyBlockWithFixedGas } from "../helper/flow/gas-station";
+import { repeat } from '../helper/flow/repeat'
+import { unjail } from '../helper/validator-operation/unjail'
+import { gql } from "graphql-request";
 
-let mantleState
+let mantleState: MantleState
 
 async function main() {
     const testkit = new Testkit("http://localhost:11317")
@@ -41,10 +44,10 @@ async function main() {
             Testkit.walletToAccountRequest('gasStation', gasStation),
         ],
         validators: [
-            Testkit.validatorInitRequest('valA', new Coin('uluna', new Int(1000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
-            Testkit.validatorInitRequest('valB', new Coin('uluna', new Int(1000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
-            Testkit.validatorInitRequest('valC', new Coin('uluna', new Int(1000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
-            Testkit.validatorInitRequest('valD', new Coin('uluna', new Int(1000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
+            Testkit.validatorInitRequest('valA', new Coin('uluna', new Int(100000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
+            Testkit.validatorInitRequest('valB', new Coin('uluna', new Int(100000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
+            Testkit.validatorInitRequest('valC', new Coin('uluna', new Int(100000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
+            Testkit.validatorInitRequest('valD', new Coin('uluna', new Int(100000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
         ],
         auto_inject: {
             validator_rounds: ['valB', 'valC', 'valD', 'valA']
@@ -82,6 +85,8 @@ async function main() {
     const a = new Wallet(lcd, aKey)
     const b = new Wallet(lcd, bKey)
     const c = new Wallet(lcd, cKey)
+
+    const valAWallet = new Wallet(lcd, validatorAKey)
 
         ;;;;;
     // store & instantiate contracts
@@ -176,25 +181,70 @@ async function main() {
     //block 31
     await mustPass(basset.bond(a, 20000000000000, validators[0].validator_address))
 
-    //block 32 - 38
-    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 7))
-
-    //block 39
-    await mustPass(basset.bond(a, 20000000000000, validators[0].validator_address))
-
-    //block 40-48
+    //block 32 - 40
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
 
-    //block 49
+    //block 41~45
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 5))
+
+    //block 46 - 50
+    // Oracle slashing happen at the block 49
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 5))
+
+    //block 51 unjail & revive oracle
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+    //await mustPass(unjail(valAWallet))
+
+    //block 52 - 54
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 3))
+
+    //block 55
+    await mustPass(basset.bond(a, 20000000000000, validators[0].validator_address))
+
+    //block 56
     await mustPass(basset.transfer_cw20_token(a, b, 10000000))
 
-    //block 50 - 100
-    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 51))
+    //block 57
+    await basset.send_cw20_token(
+        a,
+        20000000000000,
+        { unbond: {} },
+        basset.contractInfo["anchor_basset_hub"].contractAddress
+    )
 
-    //block 101
+    //block 58
+    await mustPass(basset.send_cw20_token(
+        a,
+        1000000,
+        { unbond: {} },
+        basset.contractInfo["anchor_basset_hub"].contractAddress
+    ))
+
+    //block 59 - 66
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 8))
+
+    //block 67
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+    //unbond 1
+
+    //block 68 - 89
+    //oracle slashing happen at the block 79
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 22))
+
+    //block 90 Unjail & Revive Oracle
+    //await mustPass(unjail(valAWallet))
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //block 91 - 119
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 29))
+
+    //block 120
+    await mustPass(basset.finish(a))
+
+    //block 121
     await mustPass(moneyMarket.deposit_stable(b, 1000000000000))
 
-    //block 102
+    //block 122
     const marketAddr = moneyMarket.contractInfo["moneymarket_market"].contractAddress;
     await mustPass(moneyMarket.send_cw20_token(
         b,
@@ -203,7 +253,7 @@ async function main() {
         marketAddr
     ))
 
-    //block 103 여기서 안담김
+    //block 123
     const custody = moneyMarket.contractInfo["moneymarket_custody"].contractAddress;
     await mustPass(basset.send_cw20_token(
         a,
@@ -211,25 +261,26 @@ async function main() {
         { deposit_collateral: {} },
         custody
     ))
-    //block 104
+
+    //block 124
     await mustPass(moneyMarket.overseer_lock_collateral(a, [[basset.contractInfo["anchor_basset_token"].contractAddress, "2000000000000"]]))
 
-    //block 105
-    await mustFail(moneyMarket.overseer_lock_collateral(a, [[basset.contractInfo["anchor_basset_token"].contractAddress, "1500000"]]))
+    //block 125
+    await mustFail(moneyMarket.overseer_lock_collateral(a, [[basset.contractInfo["anchor_basset_token"].contractAddress, "1500000000000"]]))
 
-    //block 106
+    //block 126
     await mustFail(moneyMarket.borrow_stable(a, 1500000000000, undefined))
 
-    //block 107
-    await mustPass(moneyMarket.borrow_stable(a, 500000000000, undefined))
+    //block 127
+    await mustPass(moneyMarket.borrow_stable(a, 400000000000, undefined))
 
-    //block 108
+    //block 128
     await mustPass(basset.update_global_index(a))
 
-    //block 109
+    //block 129
     await mustPass(moneyMarket.execute_epoch_operations(a))
 
-    // block 110
+    // block 130
     await mustFail(moneyMarket.send_cw20_token(
         b,
         50000000000000,
@@ -237,63 +288,65 @@ async function main() {
         moneyMarket.contractInfo["moneymarket_market"].contractAddress
     ))
 
-    //block 111
+    //block 131
     await mustPass(moneyMarket.deposit_stable(b, 1000000))
 
-    //block 112
+    //block 132
     await mustPass(moneyMarket.overseer_unlock_collateral(a, [[basset.contractInfo["anchor_basset_token"].contractAddress, "100000000000"]]))
 
-    //block 113
+    //block 133
     await mustFail(moneyMarket.overseer_unlock_collateral(a, [[basset.contractInfo["anchor_basset_token"].contractAddress, "10000000000000"]]))
 
-    //block 114
+    //block 134
     await mustPass(moneyMarket.withdraw_collateral(a, 150000000000))
 
-    //block 115
+    //block 135
     await mustFail(moneyMarket.withdraw_collateral(a, 990000000000))
 
-    //block 116-129
+    //block 136-149
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
 
-    //block 130
+    console.log("saving state...")
+    fs.writeFileSync("11_block149_state.json", JSON.stringify(await mantleState.getState(), null, 2))
+
+    //block 150
     await mustPass(basset.update_global_index(a))
 
-    //block 131
+    //block 151
     await mustPass(moneyMarket.execute_epoch_operations(a))
 
-    //block 132
-    await mustPass(moneyMarket.repay_stable(a, 400000000000))
+    //block 152
+    await mustPass(moneyMarket.borrow_stable(a, 200000000000, undefined))
 
-
-    //block 133 - 145
+    //block 153 - 165
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 13))
 
-    //block 146
+    //block 166
     await mustPass(basset.update_global_index(a))
 
-    //block 147
+    //block 167
     await mustPass(moneyMarket.execute_epoch_operations(a))
 
-    //block 148
-    await mustFail(moneyMarket.overseer_unlock_collateral(a, [[basset.contractInfo["anchor_basset_token"].contractAddress, "840000000000"]]))
+    //block 168
+    await mustFail(moneyMarket.overseer_unlock_collateral(a, [[basset.contractInfo["anchor_basset_token"].contractAddress, "30000000000"]]))
 
-    //block 136
-    // User C trigger liquidation(mustFail)
+    // //block 169
+    // // User C trigger liquidation(mustFail)
 
-    //block 137
-    // change MM oracle price to 0.75
+    // //block 170
+    // // change MM oracle price to 0.75
 
-    //block 138
-    // User C trigger liquidation(mustPass)
-    // fs.writeFileSync("8actions.json", JSON.stringify(getRecord(), null, 2))
-    // fs.writeFileSync("8mantleState.json", JSON.stringify(await mantleState.getState(), null, 2))
+    // //block 171
+    // // User C trigger liquidation(mustPass)
+    // // fs.writeFileSync("8actions.json", JSON.stringify(getRecord(), null, 2))
+    // // fs.writeFileSync("8mantleState.json", JSON.stringify(await mantleState.getState(), null, 2))
 }
 
 main()
     .then(() => console.log('done'))
     .then(async () => {
         console.log("saving state...")
-        fs.writeFileSync("8actions.json", JSON.stringify(getRecord(), null, 2))
-        fs.writeFileSync("8mantleState.json", JSON.stringify(await mantleState.getState(), null, 2))
+        fs.writeFileSync("11_actions.json", JSON.stringify(getRecord(), null, 2))
+        fs.writeFileSync("11_state.json", JSON.stringify(await mantleState.getState(), null, 2))
     })
     .catch(console.log)

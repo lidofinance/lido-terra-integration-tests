@@ -51,10 +51,10 @@ export default class AnchorbAsset {
       sender,
       this.contractInfo.anchor_basset_hub.codeId,
       {
-        epoch_period: 0,
+        epoch_period: 30,
         underlying_coin_denom: "uluna",
         unbonding_period: 211,
-        peg_recovery_fee: "0",
+        peg_recovery_fee: "0.001",
         er_threshold: "1",
         reward_denom: "uusd",
       }

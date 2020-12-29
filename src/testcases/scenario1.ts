@@ -181,36 +181,32 @@ async function main() {
     //block 31
     await mustPass(basset.bond(a, 20000000000000, validators[0].validator_address))
 
-    //block 32 - 35
-    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 4))
+    //block 32 - 40
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
 
-    //block 36
-    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
-
-    //block 37~66
-    // Oracle slashing happen here
-    await repeat(30, async () => {
+    //block 41~45
+    await repeat(5, async () => {
         await testkit.registerAutomaticTxPause(Testkit.automaticTxPauseRequest('valA'))
         await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
     })
 
-    //block 67
+    //block 46 - 50
+    // Oracle slashing happen at the block 49
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 5))
+
+    //block 51 unjail & revive oracle
     await mustPass(unjail(valAWallet))
 
-    //block 68
+    //block 52 - 54
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 3))
+
+    //block 55
     await mustPass(basset.bond(a, 20000000000000, validators[0].validator_address))
 
-    //block 69-77
-    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
-
-    //block 78
+    //block 56
     await mustPass(basset.transfer_cw20_token(a, b, 10000000))
 
-    // //erase this
-    // await mustPass(moneyMarket.deposit_stable(b, 1000000000000))
-    //block 69-77
-
-    //block 79
+    //block 57
     await basset.send_cw20_token(
         a,
         20000000000000,
@@ -218,60 +214,39 @@ async function main() {
         basset.contractInfo["anchor_basset_hub"].contractAddress
     )
 
-    console.log("saving state...")
+    //block 58
+    await mustPass(basset.send_cw20_token(
+        a,
+        1000000,
+        { unbond: {} },
+        basset.contractInfo["anchor_basset_hub"].contractAddress
+    ))
 
-    const log = await mantleState.query(gql`
-        query {
-            BlockState {
-                ResponseDeliverTx {
-                    Log
-                  }
-            }
-        }
-    `, {})
+    //block 59 - 66
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 8))
 
-    console.log(JSON.stringify(log, null, 2))
+    //block 67
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+    //unbond 1
 
-    fs.writeFileSync("actions.json", JSON.stringify(getRecord(), null, 2))
-    fs.writeFileSync("snapshot.json", JSON.stringify(await mantleState.getState(), null, 2))
+    //block 68 - 89
+    //oracle slashing happen at the block 79
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 22))
 
-    //block 80~88
-    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+    //block 90 Unjail & Revive Oracle
+    //await mustPass(unjail(valAWallet))
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
 
-    // fs.writeFileSync("actions.json", JSON.stringify(getRecord(), null, 2))
-    fs.writeFileSync("snapshot2.json", JSON.stringify(await mantleState.getState(), null, 2))
+    //block 91 - 119
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 29))
 
-    // await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 3))
-
-    //block 89
-    // await mustPass(basset.send_cw20_token(
-    //     a,
-    //     1000000,
-    //     { unbond: {} },
-    //     basset.contractInfo["anchor_basset_hub"].contractAddress
-    // ))
-
-    //block 89 - 127
-    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 39))
-
-    //block 128
+    //block 120
     await mustPass(basset.finish(a))
 
-    console.log(JSON.stringify(await mantleState.query(gql`
-    query {
-        BlockState {
-            ResponseDeliverTx {
-                Log
-              }
-        }
-    }
-`, {}), null, 2))
-
-
-    //block 129
+    //block 121
     await mustPass(moneyMarket.deposit_stable(b, 1000000000000))
 
-    //block 130
+    //block 122
     const marketAddr = moneyMarket.contractInfo["moneymarket_market"].contractAddress;
     await mustPass(moneyMarket.send_cw20_token(
         b,
@@ -280,7 +255,7 @@ async function main() {
         marketAddr
     ))
 
-    //block 131
+    //block 123
     const custody = moneyMarket.contractInfo["moneymarket_custody"].contractAddress;
     await mustPass(basset.send_cw20_token(
         a,
@@ -288,25 +263,26 @@ async function main() {
         { deposit_collateral: {} },
         custody
     ))
-    //block 132
+
+    //block 124
     await mustPass(moneyMarket.overseer_lock_collateral(a, [[basset.contractInfo["anchor_basset_token"].contractAddress, "2000000000000"]]))
 
-    //block 133
+    //block 125
     await mustFail(moneyMarket.overseer_lock_collateral(a, [[basset.contractInfo["anchor_basset_token"].contractAddress, "1500000000000"]]))
 
-    //block 134
+    //block 126
     await mustFail(moneyMarket.borrow_stable(a, 1500000000000, undefined))
 
-    //block 135
+    //block 127
     await mustPass(moneyMarket.borrow_stable(a, 500000000000, undefined))
 
-    //block 136
+    //block 128
     await mustPass(basset.update_global_index(a))
 
-    //block 137
+    //block 129
     await mustPass(moneyMarket.execute_epoch_operations(a))
 
-    // block 138
+    // block 130
     await mustFail(moneyMarket.send_cw20_token(
         b,
         50000000000000,
@@ -314,52 +290,55 @@ async function main() {
         moneyMarket.contractInfo["moneymarket_market"].contractAddress
     ))
 
-    //block 139
+    //block 131
     await mustPass(moneyMarket.deposit_stable(b, 1000000))
 
-    //block 140
+    //block 132
     await mustPass(moneyMarket.overseer_unlock_collateral(a, [[basset.contractInfo["anchor_basset_token"].contractAddress, "100000000000"]]))
 
-    //block 141
+    //block 133
     await mustFail(moneyMarket.overseer_unlock_collateral(a, [[basset.contractInfo["anchor_basset_token"].contractAddress, "10000000000000"]]))
 
-    //block 142
+    //block 134
     await mustPass(moneyMarket.withdraw_collateral(a, 150000000000))
 
-    //block 143
+    //block 135
     await mustFail(moneyMarket.withdraw_collateral(a, 990000000000))
 
-    //block 144-157
+    //block 136-149
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
 
-    //block 158
+    console.log("saving state...")
+    fs.writeFileSync("1_block149_state.json", JSON.stringify(await mantleState.getState(), null, 2))
+
+    //block 150
     await mustPass(basset.update_global_index(a))
 
-    //block 159
+    //block 151
     await mustPass(moneyMarket.execute_epoch_operations(a))
 
-    //block 160
+    //block 152
     await mustPass(moneyMarket.repay_stable(a, 400000000000))
 
-    //block 161 - 173
+    //block 153 - 165
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 13))
 
-    //block 174
+    //block 166
     await mustPass(basset.update_global_index(a))
 
-    //block 175
+    //block 167
     await mustPass(moneyMarket.execute_epoch_operations(a))
 
-    //block 176
+    //block 168
     await mustFail(moneyMarket.overseer_unlock_collateral(a, [[basset.contractInfo["anchor_basset_token"].contractAddress, "840000000000"]]))
 
-    // //block 136
+    // //block 169
     // // User C trigger liquidation(mustFail)
 
-    // //block 137
+    // //block 170
     // // change MM oracle price to 0.75
 
-    // //block 138
+    // //block 171
     // // User C trigger liquidation(mustPass)
     // // fs.writeFileSync("8actions.json", JSON.stringify(getRecord(), null, 2))
     // // fs.writeFileSync("8mantleState.json", JSON.stringify(await mantleState.getState(), null, 2))
@@ -369,7 +348,7 @@ main()
     .then(() => console.log('done'))
     .then(async () => {
         console.log("saving state...")
-        fs.writeFileSync("scenario1actions.json", JSON.stringify(getRecord(), null, 2))
-        fs.writeFileSync("scenario1mantleState.json", JSON.stringify(await mantleState.getState(), null, 2))
+        fs.writeFileSync("1_actions.json", JSON.stringify(getRecord(), null, 2))
+        fs.writeFileSync("1_state.json", JSON.stringify(await mantleState.getState(), null, 2))
     })
     .catch(console.log)

@@ -192,6 +192,8 @@ async function main() {
 
     //block 31
     await mustPass(basset.bond(a, 20000000000000, validators[0].validator_address))
+    console.log("saving state...")
+    fs.writeFileSync("1_block31_state.json", JSON.stringify(await mantleState.getState(), null, 2))
 
     //block 32 - 40
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
@@ -214,6 +216,8 @@ async function main() {
     //block 51 unjail & revive oracle
     // unjail & re-register oracle votes
     await mustPass(unjail(valAWallet))
+    console.log("saving state...")
+    fs.writeFileSync("1_block51_state.json", JSON.stringify(await mantleState.getState(), null, 2))
 
     const currentBlockHeight = await mantleState.getCurrentBlockHeight()
 
@@ -247,7 +251,7 @@ async function main() {
     //block 57
     await basset.send_cw20_token(
         a,
-        20000000000000,
+        40000000000000,
         { unbond: {} },
         basset.contractInfo["anchor_basset_hub"].contractAddress
     )

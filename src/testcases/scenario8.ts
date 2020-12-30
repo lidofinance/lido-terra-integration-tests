@@ -3,7 +3,7 @@ import * as path from 'path'
 import * as fs from 'fs'
 import { mustFail, mustPass } from "../helper/flow/must";
 import { getRecord } from "../helper/flow/record";
-import { registerChainOracleVote } from "../helper/oracle/chain-oracle";
+import { registerChainOracleVote, registerChainOraclePrevote } from "../helper/oracle/chain-oracle";
 import Anchor, { Asset } from "../helper/spawn";
 import { MantleState } from "../mantle-querier/MantleState";
 import { Testkit } from '../testkit/testkit'
@@ -44,10 +44,10 @@ async function main() {
             Testkit.walletToAccountRequest('gasStation', gasStation),
         ],
         validators: [
-            Testkit.validatorInitRequest('valA', new Coin('uluna', new Int(100000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
-            Testkit.validatorInitRequest('valB', new Coin('uluna', new Int(100000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
-            Testkit.validatorInitRequest('valC', new Coin('uluna', new Int(100000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
-            Testkit.validatorInitRequest('valD', new Coin('uluna', new Int(100000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
+            Testkit.validatorInitRequest('valA', new Coin('uluna', new Int(1000000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
+            Testkit.validatorInitRequest('valB', new Coin('uluna', new Int(1000000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
+            Testkit.validatorInitRequest('valC', new Coin('uluna', new Int(1000000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
+            Testkit.validatorInitRequest('valD', new Coin('uluna', new Int(1000000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
         ],
         auto_inject: {
             validator_rounds: ['valB', 'valC', 'valD', 'valA']
@@ -74,13 +74,25 @@ async function main() {
     const lcd = testkit.deriveLCD()
 
     // initialize genesis block
-    await testkit.inject(validators[0].validator_address)
+    await testkit.inject()
 
     // register oracle votes
     const validatorNames = ['valA', 'valB', 'valC', 'valD']
-    await Promise.all(registerChainOracleVote(validators, validatorNames).map(async atx => {
-        return testkit.registerAutomaticTx(atx)
-    }))
+    // register votes
+    const initialVotes = await Promise.all(validators.map(async validator => testkit.registerAutomaticTx(registerChainOracleVote(
+        validator.account_name,
+        validator.Msg.delegator_address,
+        validator.Msg.validator_address,
+        3
+    ))))
+
+    // register prevotes
+    const initialPrevotes = await Promise.all(validators.map(async validator => testkit.registerAutomaticTx(registerChainOraclePrevote(
+        validator.account_name,
+        validator.Msg.delegator_address,
+        validator.Msg.validator_address,
+        2
+    ))))
 
     const a = new Wallet(lcd, aKey)
     const b = new Wallet(lcd, bKey)
@@ -185,8 +197,13 @@ async function main() {
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
 
     //block 41~45
+    // deregister oracle vote and waste 5 blocks
+    const prevotesToClear = initialPrevotes[0]
+    const votesToClear = initialVotes[0]
+
+    await testkit.clearAutomaticTx(prevotesToClear.id)
+    await testkit.clearAutomaticTx(votesToClear.id)
     await repeat(5, async () => {
-        await testkit.registerAutomaticTxPause(Testkit.automaticTxPauseRequest('valA'))
         await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
     })
 
@@ -195,7 +212,26 @@ async function main() {
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 5))
 
     //block 51 unjail & revive oracle
+    // unjail & re-register oracle votes
     await mustPass(unjail(valAWallet))
+
+    const currentBlockHeight = await mantleState.getCurrentBlockHeight()
+
+    // // register vote for valA
+    const previousVote = await testkit.registerAutomaticTx(registerChainOracleVote(
+        validators[0].account_name,
+        validators[0].Msg.delegator_address,
+        validators[0].Msg.validator_address,
+        currentBlockHeight + 2,
+    ))
+
+    // register votes
+    const previousPrevote = await testkit.registerAutomaticTx(registerChainOraclePrevote(
+        validators[0].account_name,
+        validators[0].Msg.delegator_address,
+        validators[0].Msg.validator_address,
+        currentBlockHeight + 1
+    ))
 
     //block 52 - 54
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 3))
@@ -232,9 +268,15 @@ async function main() {
     //block 68 - 69
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 2))
 
+    console.log("saving state...")
+    fs.writeFileSync("8_block69_state.json", JSON.stringify(await mantleState.getState(), null, 2))
+
+
     //block 70 - 74
+    // deregister oracle vote and waste 5 blocks
+    await testkit.clearAutomaticTx(previousPrevote.id)
+    await testkit.clearAutomaticTx(previousVote.id)
     await repeat(5, async () => {
-        await testkit.registerAutomaticTxPause(Testkit.automaticTxPauseRequest('valA'))
         await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
     })
 
@@ -242,9 +284,26 @@ async function main() {
     //oracle slashing happen at the block 79
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 15))
 
-    //block 90 Unjail & Revive Oracle
-    //await mustPass(unjail(valAWallet))
-    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+    // unjail & re-register oracle votes
+    await mustPass(unjail(valAWallet))
+
+    const currentBlockHeight2 = await mantleState.getCurrentBlockHeight()
+
+    // // register vote for valA
+    const previousVote2 = await testkit.registerAutomaticTx(registerChainOracleVote(
+        validators[0].account_name,
+        validators[0].Msg.delegator_address,
+        validators[0].Msg.validator_address,
+        currentBlockHeight2 + 2,
+    ))
+
+    // register votes
+    const previousPrevote2 = await testkit.registerAutomaticTx(registerChainOraclePrevote(
+        validators[0].account_name,
+        validators[0].Msg.delegator_address,
+        validators[0].Msg.validator_address,
+        currentBlockHeight2 + 1
+    ))
 
     //block 91 - 119
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 29))

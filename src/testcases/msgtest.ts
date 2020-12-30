@@ -71,13 +71,25 @@ async function main() {
     const lcd = testkit.deriveLCD()
 
     // initialize genesis block
-    await testkit.inject(validators[0].validator_address)
+    await testkit.inject()
 
     // register oracle votes
     const validatorNames = ['valA', 'valB', 'valC', 'valD']
-    await Promise.all(registerChainOracleVote(validators, validatorNames).map(async atx => {
-        return testkit.registerAutomaticTx(atx)
-    }))
+    // register votes
+    const initialVotes = await Promise.all(validators.map(async validator => testkit.registerAutomaticTx(registerChainOracleVote(
+        validator.account_name,
+        validator.Msg.delegator_address,
+        validator.Msg.validator_address,
+        3
+    ))))
+
+    // register prevotes
+    const initialPrevotes = await Promise.all(validators.map(async validator => testkit.registerAutomaticTx(registerChainOraclePrevote(
+        validator.account_name,
+        validator.Msg.delegator_address,
+        validator.Msg.validator_address,
+        2
+    ))))
 
     const a = new Wallet(lcd, aKey)
     const b = new Wallet(lcd, bKey)

@@ -41,7 +41,7 @@ export default class MoneyMarket {
         bytecode.toString("base64")
       );
 
-      const result = await send_transaction(sender, [storeCode])
+      const result = await send_transaction(sender, [storeCode]);
       if (isTxError(result)) {
         throw new Error(`Couldn't upload ${c}: ${result.raw_log}`);
       }
@@ -98,7 +98,8 @@ export default class MoneyMarket {
         `Couldn't upload ${this.contractInfo.moneymarket_.codeId}: ${mmOracle.raw_log}`
       );
     }
-    const oracleAddr = mmOracle.logs[0].eventsByType.instantiate_contract.contract_address[0];
+    const oracleAddr =
+      mmOracle.logs[0].eventsByType.instantiate_contract.contract_address[0];
     this.contractInfo["moneymarket_oracle"].contractAddress = oracleAddr;
   }
 
@@ -128,7 +129,9 @@ export default class MoneyMarket {
     const liquidationAddr =
       mmLiquidation.logs[0].eventsByType.instantiate_contract
         .contract_address[0];
-    this.contractInfo["moneymarket_liquidation"].contractAddress = liquidationAddr;
+    this.contractInfo[
+      "moneymarket_liquidation"
+    ].contractAddress = liquidationAddr;
   }
 
   // initialize money market contract
@@ -136,9 +139,10 @@ export default class MoneyMarket {
     sender: Wallet,
     terraswapTokenCodeId: number,
     stableDenom: string,
-    reserveFactor: number,
+    reserveFactor: number
   ): Promise<void> {
-    const mmInterest = this.contractInfo["moneymarket_interest"].contractAddress;
+    const mmInterest = this.contractInfo["moneymarket_interest"]
+      .contractAddress;
     const mmMarket = await instantiate(
       sender,
       this.contractInfo.moneymarket_market.codeId,
@@ -157,12 +161,14 @@ export default class MoneyMarket {
       );
     }
 
-    const anchorToken = mmMarket.logs[0].eventsByType.instantiate_contract.contract_address[0];
-    const marketAddr = mmMarket.logs[0].eventsByType.instantiate_contract.contract_address[1]
+    const anchorToken =
+      mmMarket.logs[0].eventsByType.instantiate_contract.contract_address[0];
+    const marketAddr =
+      mmMarket.logs[0].eventsByType.instantiate_contract.contract_address[1];
     this.contractInfo["anchorToken"] = {
       codeId: terraswapTokenCodeId,
       contractAddress: anchorToken,
-    }
+    };
     this.contractInfo["moneymarket_market"].contractAddress = marketAddr;
   }
 
@@ -176,7 +182,8 @@ export default class MoneyMarket {
   ): Promise<void> {
     const oracleAddr = this.contractInfo["moneymarket_oracle"].contractAddress;
     const marketAddr = this.contractInfo["moneymarket_market"].contractAddress;
-    const liquidationAddr = this.contractInfo["moneymarket_liquidation"].contractAddress;
+    const liquidationAddr = this.contractInfo["moneymarket_liquidation"]
+      .contractAddress;
     const mmOverseer = await instantiate(
       sender,
       this.contractInfo.moneymarket_overseer.codeId,
@@ -345,8 +352,8 @@ export default class MoneyMarket {
     const contract = this.contractInfo["moneymarket_overseer"].contractAddress;
     const unlockCollaterallExecution = await execute(sender, contract, {
       unlock_collateral: {
-        collaterals: collaterals
-      }
+        collaterals: collaterals,
+      },
     });
     if (isTxError(unlockCollaterallExecution)) {
       throw new Error(`Couldn't run: ${unlockCollaterallExecution.raw_log}`);
@@ -362,7 +369,8 @@ export default class MoneyMarket {
     const unlockCollaterallExecution = await execute(sender, contract, {
       whitelist: {
         collateral_token: collateralToken,
-        custody_contract: this.contractInfo["moneymarket_custody"].contractAddress,
+        custody_contract: this.contractInfo["moneymarket_custody"]
+          .contractAddress,
         ltv: ltv,
       },
     });
@@ -405,7 +413,7 @@ export default class MoneyMarket {
       send: {
         contract: contracAddr,
         amount: `${amount}`,
-        msg: Buffer.from(JSON.stringify(inputMsg)).toString('base64'),
+        msg: Buffer.from(JSON.stringify(inputMsg)).toString("base64"),
       },
     });
     if (isTxError(sendExecuttion)) {

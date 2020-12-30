@@ -31,7 +31,7 @@ export default class TerraSwap {
         bytecode.toString("base64")
       );
 
-      const result = await send_transaction(sender, [storeCode])
+      const result = await send_transaction(sender, [storeCode]);
       if (isTxError(result)) {
         throw new Error(`Couldn't upload ${c}: ${result.raw_log}`);
       }
@@ -59,7 +59,9 @@ export default class TerraSwap {
         `Couldn't upload ${this.contractInfo.moneymarket_interest.codeId}: ${terraswapFactory.raw_log}`
       );
     }
-    const factoryAddr = terraswapFactory.logs[0].eventsByType.instantiate_contract.contract_address[0];
+    const factoryAddr =
+      terraswapFactory.logs[0].eventsByType.instantiate_contract
+        .contract_address[0];
 
     this.contractInfo["terraswap_factory"].contractAddress = factoryAddr;
   }
@@ -92,7 +94,7 @@ export default class TerraSwap {
         send: {
           contract: moneyMarketAddr,
           amount: `${amount}`,
-          msg: Buffer.from(JSON.stringify(inputMsg)).toString('base64'),
+          msg: Buffer.from(JSON.stringify(inputMsg)).toString("base64"),
         },
       }
     );

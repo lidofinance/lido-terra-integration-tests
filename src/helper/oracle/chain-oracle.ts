@@ -1,40 +1,51 @@
-// chain oracle
-
 import { MsgAggregateExchangeRateVote, StdFee } from "@terra-money/terra.js";
-import { Testkit, TestkitInit } from "../../testkit/testkit";
+import { Testkit } from "../../testkit/testkit";
+
+const oraclePrice =
+  "1200.000000000000000000ukrw,1.000000000000000000uusd,0.750000000000000000usdr,2400.000000000000000000umnt";
+const salt = "abcd";
+
+export const registerChainOraclePrevote = (
+  validatorName: string,
+  delegatorAddress: string,
+  validatorAddress: string,
+  startAt: number = 0
+) => {
+  const vote = new MsgAggregateExchangeRateVote(
+    oraclePrice,
+    salt,
+    delegatorAddress,
+    validatorAddress
+  );
+  const prevote = vote.getPrevote();
+
+  return Testkit.automaticTxRequest({
+    accountName: validatorName,
+    period: 1,
+    startAt: startAt,
+    msgs: [prevote],
+    fee: new StdFee(10000000, "1000000uusd"),
+  });
+};
 
 export const registerChainOracleVote = (
-    validators: TestkitInit.Validator[],
-    validatorsName: string[],
+  validatorName: string,
+  delegatorAddress: string,
+  validatorAddress: string,
+  startAt: number = 0
 ) => {
-    return validators.map((validator, i) => {
-        const vote = new MsgAggregateExchangeRateVote(
-            "1200.000000000000000000ukrw,1.000000000000000000uusd,0.750000000000000000usdr,2400.000000000000000000umnt",
-            "abcd",
-            validator.Msg.delegator_address,
-            validator.Msg.validator_address,
-        )
-        const prevote = vote.getPrevote()
+  const vote = new MsgAggregateExchangeRateVote(
+    oraclePrice,
+    salt,
+    delegatorAddress,
+    validatorAddress
+  );
 
-        return [
-            // do prevote
-            Testkit.automaticTxRequest({
-                accountName: validatorsName[i],
-                period: 9999999999999,
-                startAt: 2,
-                msgs: [prevote],
-                fee: new StdFee(10000000, "1000000uusd")
-            }),
-
-            // vote w/ offset 1
-            Testkit.automaticTxRequest({
-                accountName: validatorsName[i],
-                period: 1,
-                startAt: 3,
-                msgs: [vote, prevote],
-                fee: new StdFee(10000000, "1000000uusd")
-            }),
-        ]
-    }).flat()
-}
-
+  return Testkit.automaticTxRequest({
+    accountName: validatorName,
+    period: 1,
+    startAt: startAt,
+    msgs: [vote],
+    fee: new StdFee(10000000, "1000000uusd"),
+  });
+};

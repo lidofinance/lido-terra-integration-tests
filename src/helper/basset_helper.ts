@@ -33,7 +33,7 @@ export default class AnchorbAsset {
         bytecode.toString("base64")
       );
 
-      const result = await send_transaction(sender, [storeCode])
+      const result = await send_transaction(sender, [storeCode]);
       if (isTxError(result)) {
         throw new Error(`Couldn't upload ${c}: ${result.raw_log}`);
       }
@@ -221,7 +221,7 @@ export default class AnchorbAsset {
       send: {
         contract: contracAddr,
         amount: `${amount}`,
-        msg: Buffer.from(JSON.stringify(inputMsg)).toString('base64'),
+        msg: Buffer.from(JSON.stringify(inputMsg)).toString("base64"),
       },
     });
     if (isTxError(sendExecuttion)) {

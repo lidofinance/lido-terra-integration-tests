@@ -20,7 +20,7 @@ export default class Anchor {
   public async store_contracts(
     bassetLocation: string,
     mmLocation: string,
-    terraswapLocation: string,
+    terraswapLocation: string
   ): Promise<void> {
     await this.bAsset.storeCodes(this.owner, bassetLocation);
     await this.moneyMarket.storeCodes(this.owner, mmLocation);
@@ -35,9 +35,18 @@ export default class Anchor {
 
     await this.terraswap.instantiate_terraswap(this.owner);
 
-    await this.moneyMarket.instantiate_interest(this.owner, 0.00000000381, 0.00000004);
+    await this.moneyMarket.instantiate_interest(
+      this.owner,
+      0.00000000381,
+      0.00000004
+    );
     await this.moneyMarket.instantiate_oracle(this.owner, "uusd");
-    await this.moneyMarket.instantiate_liquidation(this.owner, 0.8, 10000000, 200000000);
+    await this.moneyMarket.instantiate_liquidation(
+      this.owner,
+      0.8,
+      10000000,
+      200000000
+    );
     await this.moneyMarket.instantiate_money(
       this.owner,
       this.terraswap.contractInfo["terraswap_token"].codeId,
@@ -66,11 +75,17 @@ export default class Anchor {
       terraswapPair
     );
     await this.moneyMarket.overseer_whitelist(this.owner, bassetToken, "0.5");
-    await execute(this.owner, this.moneyMarket.contractInfo["moneymarket_market"].contractAddress, {
-      register_overseer: {
-        overseer_contract: this.moneyMarket.contractInfo["moneymarket_overseer"].contractAddress
+    await execute(
+      this.owner,
+      this.moneyMarket.contractInfo["moneymarket_market"].contractAddress,
+      {
+        register_overseer: {
+          overseer_contract: this.moneyMarket.contractInfo[
+            "moneymarket_overseer"
+          ].contractAddress,
+        },
       }
-    })
+    );
   }
 }
 

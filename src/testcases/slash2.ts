@@ -177,13 +177,15 @@ async function main() {
     //block 41 - 45
     // Oracle slashing happen here
 
-    // deregister oracle vote and waste 5 blocks
     const prevotesToClear = initialPrevotes[0]
     const votesToClear = initialVotes[0]
 
-    await testkit.clearAutomaticTx(prevotesToClear.id)
-    await testkit.clearAutomaticTx(votesToClear.id)
-    await repeat(5, async () => {
+    console.log('before clear', await mantleState.getCurrentBlockHeight())
+
+    await mustPass(testkit.clearAutomaticTx(prevotesToClear.id))
+    await mustPass(testkit.clearAutomaticTx(votesToClear.id))
+
+    await repeat(10, async () => {
         await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
     })
 
@@ -191,31 +193,11 @@ async function main() {
 
     const validatorAWallet = new Wallet(lcd, validatorAKey)
     console.log("==== block", await mantleState.getCurrentBlockHeight())
+    await mustPass(unjail(validatorAWallet))
     console.log("==== unjkaijl finished")
 
-    // unjail & re-register oracle votes
-    // unjail & re-register oracle votes
-    await mustPass(unjail(valAWallet))
-
     const currentBlockHeight = await mantleState.getCurrentBlockHeight()
-
-    // // register vote for valA
-    const previousVote = await testkit.registerAutomaticTx(registerChainOracleVote(
-        validators[0].account_name,
-        validators[0].Msg.delegator_address,
-        validators[0].Msg.validator_address,
-        currentBlockHeight + 2,
-    ))
-
-    // register votes
-    const previousPrevote = await testkit.registerAutomaticTx(registerChainOraclePrevote(
-        validators[0].account_name,
-        validators[0].Msg.delegator_address,
-        validators[0].Msg.validator_address,
-        currentBlockHeight + 1
-    ))
-
-    const currentBlockHeight = await mantleState.getCurrentBlockHeight()
+    console.log(currentBlockHeight)
 
     // // register vote for valA
     await testkit.registerAutomaticTx(registerChainOracleVote(
@@ -232,7 +214,7 @@ async function main() {
         validators[0].Msg.validator_address,
         currentBlockHeight + 1
     ))
-
+    
     //block 46 - 50
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 5))
 

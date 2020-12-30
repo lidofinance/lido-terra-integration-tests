@@ -3,7 +3,7 @@ import * as path from 'path'
 import * as fs from 'fs'
 import { mustFail, mustPass } from "../helper/flow/must";
 import { getRecord } from "../helper/flow/record";
-import { registerChainOracleVote } from "../helper/oracle/chain-oracle";
+import { registerChainOracleVote, registerChainOraclePrevote } from "../helper/oracle/chain-oracle";
 import Anchor, { Asset } from "../helper/spawn";
 import { MantleState } from "../mantle-querier/MantleState";
 import { Testkit } from '../testkit/testkit'
@@ -335,6 +335,7 @@ async function main() {
     //block 136-149
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
 
+    //save block 149 state
     console.log("saving state...")
     fs.writeFileSync("9_block149_state.json", JSON.stringify(await mantleState.getState(), null, 2))
 

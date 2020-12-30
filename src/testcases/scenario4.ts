@@ -214,6 +214,8 @@ async function main() {
     //block 51 unjail & revive oracle
     // unjail & re-register oracle votes
     await mustPass(unjail(valAWallet))
+    console.log("saving state...")
+    fs.writeFileSync("4_block51_state.json", JSON.stringify(await mantleState.getState(), null, 2))
 
     const currentBlockHeight = await mantleState.getCurrentBlockHeight()
 
@@ -270,7 +272,10 @@ async function main() {
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 22))
 
     // unjail & re-register oracle votes
+    //block 90
     await mustPass(unjail(valAWallet))
+    console.log("saving state...")
+    fs.writeFileSync("4_block90_state.json", JSON.stringify(await mantleState.getState(), null, 2))
 
     const currentBlockHeight2 = await mantleState.getCurrentBlockHeight()
 

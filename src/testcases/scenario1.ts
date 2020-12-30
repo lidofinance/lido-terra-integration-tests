@@ -3,7 +3,7 @@ import * as path from 'path'
 import * as fs from 'fs'
 import { mustFail, mustPass } from "../helper/flow/must";
 import { getRecord } from "../helper/flow/record";
-import { registerChainOracleVote } from "../helper/oracle/chain-oracle";
+import { registerChainOracleVote, registerChainOraclePrevote } from "../helper/oracle/chain-oracle";
 import Anchor, { Asset } from "../helper/spawn";
 import { MantleState } from "../mantle-querier/MantleState";
 import { Testkit } from '../testkit/testkit'
@@ -238,6 +238,8 @@ async function main() {
 
     //block 55
     await mustPass(basset.bond(a, 20000000000000, validators[0].validator_address))
+    console.log("saving state...")
+    fs.writeFileSync("1_block55_state.json", JSON.stringify(await mantleState.getState(), null, 2))
 
     //block 56
     await mustPass(basset.transfer_cw20_token(a, b, 10000000))
@@ -249,6 +251,8 @@ async function main() {
         { unbond: {} },
         basset.contractInfo["anchor_basset_hub"].contractAddress
     )
+    console.log("saving state...")
+    fs.writeFileSync("1_block57_state.json", JSON.stringify(await mantleState.getState(), null, 2))
 
     //block 58
     await mustPass(basset.send_cw20_token(
@@ -269,25 +273,26 @@ async function main() {
     //oracle slashing happen at the block 79
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 22))
 
+    // block 90
     // unjail & re-register oracle votes
     await mustPass(unjail(valAWallet))
 
-    const currentBlockHeight = await mantleState.getCurrentBlockHeight()
+    const currentBlockHeight2 = await mantleState.getCurrentBlockHeight()
 
     // // register vote for valA
-    const previousVote = await testkit.registerAutomaticTx(registerChainOracleVote(
+    const previousVote2 = await testkit.registerAutomaticTx(registerChainOracleVote(
         validators[0].account_name,
         validators[0].Msg.delegator_address,
         validators[0].Msg.validator_address,
-        currentBlockHeight + 2,
+        currentBlockHeight2 + 2,
     ))
 
     // register votes
-    const previousPrevote = await testkit.registerAutomaticTx(registerChainOraclePrevote(
+    const previousPrevote2 = await testkit.registerAutomaticTx(registerChainOraclePrevote(
         validators[0].account_name,
         validators[0].Msg.delegator_address,
         validators[0].Msg.validator_address,
-        currentBlockHeight + 1
+        currentBlockHeight2 + 1
     ))
 
     //block 91 - 119

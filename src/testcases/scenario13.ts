@@ -3,7 +3,7 @@ import * as path from 'path'
 import * as fs from 'fs'
 import { mustFail, mustPass } from "../helper/flow/must";
 import { getRecord } from "../helper/flow/record";
-import { registerChainOracleVote } from "../helper/oracle/chain-oracle";
+import { registerChainOracleVote, registerChainOraclePrevote } from "../helper/oracle/chain-oracle";
 import Anchor, { Asset } from "../helper/spawn";
 import { MantleState } from "../mantle-querier/MantleState";
 import { Testkit } from '../testkit/testkit'
@@ -241,6 +241,8 @@ async function main() {
 
     //block 68 - 69
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 2))
+    console.log("saving state...")
+    fs.writeFileSync("13_block69_state.json", JSON.stringify(await mantleState.getState(), null, 2))
 
     //block 70 - 74
     // deregister oracle vote and waste 5 blocks
@@ -253,12 +255,31 @@ async function main() {
         await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
     })
 
-    //block 75 - 89
+    //block 75 - 79
     //oracle slashing happen at the block 79
-    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 15))
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 5))
+    console.log("saving state...")
+    fs.writeFileSync("13_block79_state.json", JSON.stringify(await mantleState.getState(), null, 2))
 
+    //block 80
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+    console.log("saving state...")
+    fs.writeFileSync("13_block80_state.json", JSON.stringify(await mantleState.getState(), null, 2))
+
+    //block 81
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+    console.log("saving state...")
+    fs.writeFileSync("13_block80_state.json", JSON.stringify(await mantleState.getState(), null, 2))
+
+    //block 82-89
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 8))
+
+    //block 90
     // unjail & re-register oracle votes
     await mustPass(unjail(valAWallet))
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 5))
+    console.log("saving state...")
+    fs.writeFileSync("13_block90_state.json", JSON.stringify(await mantleState.getState(), null, 2))
 
     const currentBlockHeight = await mantleState.getCurrentBlockHeight()
 

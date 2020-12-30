@@ -12,7 +12,7 @@ export const getBlunaState = async (
     contracts.bLunaHub,
     { current_batch: {} },
     client
-  ).catch(() => {});
+  ).catch(() => { });
 
   const whitelist = await makeContractStoreQuery(
     contracts.bLunaHub,
@@ -24,10 +24,7 @@ export const getBlunaState = async (
     contracts.bLunaHub,
     { state: {} },
     client
-  ).then((r) => ({
-    total_bond_amount: r.total_bond_amount,
-    exchange_rate: r.exchange_rate,
-  }));
+  );
 
   const total_issued = await makeContractStoreQuery(
     contracts.bAssetToken,

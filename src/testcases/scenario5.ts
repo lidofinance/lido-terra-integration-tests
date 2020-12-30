@@ -3,7 +3,7 @@ import * as path from 'path'
 import * as fs from 'fs'
 import { mustFail, mustPass } from "../helper/flow/must";
 import { getRecord } from "../helper/flow/record";
-import { registerChainOracleVote } from "../helper/oracle/chain-oracle";
+import { registerChainOracleVote, registerChainOraclePrevote } from "../helper/oracle/chain-oracle";
 import Anchor, { Asset } from "../helper/spawn";
 import { MantleState } from "../mantle-querier/MantleState";
 import { Testkit } from '../testkit/testkit'
@@ -218,7 +218,7 @@ async function main() {
     const currentBlockHeight = await mantleState.getCurrentBlockHeight()
 
     // // register vote for valA
-    const previousVote = await testkit.registerAutomaticTx(registerChainOracleVote(
+    const previousVote2 = await testkit.registerAutomaticTx(registerChainOracleVote(
         validators[0].account_name,
         validators[0].Msg.delegator_address,
         validators[0].Msg.validator_address,
@@ -226,7 +226,7 @@ async function main() {
     ))
 
     // register votes
-    const previousPrevote = await testkit.registerAutomaticTx(registerChainOraclePrevote(
+    const previousPrevote2 = await testkit.registerAutomaticTx(registerChainOraclePrevote(
         validators[0].account_name,
         validators[0].Msg.delegator_address,
         validators[0].Msg.validator_address,
@@ -270,11 +270,11 @@ async function main() {
 
     //block 70 - 74
     // deregister oracle vote and waste 5 blocks
-    const prevotesToClear = initialPrevotes[0]
-    const votesToClear = initialVotes[0]
+    const prevotesToClear2 = previousVote2
+    const votesToClear2 = previousPrevote2
 
-    await testkit.clearAutomaticTx(prevotesToClear.id)
-    await testkit.clearAutomaticTx(votesToClear.id)
+    await testkit.clearAutomaticTx(prevotesToClear2.id)
+    await testkit.clearAutomaticTx(votesToClear2.id)
     await repeat(5, async () => {
         await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
     })
@@ -283,17 +283,20 @@ async function main() {
     //oracle slashing happen at the block 79
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 15))
 
+    //block 90
     // unjail & re-register oracle votes
     await mustPass(unjail(valAWallet))
+    console.log("saving state...")
+    fs.writeFileSync("5_block90_state.json", JSON.stringify(await mantleState.getState(), null, 2))
 
-    const currentBlockHeight = await mantleState.getCurrentBlockHeight()
+    const currentBlockHeight2 = await mantleState.getCurrentBlockHeight()
 
     // // register vote for valA
     const previousVote = await testkit.registerAutomaticTx(registerChainOracleVote(
         validators[0].account_name,
         validators[0].Msg.delegator_address,
         validators[0].Msg.validator_address,
-        currentBlockHeight + 2,
+        currentBlockHeight2 + 2,
     ))
 
     // register votes
@@ -301,7 +304,7 @@ async function main() {
         validators[0].account_name,
         validators[0].Msg.delegator_address,
         validators[0].Msg.validator_address,
-        currentBlockHeight + 1
+        currentBlockHeight2 + 1
     ))
 
     //block 91 - 119

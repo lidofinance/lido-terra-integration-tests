@@ -5,7 +5,7 @@
   "total_reserves": "0",
   "aust_supply": "0",
   "oraclePrice": {
-    "last_updated_base": 1609402221,
+    "last_updated_base": 1609402215,
     "last_updated_quote": 9999999999,
     "rate": "1"
   },
@@ -29,12 +29,12 @@
   "last_executed_height": 24,
   "prev_a_token_supply": "0",
   "prev_exchange_rate": "1",
-  "block_time": 1609402221,
-  "block_proposer": "terravaloper1h3h2n9t3fuqfhtmmuuep7xadyqyc48qqpnt6ww",
+  "block_time": 1609402215,
+  "block_proposer": "terravaloper1qrvyprsnw9s08fwqk5ztheceas9e6tp707zgyp",
   "reward": [
     {
       "denom": "uusd",
-      "amount": "6329130.004210794526702000"
+      "amount": "6224471.091025158047011320"
     }
   ],
   "terravaloper1zhpxjwkmwyjtwrpr88xd0gydu4lxm8hdlwh5sy": {
@@ -44,7 +44,7 @@
       "denoms": [
         {
           "denom": "uusd",
-          "amount": "502545488.939232179178510000"
+          "amount": "499174188.045821348842810000"
         }
       ]
     },
@@ -59,7 +59,7 @@
       "denoms": [
         {
           "denom": "uusd",
-          "amount": "502495488.939232179178510000"
+          "amount": "499624188.045821348842810000"
         }
       ]
     },
@@ -74,7 +74,7 @@
       "denoms": [
         {
           "denom": "uusd",
-          "amount": "502295488.939232179178510000"
+          "amount": "499424188.045821348842810000"
         }
       ]
     },
@@ -89,7 +89,7 @@
       "denoms": [
         {
           "denom": "uusd",
-          "amount": "190121446.260482515622140000"
+          "amount": "189435348.940715006647840000"
         }
       ]
     },
@@ -107,7 +107,7 @@
           "Denom": "ukrw"
         },
         {
-          "Amount": "999982000000000039",
+          "Amount": "999982000000000000",
           "Denom": "uluna"
         },
         {
@@ -119,7 +119,7 @@
           "Denom": "usdr"
         },
         {
-          "Amount": "999999999995000000",
+          "Amount": "999999999996000000",
           "Denom": "uusd"
         }
       ]
@@ -187,9 +187,9 @@
   "actual_unbonded_amount": "0",
   "exchange_rate": "0.20250000000001125",
   "last_index_modification": 1609401165,
-  "last_processed_batch": 2,
+  "last_processed_batch": 1,
   "last_unbonded_time": 1609401915,
-  "prev_hub_balance": "1",
+  "prev_hub_balance": "0",
   "total_bond_amount": "3644999999960",
   "total_issued": {
     "decimals": 6,
@@ -214,12 +214,12 @@
       "index": "0",
       "pending_reward": "0"
     },
-    "terra1p4ncr3y0sdanu0vw4avmv5mrwq35yw0f2zyakr": {
+    "terra1flnhegl0z7kq4c2fkten9wjjcq358qxt02fkp2": {
       "balance": "0",
       "index": "0",
       "pending_reward": "0"
     },
-    "terra1flnhegl0z7kq4c2fkten9wjjcq358qxt02fkp2": {
+    "terra1p4ncr3y0sdanu0vw4avmv5mrwq35yw0f2zyakr": {
       "balance": "0",
       "index": "0",
       "pending_reward": "0"

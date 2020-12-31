@@ -115,7 +115,9 @@ export const getCoreState = async (
               ) {
                 Result {
                   DelegatorAddress
-                  Shares
+                  Balance {
+                    Amount
+                  }
                 }
               }
             }
@@ -137,7 +139,7 @@ export const getCoreState = async (
           },
           delegators: validator_specific.StakingValidatorsValidatorAddrDelegations.Result.reduce(
             (m, k) => {
-              m[k.DelegatorAddress] = k.Shares;
+              m[k.DelegatorAddress] = (k.Balance || {}).Amount || 0;
               return m;
             },
             {}

@@ -5,7 +5,7 @@
   "total_reserves": "0",
   "aust_supply": "0",
   "oraclePrice": {
-    "last_updated_base": 1609402221,
+    "last_updated_base": 1609401381,
     "last_updated_quote": 9999999999,
     "rate": "1"
   },
@@ -29,12 +29,12 @@
   "last_executed_height": 24,
   "prev_a_token_supply": "0",
   "prev_exchange_rate": "1",
-  "block_time": 1609402221,
+  "block_time": 1609401381,
   "block_proposer": "terravaloper1h3h2n9t3fuqfhtmmuuep7xadyqyc48qqpnt6ww",
   "reward": [
     {
       "denom": "uusd",
-      "amount": "6329130.004210794526702000"
+      "amount": "4782837.853478700000000000"
     }
   ],
   "terravaloper1zhpxjwkmwyjtwrpr88xd0gydu4lxm8hdlwh5sy": {
@@ -44,7 +44,7 @@
       "denoms": [
         {
           "denom": "uusd",
-          "amount": "502545488.939232179178510000"
+          "amount": "102597780.246069719730800000"
         }
       ]
     },
@@ -59,7 +59,7 @@
       "denoms": [
         {
           "denom": "uusd",
-          "amount": "502495488.939232179178510000"
+          "amount": "102647780.246069719730800000"
         }
       ]
     },
@@ -74,28 +74,12 @@
       "denoms": [
         {
           "denom": "uusd",
-          "amount": "502295488.939232179178510000"
+          "amount": "102447780.246069719730800000"
         }
       ]
     },
     "delegators": {
       "terra10w3gyp4d7743wwace0jffjkj9crpz2ncctm40f": "100000000000000"
-    }
-  },
-  "terravaloper1h9fcnnxf3f8jn85980pvdtvnwhlnjfnsp7gl43": {
-    "valaddr": "terravaloper1h9fcnnxf3f8jn85980pvdtvnwhlnjfnsp7gl43",
-    "commission": "0.000000000000000000",
-    "rewardsPool": {
-      "denoms": [
-        {
-          "denom": "uusd",
-          "amount": "190121446.260482515622140000"
-        }
-      ]
-    },
-    "delegators": {
-      "terra18vd8fpwxzck93qlwghaj6arh4p7c5n896xzem5": "3644999999960",
-      "terra1h9fcnnxf3f8jn85980pvdtvnwhlnjfnsp3yz9z": "20250000000000"
     }
   },
   "accountBalances": [
@@ -107,7 +91,7 @@
           "Denom": "ukrw"
         },
         {
-          "Amount": "999982000000000039",
+          "Amount": "999980000000000000",
           "Denom": "uluna"
         },
         {
@@ -119,7 +103,7 @@
           "Denom": "usdr"
         },
         {
-          "Amount": "999999999995000000",
+          "Amount": "999999999998000000",
           "Denom": "uusd"
         }
       ]
@@ -176,7 +160,7 @@
     }
   ],
   "epoch_id": {
-    "id": 3,
+    "id": 2,
     "requested_with_fee": "0"
   },
   "whitelist": {
@@ -185,23 +169,23 @@
     ]
   },
   "actual_unbonded_amount": "0",
-  "exchange_rate": "0.20250000000001125",
+  "exchange_rate": "1",
   "last_index_modification": 1609401165,
-  "last_processed_batch": 2,
-  "last_unbonded_time": 1609401915,
-  "prev_hub_balance": "1",
-  "total_bond_amount": "3644999999960",
+  "last_processed_batch": 0,
+  "last_unbonded_time": 1609401297,
+  "prev_hub_balance": "0",
+  "total_bond_amount": "18000000000000",
   "total_issued": {
     "decimals": 6,
     "name": "bluna",
     "symbol": "BLUNA",
-    "total_supply": "17999999999800"
+    "total_supply": "18000000000000"
   },
   "balance": {
     "Response": {
       "Result": [
         {
-          "Amount": "13622086",
+          "Amount": "387500",
           "Denom": "uusd"
         }
       ]
@@ -210,16 +194,16 @@
   "global_index": "0",
   "holder_map": {
     "terra1vtkmkx3yplck0k8ecpz7zsmh9uzhun4undcs3m": {
-      "balance": "17999999999800",
-      "index": "0",
-      "pending_reward": "0"
-    },
-    "terra1p4ncr3y0sdanu0vw4avmv5mrwq35yw0f2zyakr": {
-      "balance": "0",
+      "balance": "18000000000000",
       "index": "0",
       "pending_reward": "0"
     },
     "terra1flnhegl0z7kq4c2fkten9wjjcq358qxt02fkp2": {
+      "balance": "0",
+      "index": "0",
+      "pending_reward": "0"
+    },
+    "terra1p4ncr3y0sdanu0vw4avmv5mrwq35yw0f2zyakr": {
       "balance": "0",
       "index": "0",
       "pending_reward": "0"

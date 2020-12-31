@@ -592,7 +592,7 @@
             "tobin_tax": "0.020000000000000000"
           }
         ],
-        "slash_fraction": "0.050000000000000000",
+        "slash_fraction": "0.550000000000000000",
         "slash_window": "10",
         "min_valid_per_window": "0.49000000000000000"
       },

@@ -187,35 +187,50 @@ async function main() {
     //block 29
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
 
-    //block 30
-    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+    //block 30-34
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 5))
 
-    //block 31
+    //block 35
     await mustPass(basset.bond(a, 20000000000000, validators[0].validator_address))
     console.log("saving state...")
     fs.writeFileSync("1_block31_state.json", JSON.stringify(await mantleState.getState(), null, 2))
 
-    //block 32 - 40
-    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+    //block 36
+    await basset.send_cw20_token(
+        a,
+        2000000000000,
+        { unbond: {} },
+        basset.contractInfo["anchor_basset_hub"].contractAddress
+    )
+    console.log("saving state...")
+    fs.writeFileSync("1_block32_state.json", JSON.stringify(await mantleState.getState(), null, 2))
 
-    //block 41~45
+    //block 37~46
     // deregister oracle vote and waste 5 blocks
     const prevotesToClear = initialPrevotes[0]
     const votesToClear = initialVotes[0]
 
     await testkit.clearAutomaticTx(prevotesToClear.id)
     await testkit.clearAutomaticTx(votesToClear.id)
-    await repeat(5, async () => {
+    await repeat(10, async () => {
         await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
     })
+    console.log("saving state...")
 
-    //block 46 - 50
-    // Oracle slashing happen at the block 49
-    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 5))
 
-    //block 51 unjail & revive oracle
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 4))
+    fs.writeFileSync("1_block50_state.json", JSON.stringify(await mantleState.getState(), null, 2))
+
+    await mustPass(unjail(valAWallet))
+    fs.writeFileSync("1_block51_state.json", JSON.stringify(await mantleState.getState(), null, 2))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 35))
+
+    //block 47 unjail & revive oracle
     // unjail & re-register oracle votes
     await mustPass(unjail(valAWallet))
+    console.log("saving state...")
+    fs.writeFileSync("1_afterslashing_state.json", JSON.stringify(await mantleState.getState(), null, 2))
     console.log("saving state...")
     fs.writeFileSync("1_block51_state.json", JSON.stringify(await mantleState.getState(), null, 2))
 
@@ -236,38 +251,59 @@ async function main() {
         validators[0].Msg.validator_address,
         currentBlockHeight + 1
     ))
-
-    //block 52 - 54
-    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 3))
-
-    //block 55
-    await mustPass(basset.bond(a, 20000000000000, validators[0].validator_address))
+    await mustPass(basset.finish(a))
     console.log("saving state...")
-    fs.writeFileSync("1_block55_state.json", JSON.stringify(await mantleState.getState(), null, 2))
+    fs.writeFileSync("1_finishundelegation_state.json", JSON.stringify(await mantleState.getState(), null, 2))
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 50))
 
-    //block 56
-    await mustPass(basset.transfer_cw20_token(a, b, 10000000))
 
-    //block 57
     await basset.send_cw20_token(
         a,
-        40000000000000,
+        200,
         { unbond: {} },
         basset.contractInfo["anchor_basset_hub"].contractAddress
     )
 
+    //block 52
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 50))
+    console.log("saving state...")
+    fs.writeFileSync("1_block54_state.json", JSON.stringify(await mantleState.getState(), null, 2))
+
+    await mustPass(basset.finish(a))
+    console.log("saving state...")
+    fs.writeFileSync("1_block55_state.json", JSON.stringify(await mantleState.getState(), null, 2))
+
+
+    return
+    //block 53
+    await mustPass(basset.bond(a, 20000000000000, validators[0].validator_address))
+    console.log("saving state...")
+    fs.writeFileSync("1_block55_state.json", JSON.stringify(await mantleState.getState(), null, 2))
+
+
+    //block 56
+    await mustPass(basset.transfer_cw20_token(a, b, 10000000))
+
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 3))
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
     console.log("saving state...")
     fs.writeFileSync("1_block57_state.json", JSON.stringify(await mantleState.getState(), null, 2))
 
-    return
-    //block 58
-    await mustPass(basset.send_cw20_token(
+
+    //block 57
+    await basset.send_cw20_token(
         a,
-        1000000,
+        20000000000000,
         { unbond: {} },
         basset.contractInfo["anchor_basset_hub"].contractAddress
-    ))
+    )
+
+
+    //block 58
+    await mustPass(basset.bond(a, 10000000000000, validators[0].validator_address))
+    console.log("saving state...")
+    fs.writeFileSync("1_block58_state.json", JSON.stringify(await mantleState.getState(), null, 2))
 
     // //block 59 - 66
     // await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 8))

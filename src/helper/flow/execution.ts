@@ -15,24 +15,26 @@ export async function instantiate(
   sender: Wallet,
   codeId: number,
   initMsg: object,
-  tokens?: Coins
+  tokens?: Coins,
+  fee?: StdFee
 ): ReturnType<typeof send_transaction> {
   console.error(`instantiate ${codeId} w/ ${JSON.stringify(initMsg)}`);
   return await send_transaction(sender, [
     new MsgInstantiateContract(sender.key.accAddress, codeId, initMsg, tokens),
-  ]);
+  ], fee);
 }
 
 export async function execute(
   sender: Wallet,
   contract: string,
   executeMsg: object,
-  tokens?: Coins
+  tokens?: Coins,
+  fee?: StdFee
 ): ReturnType<typeof send_transaction> {
   console.error(`execute ${contract} w/ ${JSON.stringify(executeMsg)}`);
   return await send_transaction(sender, [
     new MsgExecuteContract(sender.key.accAddress, contract, executeMsg, tokens),
-  ]);
+  ], fee);
 }
 
 const mantleStateForBlockResponse = new MantleState(
@@ -44,19 +46,20 @@ const mantleStateForBlockResponse = new MantleState(
 
 export async function send_transaction(
   sender: Wallet,
-  msgs: Msg[]
+  msgs: Msg[],
+  fee: StdFee = new StdFee(10000000, "1000000uusd"),
 ): Promise<BlockTxBroadcastResult> {
   return Promise.resolve()
     .then(() =>
       sender.createAndSignTx({
         msgs,
         gasAdjustment: 1.4,
-        fee: new StdFee(10000000, "1000000uusd"),
+        fee: fee,
       })
     )
     .then((tx) => sender.lcd.tx.broadcast(tx))
     .then(async (result) => {
-      const totalGas: number = await mantleStateForBlockResponse
+      await mantleStateForBlockResponse
         .query(
           gql`
             query {
@@ -74,9 +77,12 @@ export async function send_transaction(
             (p: any, c: { GasWanted: any }) => p + +c.GasWanted,
             0
           )
-        );
+        )
+        .then(gas => makeRecord(msgs, gas))
+        .catch(() => {
+          // noop if mantle couldn't be connected
+        })
 
-      makeRecord(msgs, totalGas);
       return result;
     });
 }

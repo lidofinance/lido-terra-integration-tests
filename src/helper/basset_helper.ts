@@ -25,7 +25,7 @@ export default class AnchorbAsset {
     this.contractInfo = {};
   }
 
-  public async storeCodes(sender: Wallet, location: string): Promise<void> {
+  public async storeCodes(sender: Wallet, location: string, fee?: StdFee): Promise<void> {
     for (const c of contracts) {
       const bytecode = fs.readFileSync(`${location}/${c}.wasm`);
       const storeCode = new MsgStoreCode(
@@ -33,7 +33,7 @@ export default class AnchorbAsset {
           bytecode.toString("base64")
       );
 
-      const result = await send_transaction(sender, [storeCode]);
+      const result = await send_transaction(sender, [storeCode], fee);
       if (isTxError(result)) {
         throw new Error(`Couldn't upload ${c}: ${result.raw_log}`);
       }
@@ -46,7 +46,7 @@ export default class AnchorbAsset {
     }
   }
 
-  public async instantiate_hub(sender: Wallet): Promise<void> {
+  public async instantiate_hub(sender: Wallet, fee?: StdFee): Promise<void> {
     const init = await instantiate(
         sender,
         this.contractInfo.anchor_basset_hub.codeId,
@@ -57,7 +57,9 @@ export default class AnchorbAsset {
           peg_recovery_fee: "0.001",
           er_threshold: "1",
           reward_denom: "uusd",
-        }
+        },
+        null,
+        fee
     );
     if (isTxError(init)) {
       throw new Error(`Couldn't instantiate: ${init.raw_log}`);
@@ -72,14 +74,16 @@ export default class AnchorbAsset {
     );
   }
 
-  public async instantiate_reward(sender: Wallet): Promise<void> {
+  public async instantiate_reward(sender: Wallet, fee?: StdFee): Promise<void> {
     const init = await instantiate(
         sender,
         this.contractInfo.anchor_basset_reward.codeId,
         {
           hub_contract: `${this.contractInfo["anchor_basset_hub"].contractAddress}`,
           reward_denom: "uusd",
-        }
+        },
+        null,
+        fee
     );
     if (isTxError(init)) {
       throw new Error(`Couldn't instantiate: ${init.raw_log}`);
@@ -94,7 +98,7 @@ export default class AnchorbAsset {
     );
   }
 
-  public async instantiate_token(sender: Wallet): Promise<void> {
+  public async instantiate_token(sender: Wallet, fee?: StdFee): Promise<void> {
     const init = await instantiate(
         sender,
         this.contractInfo.anchor_basset_token.codeId,
@@ -108,7 +112,9 @@ export default class AnchorbAsset {
             cap: null,
           },
           hub_contract: `${this.contractInfo["anchor_basset_hub"].contractAddress}`,
-        }
+        },
+        null,
+        fee
     );
     if (isTxError(init)) {
       throw new Error(`Couldn't instantiate: ${init.raw_log}`);
@@ -123,7 +129,7 @@ export default class AnchorbAsset {
     );
   }
 
-  public async register_contracts(sender: Wallet) {
+  public async register_contracts(sender: Wallet, fee?: StdFee) {
     const msg = await execute(
         sender,
         this.contractInfo["anchor_basset_hub"].contractAddress,
@@ -132,7 +138,9 @@ export default class AnchorbAsset {
             contract: "reward",
             contract_address: `${this.contractInfo["anchor_basset_reward"].contractAddress}`,
           },
-        }
+        },
+        null,
+        fee,
     );
 
     if (isTxError(msg)) {

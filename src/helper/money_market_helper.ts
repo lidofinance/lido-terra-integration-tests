@@ -33,7 +33,7 @@ export default class MoneyMarket {
     this.contractInfo = {};
   }
 
-  public async storeCodes(sender: Wallet, location: string): Promise<void> {
+  public async storeCodes(sender: Wallet, location: string, fee?: StdFee): Promise<void> {
     for (const c of contracts) {
       const bytecode = fs.readFileSync(`${location}/${c}.wasm`);
       const storeCode = new MsgStoreCode(
@@ -41,7 +41,7 @@ export default class MoneyMarket {
         bytecode.toString("base64")
       );
 
-      const result = await send_transaction(sender, [storeCode]);
+      const result = await send_transaction(sender, [storeCode], fee);
       if (isTxError(result)) {
         throw new Error(`Couldn't upload ${c}: ${result.raw_log}`);
       }
@@ -57,7 +57,8 @@ export default class MoneyMarket {
   public async instantiate_interest(
     sender: Wallet,
     baseRate: number,
-    interestMultiplier: number
+    interestMultiplier: number,
+    fee?: StdFee
   ): Promise<void> {
     const mmInterest = await instantiate(
       sender,
@@ -66,7 +67,9 @@ export default class MoneyMarket {
         owner: sender.key.accAddress,
         base_rate: `${baseRate.toFixed(18)}`,
         interest_multiplier: `${interestMultiplier.toFixed(18)}`,
-      }
+      },
+      null,
+      fee
     );
 
     if (isTxError(mmInterest)) {
@@ -82,7 +85,8 @@ export default class MoneyMarket {
   // initialize oracle contract
   public async instantiate_oracle(
     sender: Wallet,
-    baseAsset: string
+    baseAsset: string,
+    fee?: StdFee
   ): Promise<void> {
     const mmOracle = await instantiate(
       sender,
@@ -90,7 +94,9 @@ export default class MoneyMarket {
       {
         owner: sender.key.accAddress,
         base_asset: "uusd",
-      }
+      },
+      null,
+      fee
     );
 
     if (isTxError(mmOracle)) {
@@ -110,6 +116,7 @@ export default class MoneyMarket {
     liquidationThreshold: number,
     oracleContract: string,
     price_timeframe: number,
+    fee?: StdFee,
   ): Promise<void> {
     const mmLiquidation = await instantiate(
       sender,
@@ -124,7 +131,9 @@ export default class MoneyMarket {
         // min_liquidation: `${minLiquidation}`,
         liquidation_threshold: `${liquidationThreshold}`,
         price_timeframe: price_timeframe,
-      }
+      },
+      null,
+      fee
     );
 
     if (isTxError(mmLiquidation)) {
@@ -145,7 +154,8 @@ export default class MoneyMarket {
     sender: Wallet,
     terraswapTokenCodeId: number,
     stableDenom: string,
-    reserveFactor: number
+    reserveFactor: number,
+    fee?: StdFee,
   ): Promise<void> {
     const mmInterest = this.contractInfo["moneymarket_interest"]
       .contractAddress;
@@ -158,7 +168,9 @@ export default class MoneyMarket {
         interest_model: mmInterest,
         stable_denom: stableDenom,
         reserve_factor: reserveFactor.toFixed(10),
-      }
+      },
+      null,
+      fee
     );
 
     if (isTxError(mmMarket)) {
@@ -186,6 +198,7 @@ export default class MoneyMarket {
     targetDepositRate: number,
     bufferDistributionRate: number,
     price_timeframe: number,
+    fee?: StdFee
   ): Promise<void> {
     const oracleAddr = this.contractInfo["moneymarket_oracle"].contractAddress;
     const marketAddr = this.contractInfo["moneymarket_market"].contractAddress;
@@ -205,7 +218,9 @@ export default class MoneyMarket {
         target_deposit_rate: targetDepositRate.toFixed(10),
         buffer_distribution_rate: bufferDistributionRate.toFixed(10),
         price_timeframe: price_timeframe,
-      }
+      },
+      null,
+      fee
     );
     if (isTxError(mmOverseer)) {
       throw new Error(
@@ -223,7 +238,8 @@ export default class MoneyMarket {
     bAssetToken: string,
     bAssetReward: string,
     stableDenom: string,
-    terraswapPair: string
+    terraswapPair: string,
+    fee?: StdFee
   ): Promise<void> {
     const oracleAddr = this.contractInfo["moneymarket_oracle"].contractAddress;
     const marketAddr = this.contractInfo["moneymarket_market"].contractAddress;
@@ -243,7 +259,9 @@ export default class MoneyMarket {
         reward_contract: bAssetReward,
         stable_denom: stableDenom,
         terraswap_contract: terraswapPair,
-      }
+      },
+      null,
+      fee
     );
     if (isTxError(mmCustody)) {
       throw new Error(
@@ -572,7 +590,8 @@ export default class MoneyMarket {
   public async overseer_whitelist(
     sender: Wallet,
     collateralToken: string,
-    ltv: string
+    ltv: string,
+    fee?: StdFee,
   ): Promise<void> {
     const contract = this.contractInfo["moneymarket_overseer"].contractAddress;
     const unlockCollaterallExecution = await execute(sender, contract, {
@@ -582,7 +601,7 @@ export default class MoneyMarket {
           .contractAddress,
         ltv: ltv,
       },
-    });
+    }, null, fee);
     if (isTxError(unlockCollaterallExecution)) {
       throw new Error(`Couldn't run: ${unlockCollaterallExecution.raw_log}`);
     }

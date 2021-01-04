@@ -1,4 +1,4 @@
-import { Wallet } from "@terra-money/terra.js";
+import { StdFee, Wallet } from "@terra-money/terra.js";
 import * as path from 'path'
 import Anchor from "../helper/spawn";
 import { Contracts } from "../mantle-querier/types"
@@ -6,15 +6,17 @@ import { Contracts } from "../mantle-querier/types"
 const locationBase = path.resolve(__dirname, "../../")
 
 export async function anchor(owner: Wallet): Promise<Contracts> {
-
     const anchor = new Anchor(owner)
 
+    const fixedFeeForInit = new StdFee(6000000, "2000000uusd")
+
     await anchor.store_contracts(
-        path.resolve(locationBase, './anchor-bAsset-contracts'),
-        path.resolve(locationBase, './money-market-contracts'),
-        path.resolve(locationBase, './terraswap')
+        path.resolve(locationBase, './anchor-bAsset-contracts/artifacts'),
+        path.resolve(locationBase, './money-market-contracts/artifacts'),
+        path.resolve(locationBase, './terraswap/artifacts'),
+        fixedFeeForInit
     )
-    await anchor.instantiate()
+    await anchor.instantiate(fixedFeeForInit)
 
     const basset = anchor.bAsset;
     const moneyMarket = anchor.moneyMarket;

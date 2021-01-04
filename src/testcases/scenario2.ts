@@ -45,10 +45,10 @@ async function main() {
             Testkit.walletToAccountRequest('gasStation', gasStation),
         ],
         validators: [
-            Testkit.validatorInitRequest('valA', new Coin('uluna', new Int(100000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
-            Testkit.validatorInitRequest('valB', new Coin('uluna', new Int(100000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
-            Testkit.validatorInitRequest('valC', new Coin('uluna', new Int(100000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
-            Testkit.validatorInitRequest('valD', new Coin('uluna', new Int(100000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
+            Testkit.validatorInitRequest('valA', new Coin('uluna', new Int(1000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
+            Testkit.validatorInitRequest('valB', new Coin('uluna', new Int(1000000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
+            Testkit.validatorInitRequest('valC', new Coin('uluna', new Int(1000000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
+            Testkit.validatorInitRequest('valD', new Coin('uluna', new Int(1000000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
         ],
         auto_inject: {
             validator_rounds: ['valB', 'valC', 'valD', 'valA']
@@ -251,32 +251,12 @@ async function main() {
 
     //block 67
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
-    //unbond 1
 
     //block 68 - 89
-    //oracle slashing happen at the block 79
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 22))
 
-    // unjail & re-register oracle votes
-    await mustPass(unjail(valAWallet))
-
-    const currentBlockHeight2 = await mantleState.getCurrentBlockHeight()
-
-    // // register vote for valA
-    const previousVote2 = await testkit.registerAutomaticTx(registerChainOracleVote(
-        validators[0].account_name,
-        validators[0].Msg.delegator_address,
-        validators[0].Msg.validator_address,
-        currentBlockHeight + 2,
-    ))
-
-    // register votes
-    const previousPrevote2 = await testkit.registerAutomaticTx(registerChainOraclePrevote(
-        validators[0].account_name,
-        validators[0].Msg.delegator_address,
-        validators[0].Msg.validator_address,
-        currentBlockHeight2 + 1
-    ))
+    // block 90
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
 
     //block 91 - 119
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 29))
@@ -285,7 +265,7 @@ async function main() {
     await mustPass(basset.finish(a))
 
     //block 121
-    await mustPass(moneyMarket.deposit_stable(b, 1000000000000))
+    await mustPass(moneyMarket.deposit_stable(b, 9000000000000))
 
     //block 122
     const marketAddr = moneyMarket.contractInfo["moneymarket_market"].contractAddress;
@@ -315,13 +295,19 @@ async function main() {
     await mustFail(moneyMarket.borrow_stable(a, 1500000000000, undefined))
 
     //block 127
-    await mustPass(moneyMarket.borrow_stable(a, 400000000000, undefined))
+    await mustPass(moneyMarket.borrow_stable(a, 50000000000, undefined))
 
     //block 128
     await mustPass(basset.update_global_index(a))
 
     //block 129
     await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //erase this
+    await mustPass(basset.update_global_index(a))
+
+    console.log("saving state...")
+    fs.writeFileSync("2_block130_state.json", JSON.stringify(await mantleState.getState(), null, 2))
 
     // block 130
     await mustFail(moneyMarket.send_cw20_token(
@@ -353,7 +339,7 @@ async function main() {
     fs.writeFileSync("2_block149_state.json", JSON.stringify(await mantleState.getState(), null, 2))
 
     //block 150
-    await mustPass(basset.update_global_index(a))
+    //await mustPass(basset.update_global_index(a))
 
     //block 151
     await mustPass(moneyMarket.execute_epoch_operations(a))
@@ -383,14 +369,14 @@ async function main() {
     //block 172
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
 
-    //TEST actions when Oracle price is not supported
-    await mustFail(moneyMarket.borrow_stable(a, 100, undefined))
-    await mustFail(moneyMarket.repay_stable(a, 100))
-    await mustFail(moneyMarket.overseer_lock_collateral(a,
-        [[basset.contractInfo["anchor_basset_token"].contractAddress, "100"]]))
-    await mustFail(moneyMarket.overseer_unlock_collateral(a,
-        [[basset.contractInfo["anchor_basset_token"].contractAddress, "100"]]))
-    await mustFail(moneyMarket.withdraw_collateral(a, 100))
+    // Testing msgs when oracle is off, not included in scenario itself
+
+    // await mustFail(moneyMarket.borrow_stable(a, 100, undefined))
+    // await mustFail(moneyMarket.repay_stable(a, 100))
+    // await mustFail(moneyMarket.overseer_lock_collateral(a,
+    //     [[basset.contractInfo["anchor_basset_token"].contractAddress, "100"]]))
+    // await mustFail(moneyMarket.overseer_unlock_collateral(a,
+    //     [[basset.contractInfo["anchor_basset_token"].contractAddress, "100"]]))
 
     const previousOracleFeed2 = await testkit.registerAutomaticTx(configureMMOracle(
         owner,
@@ -400,11 +386,11 @@ async function main() {
     ))
     // // change MM oracle price to 0.75
 
-    // block 171
+    // block 173
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
     //한블록 더 써야 하는 이유는 ,오라클 바뀌는 것 보다 autotx관련 오퍼레이션이 뒤에 들어가기 때문
 
-    // block 172
+    // block 174
     await mustFail(moneyMarket.liquidate_collateral(c, aKey.accAddress))
 
 }

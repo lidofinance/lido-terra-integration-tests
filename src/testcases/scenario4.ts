@@ -45,10 +45,10 @@ async function main() {
             Testkit.walletToAccountRequest('gasStation', gasStation),
         ],
         validators: [
-            Testkit.validatorInitRequest('valA', new Coin('uluna', new Int(100000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
-            Testkit.validatorInitRequest('valB', new Coin('uluna', new Int(100000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
-            Testkit.validatorInitRequest('valC', new Coin('uluna', new Int(100000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
-            Testkit.validatorInitRequest('valD', new Coin('uluna', new Int(100000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
+            Testkit.validatorInitRequest('valA', new Coin('uluna', new Int(1000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
+            Testkit.validatorInitRequest('valB', new Coin('uluna', new Int(1000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
+            Testkit.validatorInitRequest('valC', new Coin('uluna', new Int(1000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
+            Testkit.validatorInitRequest('valD', new Coin('uluna', new Int(1000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
         ],
         auto_inject: {
             validator_rounds: ['valB', 'valC', 'valD', 'valA']
@@ -403,11 +403,11 @@ async function main() {
     ))
     // // change MM oracle price to 0.75
 
-    // block 171
+    // block 173
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
     //한블록 더 써야 하는 이유는 ,오라클 바뀌는 것 보다 autotx관련 오퍼레이션이 뒤에 들어가기 때문
 
-    // block 172
+    // block 174
     await mustFail(moneyMarket.liquidate_collateral(c, aKey.accAddress))
 }
 

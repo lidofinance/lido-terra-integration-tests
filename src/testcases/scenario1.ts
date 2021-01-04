@@ -45,10 +45,10 @@ async function main() {
             Testkit.walletToAccountRequest('gasStation', gasStation),
         ],
         validators: [
-            Testkit.validatorInitRequest('valA', new Coin('uluna', new Int(100000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
-            Testkit.validatorInitRequest('valB', new Coin('uluna', new Int(100000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
-            Testkit.validatorInitRequest('valC', new Coin('uluna', new Int(100000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
-            Testkit.validatorInitRequest('valD', new Coin('uluna', new Int(100000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
+            Testkit.validatorInitRequest('valA', new Coin('uluna', new Int(1000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
+            Testkit.validatorInitRequest('valB', new Coin('uluna', new Int(1000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
+            Testkit.validatorInitRequest('valC', new Coin('uluna', new Int(1000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
+            Testkit.validatorInitRequest('valD', new Coin('uluna', new Int(1000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
         ],
         auto_inject: {
             validator_rounds: ['valB', 'valC', 'valD', 'valA']
@@ -255,15 +255,11 @@ async function main() {
 
     //block 67
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
-    //unbond 1
 
     //block 68 - 89
-    //oracle slashing happen at the block 79
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 22))
 
     // block 90
-    // unjail & re-register oracle votes
-    //await mustPass(unjail(valAWallet))
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
 
     //block 91 - 119
@@ -343,11 +339,10 @@ async function main() {
     //block 136-149
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
 
-    console.log("saving state...")
-    fs.writeFileSync("1_block149_state.json", JSON.stringify(await mantleState.getState(), null, 2))
-
     //block 150
     await mustPass(basset.update_global_index(a))
+    console.log("saving state...")
+    fs.writeFileSync("1_block150_state.json", JSON.stringify(await mantleState.getState(), null, 2))
 
     //block 151
     await mustPass(moneyMarket.execute_epoch_operations(a))
@@ -368,7 +363,6 @@ async function main() {
     await mustFail(moneyMarket.overseer_lock_collateral(a, [[basset.contractInfo["anchor_basset_token"].contractAddress, "840000000000"]]))
 
     // block 169
-
     await mustPass(moneyMarket.liquidation_submit_bid(c, basset.contractInfo["anchor_basset_token"].contractAddress, "0.2", "100000000000uusd"))
 
     // block 170 
@@ -378,26 +372,28 @@ async function main() {
     //block 172
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
 
-    await mustFail(moneyMarket.borrow_stable(a, 100, undefined))
-    await mustFail(moneyMarket.repay_stable(a, 100))
-    await mustFail(moneyMarket.overseer_lock_collateral(a,
-        [[basset.contractInfo["anchor_basset_token"].contractAddress, "100"]]))
-    await mustFail(moneyMarket.overseer_unlock_collateral(a,
-        [[basset.contractInfo["anchor_basset_token"].contractAddress, "100"]]))
+    // Testing msgs when oracle is off, not included in scenario itself
+
+    // await mustFail(moneyMarket.borrow_stable(a, 100, undefined))
+    // await mustFail(moneyMarket.repay_stable(a, 100))
+    // await mustFail(moneyMarket.overseer_lock_collateral(a,
+    //     [[basset.contractInfo["anchor_basset_token"].contractAddress, "100"]]))
+    // await mustFail(moneyMarket.overseer_unlock_collateral(a,
+    //     [[basset.contractInfo["anchor_basset_token"].contractAddress, "100"]]))
 
     const previousOracleFeed2 = await testkit.registerAutomaticTx(configureMMOracle(
         owner,
         anchor.moneyMarket.contractInfo["moneymarket_oracle"].contractAddress,
         anchor.bAsset.contractInfo["anchor_basset_token"].contractAddress,
-        0.18867924528301886792452830188679245
+        0.1
     ))
     // // change MM oracle price to 0.75
 
-    // block 171
+    // block 173
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
     //한블록 더 써야 하는 이유는 ,오라클 바뀌는 것 보다 autotx관련 오퍼레이션이 뒤에 들어가기 때문
 
-    // block 172
+    // block 174
     await mustFail(moneyMarket.liquidate_collateral(c, aKey.accAddress))
 
 }

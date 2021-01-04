@@ -12,6 +12,7 @@ import { emptyBlockWithFixedGas } from "../helper/flow/gas-station";
 import { repeat } from '../helper/flow/repeat'
 import { unjail } from '../helper/validator-operation/unjail'
 import { gql } from "graphql-request";
+import { configureMMOracle } from "../helper/oracle/mm-oracle";
 
 let mantleState: MantleState
 
@@ -113,25 +114,12 @@ async function main() {
     await anchor.instantiate();
 
     // register oracle price feeder
-    await testkit.registerAutomaticTx(Testkit.automaticTxRequest({
-        accountName: "owner",
-        period: 1,
-        msgs: [
-            new MsgExecuteContract(
-                owner.accAddress,
-                anchor.moneyMarket.contractInfo["moneymarket_oracle"].contractAddress,
-                {
-                    feed_price: {
-                        prices: [[
-                            anchor.bAsset.contractInfo["anchor_basset_token"].contractAddress,
-                            "1.000000"
-                        ]]
-                    }
-                },
-            )
-        ],
-        fee: new StdFee(10000000, "1000000uusd")
-    }))
+    const previousOracleFeed = await testkit.registerAutomaticTx(configureMMOracle(
+        owner,
+        anchor.moneyMarket.contractInfo["moneymarket_oracle"].contractAddress,
+        anchor.bAsset.contractInfo["anchor_basset_token"].contractAddress,
+        1.0000000000
+    ))
 
 
     ///////////////// scenario 시작 ////////////////////
@@ -220,7 +208,7 @@ async function main() {
     const currentBlockHeight = await mantleState.getCurrentBlockHeight()
 
     // // register vote for valA
-    const previousVote2 = await testkit.registerAutomaticTx(registerChainOracleVote(
+    const previousVote = await testkit.registerAutomaticTx(registerChainOracleVote(
         validators[0].account_name,
         validators[0].Msg.delegator_address,
         validators[0].Msg.validator_address,
@@ -228,7 +216,7 @@ async function main() {
     ))
 
     // register votes
-    const previousPrevote2 = await testkit.registerAutomaticTx(registerChainOraclePrevote(
+    const previousPrevote = await testkit.registerAutomaticTx(registerChainOraclePrevote(
         validators[0].account_name,
         validators[0].Msg.delegator_address,
         validators[0].Msg.validator_address,
@@ -280,7 +268,7 @@ async function main() {
     const currentBlockHeight2 = await mantleState.getCurrentBlockHeight()
 
     // // register vote for valA
-    const previousVote = await testkit.registerAutomaticTx(registerChainOracleVote(
+    const previousVote2 = await testkit.registerAutomaticTx(registerChainOracleVote(
         validators[0].account_name,
         validators[0].Msg.delegator_address,
         validators[0].Msg.validator_address,
@@ -288,7 +276,7 @@ async function main() {
     ))
 
     // register votes
-    const previousPrevote = await testkit.registerAutomaticTx(registerChainOraclePrevote(
+    const previousPrevote2 = await testkit.registerAutomaticTx(registerChainOraclePrevote(
         validators[0].account_name,
         validators[0].Msg.delegator_address,
         validators[0].Msg.validator_address,
@@ -390,16 +378,37 @@ async function main() {
     //block 168
     await mustFail(moneyMarket.overseer_unlock_collateral(a, [[basset.contractInfo["anchor_basset_token"].contractAddress, "30000000000"]]))
 
-    // //block 169
-    // // User C trigger liquidation(mustFail)
+    // block 169
+    await mustPass(moneyMarket.liquidation_submit_bid(c, basset.contractInfo["anchor_basset_token"].contractAddress, "0.2", "100000000000uusd"))
 
-    // //block 170
+    // block 170 
+    await mustFail(moneyMarket.liquidate_collateral(c, aKey.accAddress))
+    await testkit.clearAutomaticTx(previousOracleFeed.id)
+
+    //block 172
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    await mustFail(moneyMarket.borrow_stable(a, 100, undefined))
+    await mustFail(moneyMarket.repay_stable(a, 100))
+    await mustFail(moneyMarket.overseer_lock_collateral(a,
+        [[basset.contractInfo["anchor_basset_token"].contractAddress, "100"]]))
+    await mustFail(moneyMarket.overseer_unlock_collateral(a,
+        [[basset.contractInfo["anchor_basset_token"].contractAddress, "100"]]))
+
+    const previousOracleFeed2 = await testkit.registerAutomaticTx(configureMMOracle(
+        owner,
+        anchor.moneyMarket.contractInfo["moneymarket_oracle"].contractAddress,
+        anchor.bAsset.contractInfo["anchor_basset_token"].contractAddress,
+        0.18867924528301886792452830188679245
+    ))
     // // change MM oracle price to 0.75
 
-    // //block 171
-    // // User C trigger liquidation(mustPass)
-    // // fs.writeFileSync("8actions.json", JSON.stringify(getRecord(), null, 2))
-    // // fs.writeFileSync("8mantleState.json", JSON.stringify(await mantleState.getState(), null, 2))
+    // block 171
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+    //한블록 더 써야 하는 이유는 ,오라클 바뀌는 것 보다 autotx관련 오퍼레이션이 뒤에 들어가기 때문
+
+    // block 172
+    await mustFail(moneyMarket.liquidate_collateral(c, aKey.accAddress))
 }
 
 main()

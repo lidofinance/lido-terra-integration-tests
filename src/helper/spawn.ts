@@ -44,8 +44,9 @@ export default class Anchor {
     await this.moneyMarket.instantiate_liquidation(
       this.owner,
       0.8,
-      10000000,
-      200000000
+      200000000,
+      this.moneyMarket.contractInfo["moneymarket_oracle"].contractAddress,
+      30
     );
     await this.moneyMarket.instantiate_money(
       this.owner,
@@ -59,7 +60,8 @@ export default class Anchor {
       12,
       0.00000000951,
       0.00000001522,
-      0.1
+      0.1,
+      30
     );
     const bassetReward = this.bAsset.contractInfo["anchor_basset_reward"]
       .contractAddress;

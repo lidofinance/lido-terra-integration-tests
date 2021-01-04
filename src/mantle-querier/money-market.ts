@@ -116,17 +116,69 @@ export async function getMoneyMarketState(
     }, {} as { [address: string]: { collateral: string; amount: number } });
   });
 
-  // const borrow_rate = await makeContractStoreQuery(
-  //     contracts.mmInterest,
-  //     {
-  //         borrow_rate: {
-  //             market_balance: marketBalance.Response.Result[0].Amount,
-  //             total_liabilities: moneyMarketState.total_liabilities,
-  //             total_reserve: moneyMarketState.total_reserves
-  //         }
-  //     },
-  //     client
-  // ).then(r => r.rate)
+
+  // Config {},
+  // LiquidationAmount {
+  //     borrow_amount: Uint256,
+  //     borrow_limit: Uint256,
+  //     collaterals: TokensHuman,
+  //     collateral_prices: Vec<Decimal256>,
+  // },
+  // Bid {
+  //     collateral_token: HumanAddr,
+  //     bidder: HumanAddr,
+  // },
+  // BidsByUser {
+  //     bidder: HumanAddr,
+  //     start_after: Option<HumanAddr>,
+  //     limit: Option<u32>,
+  // },
+  // BidsByCollateral {
+  //     collateral_token: HumanAddr,
+  //     start_after: Option<HumanAddr>,
+  //     limit: Option<u32>,
+  // },
+
+  const liquidation_config = await makeContractStoreQuery(
+    contracts.mmLiquidation,
+    { config: {} },
+    client
+  )
+
+  const liquidation_bids = await Promise.all(addresses.map(async address => {
+    return await makeContractStoreQuery(
+      contracts.mmLiquidation,
+      {
+        bid: {
+          collateral_token: contracts.bAssetToken,
+          bidder: address
+        }
+      },
+      client
+    ).catch(() => null)
+  }))
+
+  const liquidation_bids_by_user = await Promise.all(addresses.map(async address => {
+    return await makeContractStoreQuery(
+      contracts.mmLiquidation,
+      {
+        bids_by_user: {
+          bidder: address,
+        }
+      },
+      client
+    ).catch(() => null)
+  }))
+
+  const liquidation_bids_by_collateral = await makeContractStoreQuery(
+    contracts.mmLiquidation,
+    {
+      bids_by_collateral: {
+        collateral_token: contracts.bAssetToken
+      }
+    },
+    client
+  ).then(() => ({}))
 
   return {
     ...moneyMarketState,
@@ -140,6 +192,10 @@ export async function getMoneyMarketState(
     atoken_holder_map,
     ...overseerEpochState,
     collateralMap,
+    liquidation_config,
+    liquidation_bids,
+    liquidation_bids_by_collateral,
+    liquidation_bids_by_user
     // borrow_rate,
   };
 }

@@ -108,25 +108,12 @@ async function main() {
     await anchor.instantiate();
 
     // register oracle price feeder
-    await testkit.registerAutomaticTx(Testkit.automaticTxRequest({
-        accountName: "owner",
-        period: 1,
-        msgs: [
-            new MsgExecuteContract(
-                owner.accAddress,
-                anchor.moneyMarket.contractInfo["moneymarket_oracle"].contractAddress,
-                {
-                    feed_price: {
-                        prices: [[
-                            anchor.bAsset.contractInfo["anchor_basset_token"].contractAddress,
-                            "1.000000"
-                        ]]
-                    }
-                },
-            )
-        ],
-        fee: new StdFee(10000000, "1000000uusd")
-    }))
+    const previousOracleFeed = await testkit.registerAutomaticTx(configureMMOracle(
+        owner,
+        anchor.moneyMarket.contractInfo["moneymarket_oracle"].contractAddress,
+        anchor.bAsset.contractInfo["anchor_basset_token"].contractAddress,
+        1.0000000000
+    ))
 
 
     ///////////////// scenario 시작 ////////////////////

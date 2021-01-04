@@ -102,25 +102,12 @@ async function main() {
     );
     await anchor.instantiate();
     // register oracle price feeder
-    await testkit.registerAutomaticTx(Testkit.automaticTxRequest({
-        accountName: "owner",
-        period: 1,
-        msgs: [
-            new MsgExecuteContract(
-                owner.accAddress,
-                anchor.moneyMarket.contractInfo["moneymarket_oracle"].contractAddress,
-                {
-                    feed_price: {
-                        prices: [[
-                            anchor.bAsset.contractInfo["anchor_basset_token"].contractAddress,
-                            "1.000000"
-                        ]]
-                    }
-                },
-            )
-        ],
-        fee: new StdFee(10000000, "1000000uusd")
-    }))
+    const previousOracleFeed = await testkit.registerAutomaticTx(configureMMOracle(
+        owner,
+        anchor.moneyMarket.contractInfo["moneymarket_oracle"].contractAddress,
+        anchor.bAsset.contractInfo["anchor_basset_token"].contractAddress,
+        1.0000000000
+    ))
     ///////////////// scenario 시작 ////////////////////
     // await testkit.inject(validators[0].validator_address) -> 아무 Tx 없이 지나가는 경우의 테스팅
     await anchor.bAsset.register_validator(ownerWallet, validators[0].validator_address)
@@ -214,7 +201,7 @@ async function main() {
         validators[0].Msg.validator_address,
         currentBlockHeight + 1
     ))
-    
+
     //block 46 - 50
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 5))
 

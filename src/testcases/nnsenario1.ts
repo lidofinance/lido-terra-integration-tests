@@ -13,6 +13,8 @@ import { repeat } from '../helper/flow/repeat'
 import { unjail } from '../helper/validator-operation/unjail'
 import { gql } from "graphql-request";
 
+import { configureMMOracle } from '../helper/oracle/mm-oracle'
+
 let mantleState: MantleState
 
 async function main() {
@@ -113,26 +115,12 @@ async function main() {
     await anchor.instantiate();
 
     // register oracle price feeder
-    await testkit.registerAutomaticTx(Testkit.automaticTxRequest({
-        accountName: "owner",
-        period: 1,
-        msgs: [
-            new MsgExecuteContract(
-                owner.accAddress,
-                anchor.moneyMarket.contractInfo["moneymarket_oracle"].contractAddress,
-                {
-                    feed_price: {
-                        prices: [[
-                            anchor.bAsset.contractInfo["anchor_basset_token"].contractAddress,
-                            "1.000000"
-                        ]]
-                    }
-                },
-            )
-        ],
-        fee: new StdFee(10000000, "1000000uusd")
-    }))
-
+    const previousOracleFeed = await testkit.registerAutomaticTx(configureMMOracle(
+        owner,
+        anchor.moneyMarket.contractInfo["moneymarket_oracle"].contractAddress,
+        anchor.bAsset.contractInfo["anchor_basset_token"].contractAddress,
+        1.0000000000
+    ))
 
     ///////////////// scenario 시작 ////////////////////
 
@@ -195,15 +183,6 @@ async function main() {
     console.log("saving state...")
     fs.writeFileSync("1_block31_state.json", JSON.stringify(await mantleState.getState(), null, 2))
 
-    //block 36
-    await basset.send_cw20_token(
-        a,
-        2000000000000,
-        { unbond: {} },
-        basset.contractInfo["anchor_basset_hub"].contractAddress
-    )
-    console.log("saving state...")
-    fs.writeFileSync("1_block32_state.json", JSON.stringify(await mantleState.getState(), null, 2))
 
     //block 37~46
     // deregister oracle vote and waste 5 blocks
@@ -217,24 +196,38 @@ async function main() {
     })
     console.log("saving state...")
 
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 48
+    await basset.send_cw20_token(
+        a,
+        10000000000000,
+        { unbond: {} },
+        basset.contractInfo["anchor_basset_hub"].contractAddress
+    )
+
+    console.log("saving state...")
+    fs.writeFileSync("1_block32_state.json", JSON.stringify(await mantleState.getState(), null, 2))
+
 
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 4))
     fs.writeFileSync("1_block50_state.json", JSON.stringify(await mantleState.getState(), null, 2))
 
     await mustPass(unjail(valAWallet))
     fs.writeFileSync("1_block51_state.json", JSON.stringify(await mantleState.getState(), null, 2))
-
-    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 35))
-
     //block 47 unjail & revive oracle
     // unjail & re-register oracle votes
-    await mustPass(unjail(valAWallet))
     console.log("saving state...")
     fs.writeFileSync("1_afterslashing_state.json", JSON.stringify(await mantleState.getState(), null, 2))
     console.log("saving state...")
     fs.writeFileSync("1_block51_state.json", JSON.stringify(await mantleState.getState(), null, 2))
 
     const currentBlockHeight = await mantleState.getCurrentBlockHeight()
+
+    await mustPass(b.lcd.tx.broadcast(
+        await b.createAndSignTx({ msgs: [new MsgSend(bKey.accAddress, basset.contractInfo['anchor_basset_hub'].contractAddress, new Coins("100000000000000uluna"))] })
+    ))
+
 
     // // register vote for valA
     const previousVote = await testkit.registerAutomaticTx(registerChainOracleVote(
@@ -251,11 +244,11 @@ async function main() {
         validators[0].Msg.validator_address,
         currentBlockHeight + 1
     ))
-    await mustPass(basset.finish(a))
+
+
     console.log("saving state...")
     fs.writeFileSync("1_finishundelegation_state.json", JSON.stringify(await mantleState.getState(), null, 2))
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 50))
-
 
     await basset.send_cw20_token(
         a,
@@ -264,17 +257,16 @@ async function main() {
         basset.contractInfo["anchor_basset_hub"].contractAddress
     )
 
-    //block 52
-    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 50))
-    console.log("saving state...")
-    fs.writeFileSync("1_block54_state.json", JSON.stringify(await mantleState.getState(), null, 2))
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 36))
+
 
     await mustPass(basset.finish(a))
+
     console.log("saving state...")
     fs.writeFileSync("1_block55_state.json", JSON.stringify(await mantleState.getState(), null, 2))
 
 
-    return
+
     //block 53
     await mustPass(basset.bond(a, 20000000000000, validators[0].validator_address))
     console.log("saving state...")
@@ -304,6 +296,17 @@ async function main() {
     await mustPass(basset.bond(a, 10000000000000, validators[0].validator_address))
     console.log("saving state...")
     fs.writeFileSync("1_block58_state.json", JSON.stringify(await mantleState.getState(), null, 2))
+
+
+    await testkit.clearAutomaticTx(previousOracleFeed.id)
+
+
+    const previousOracleFeed2 = await testkit.registerAutomaticTx(configureMMOracle(
+        owner,
+        anchor.moneyMarket.contractInfo["moneymarket_oracle"].contractAddress,
+        anchor.bAsset.contractInfo["anchor_basset_token"].contractAddress,
+        2.0000000000
+    ))
 
     // //block 59 - 66
     // await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 8))

@@ -29,43 +29,35 @@ export default class Anchor {
   }
 
   public async instantiate(fee?: StdFee): Promise<void> {
-    await this.bAsset.instantiate_hub(this.owner, fee);
-    await this.bAsset.instantiate_reward(this.owner, fee);
-    await this.bAsset.instantiate_token(this.owner, fee);
-    await this.bAsset.register_contracts(this.owner, fee);
+    await this.bAsset.instantiate_hub(this.owner, {}, fee);
+    await this.bAsset.instantiate_reward(this.owner, {}, fee);
+    await this.bAsset.instantiate_token(this.owner, {}, fee);
+    await this.bAsset.register_contracts(this.owner,{}, fee);
 
     await this.terraswap.instantiate_terraswap(this.owner, fee);
 
     await this.moneyMarket.instantiate_interest(
       this.owner,
-      0.00000000381,
-      0.00000004,
+        {},
       fee,
     );
-    await this.moneyMarket.instantiate_oracle(this.owner, "uusd", fee);
+    await this.moneyMarket.instantiate_oracle(this.owner, {}, fee);
     await this.moneyMarket.instantiate_liquidation(
       this.owner,
-      0.8,
-      200000000,
-      this.moneyMarket.contractInfo["moneymarket_oracle"].contractAddress,
-      30,
+        {},
       fee
     );
+
     await this.moneyMarket.instantiate_money(
-      this.owner,
-      this.terraswap.contractInfo["terraswap_token"].codeId,
-      "uusd",
-      0.05,
+      this.owner,{terraswapTokenCodeId : this.terraswap.contractInfo["terraswap_token"].codeId,
+          stableDenom: null,
+          reserveFactor: null
+        },
       fee
     );
+
     await this.moneyMarket.instantiate_overseer(
-      this.owner,
-      "uusd",
-      12,
-      0.00000000951,
-      0.00000001522,
-      0.1,
-      30,
+      this.owner, {},
       fee
     );
     const bassetReward = this.bAsset.contractInfo["anchor_basset_reward"]
@@ -76,10 +68,12 @@ export default class Anchor {
       .contractAddress;
     await this.moneyMarket.instantiate_custody(
       this.owner,
-      bassetToken,
-      bassetReward,
-      "uusd",
-      terraswapPair,
+        {
+          bAssetToken: bassetToken,
+          bAssetReward: bassetReward,
+          stableDenom: null,
+          terraswapPair: terraswapPair,
+        },
       fee
     );
     await this.moneyMarket.overseer_whitelist(this.owner, bassetToken, "0.5", fee);

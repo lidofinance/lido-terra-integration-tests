@@ -10,6 +10,12 @@ import {
 import * as fs from "fs";
 import { execute, instantiate, send_transaction } from "./flow/execution";
 
+
+type Mint = {
+  minter: string,
+  cap?:number
+};
+
 const contracts = [
   "anchor_basset_hub",
   "anchor_basset_reward",
@@ -46,17 +52,25 @@ export default class AnchorbAsset {
     }), Promise.resolve())
   }
 
-  public async instantiate_hub(sender: Wallet, fee?: StdFee): Promise<void> {
+  public async instantiate_hub(sender: Wallet, params: {
+    epoch_period?: number,
+    underlying_coin_denom?: string,
+    unbonding_period?: number,
+    peg_recovery_fee?: string,
+    er_threshold?: string,
+    reward_denom?: string,
+  } , fee?: StdFee): Promise<void> {
     const init = await instantiate(
         sender,
         this.contractInfo.anchor_basset_hub.codeId,
         {
-          epoch_period: 30,
-          underlying_coin_denom: "uluna",
-          unbonding_period: 211,
-          peg_recovery_fee: "0.001",
-          er_threshold: "1",
-          reward_denom: "uusd",
+          //FIXME: The epoch period and unbonding period must be changed
+          epoch_period: params.epoch_period || 30,
+          underlying_coin_denom: params.underlying_coin_denom || "uluna",
+          unbonding_period: params.unbonding_period || 211,
+          peg_recovery_fee: params.peg_recovery_fee||"0.001",
+          er_threshold: params.er_threshold || "0.98",
+          reward_denom: params.reward_denom||"uusd",
         },
         undefined,
         fee
@@ -74,13 +88,16 @@ export default class AnchorbAsset {
     );
   }
 
-  public async instantiate_reward(sender: Wallet, fee?: StdFee): Promise<void> {
+  public async instantiate_reward(sender: Wallet, params: {
+    hub_contract?: string,
+    reward_denom?: string
+  }, fee?: StdFee): Promise<void> {
     const init = await instantiate(
         sender,
         this.contractInfo.anchor_basset_reward.codeId,
         {
-          hub_contract: `${this.contractInfo["anchor_basset_hub"].contractAddress}`,
-          reward_denom: "uusd",
+          hub_contract: params.hub_contract ||`${this.contractInfo["anchor_basset_hub"].contractAddress}`,
+          reward_denom: params.reward_denom || "uusd",
         },
         undefined,
         fee
@@ -98,20 +115,27 @@ export default class AnchorbAsset {
     );
   }
 
-  public async instantiate_token(sender: Wallet, fee?: StdFee): Promise<void> {
+  public async instantiate_token(sender: Wallet, params: {
+    name?: string,
+    symbol?: string,
+    decimals?: number,
+    initial_balances?: object,
+    mint?: Mint,
+    hub_contract?: string
+  },  fee?: StdFee): Promise<void> {
     const init = await instantiate(
         sender,
         this.contractInfo.anchor_basset_token.codeId,
         {
-          name: "bluna",
-          symbol: "BLUNA",
-          decimals: 6,
-          initial_balances: [],
+          name: params.name||"bluna",
+          symbol: params.symbol || "BLUNA",
+          decimals: params.decimals || 6,
+          initial_balances: params.initial_balances || [],
           mint: {
-            minter: `${this.contractInfo["anchor_basset_hub"].contractAddress}`,
-            cap: null,
+            minter: params.mint.minter ||`${this.contractInfo["anchor_basset_hub"].contractAddress}`,
+            cap: params.mint.cap || null,
           },
-          hub_contract: `${this.contractInfo["anchor_basset_hub"].contractAddress}`,
+          hub_contract: params.hub_contract ||`${this.contractInfo["anchor_basset_hub"].contractAddress}`,
         },
         undefined,
         fee
@@ -129,14 +153,17 @@ export default class AnchorbAsset {
     );
   }
 
-  public async register_contracts(sender: Wallet, fee?: StdFee) {
+  public async register_contracts(sender: Wallet, params: {
+    reward_address?: string,
+    token_address?: string
+  }, fee?: StdFee) {
     const msg = await execute(
         sender,
         this.contractInfo["anchor_basset_hub"].contractAddress,
         {
           register_subcontracts: {
             contract: "reward",
-            contract_address: `${this.contractInfo["anchor_basset_reward"].contractAddress}`,
+            contract_address: params.reward_address ||`${this.contractInfo["anchor_basset_reward"].contractAddress}`,
           },
         },
         undefined,
@@ -153,7 +180,7 @@ export default class AnchorbAsset {
         {
           register_subcontracts: {
             contract: "token",
-            contract_address: `${this.contractInfo["anchor_basset_token"].contractAddress}`,
+            contract_address: params.token_address ||`${this.contractInfo["anchor_basset_token"].contractAddress}`,
           },
         },
         undefined,

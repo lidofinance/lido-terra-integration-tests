@@ -50,8 +50,8 @@ export default class Anchor {
 
     await this.moneyMarket.instantiate_money(
       this.owner,{terraswapTokenCodeId : this.terraswap.contractInfo["terraswap_token"].codeId,
-          stableDenom: null,
-          reserveFactor: null
+          stableDenom: undefined,
+          reserveFactor: undefined
         },
       fee
     );

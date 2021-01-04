@@ -59,6 +59,7 @@ export async function send_transaction(
     )
     .then((tx) => sender.lcd.tx.broadcast(tx))
     .then(async (result) => {
+      console.error(result.txhash)
       await mantleStateForBlockResponse
         .query(
           gql`
@@ -82,7 +83,9 @@ export async function send_transaction(
         .catch(() => {
           // noop if mantle couldn't be connected
         })
+        .then(() => new Promise(resolve => setTimeout(resolve, 1000)))
 
       return result;
-    });
+    })
+
 }

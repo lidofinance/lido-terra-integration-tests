@@ -68,8 +68,8 @@ export default class MoneyMarket {
       this.contractInfo.moneymarket_interest.codeId,
       {
         owner: params.owner || sender.key.accAddress,
-        base_rate: `${params.baseRate.toFixed(18)}` || 0.00000000381,
-        interest_multiplier: `${params.interestMultiplier.toFixed(18)}` || 0.00000004,
+        base_rate: params?.baseRate?.toFixed(18) || "0.00000000381",
+        interest_multiplier: params?.interestMultiplier?.toFixed(18) || "0.00000004",
       },
       undefined,
       fee

@@ -132,8 +132,8 @@ export default class AnchorbAsset {
           decimals: params.decimals || 6,
           initial_balances: params.initial_balances || [],
           mint: {
-            minter: params.mint.minter ||`${this.contractInfo["anchor_basset_hub"].contractAddress}`,
-            cap: params.mint.cap || null,
+            minter: params.mint?.minter ||`${this.contractInfo["anchor_basset_hub"].contractAddress}`,
+            cap: params.mint?.cap || null,
           },
           hub_contract: params.hub_contract ||`${this.contractInfo["anchor_basset_hub"].contractAddress}`,
         },

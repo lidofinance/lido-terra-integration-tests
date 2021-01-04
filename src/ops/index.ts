@@ -14,4 +14,6 @@ const ownerWallet = new Wallet(lcd, owner)
 ownerWallet.lcd.tendermint.blockInfo().then(console.log)
 
 // run store_code, instantiate, print contract addresses to stdout
-anchor(ownerWallet).then(contracts => console.log(contracts)).catch(console.error)
+anchor(ownerWallet)
+    .then(contracts => console.log(contracts))
+    .catch(console.error)

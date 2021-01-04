@@ -34,7 +34,7 @@ export default class MoneyMarket {
   }
 
   public async storeCodes(sender: Wallet, location: string, fee?: StdFee): Promise<void> {
-    for (const c of contracts) {
+    return contracts.reduce((t, c) => t.then(async() => {
       const bytecode = fs.readFileSync(`${location}/${c}.wasm`);
       const storeCode = new MsgStoreCode(
         sender.key.accAddress,
@@ -51,7 +51,7 @@ export default class MoneyMarket {
         codeId,
         contractAddress: "",
       };
-    }
+    }), Promise.resolve())
   }
   // initialize interest contract
   public async instantiate_interest(
@@ -68,7 +68,7 @@ export default class MoneyMarket {
         base_rate: `${baseRate.toFixed(18)}`,
         interest_multiplier: `${interestMultiplier.toFixed(18)}`,
       },
-      null,
+      undefined,
       fee
     );
 
@@ -95,7 +95,7 @@ export default class MoneyMarket {
         owner: sender.key.accAddress,
         base_asset: "uusd",
       },
-      null,
+      undefined,
       fee
     );
 
@@ -132,7 +132,7 @@ export default class MoneyMarket {
         liquidation_threshold: `${liquidationThreshold}`,
         price_timeframe: price_timeframe,
       },
-      null,
+      undefined,
       fee
     );
 
@@ -169,7 +169,7 @@ export default class MoneyMarket {
         stable_denom: stableDenom,
         reserve_factor: reserveFactor.toFixed(10),
       },
-      null,
+      undefined,
       fee
     );
 
@@ -219,7 +219,7 @@ export default class MoneyMarket {
         buffer_distribution_rate: bufferDistributionRate.toFixed(10),
         price_timeframe: price_timeframe,
       },
-      null,
+      undefined,
       fee
     );
     if (isTxError(mmOverseer)) {
@@ -260,7 +260,7 @@ export default class MoneyMarket {
         stable_denom: stableDenom,
         terraswap_contract: terraswapPair,
       },
-      null,
+      undefined,
       fee
     );
     if (isTxError(mmCustody)) {
@@ -601,7 +601,7 @@ export default class MoneyMarket {
           .contractAddress,
         ltv: ltv,
       },
-    }, null, fee);
+    }, undefined, fee);
     if (isTxError(unlockCollaterallExecution)) {
       throw new Error(`Couldn't run: ${unlockCollaterallExecution.raw_log}`);
     }

@@ -93,7 +93,7 @@ export default class Anchor {
           ].contractAddress,
         },
       },
-      null,
+      undefined,
       fee
     );
   }

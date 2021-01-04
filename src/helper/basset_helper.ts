@@ -26,11 +26,11 @@ export default class AnchorbAsset {
   }
 
   public async storeCodes(sender: Wallet, location: string, fee?: StdFee): Promise<void> {
-    for (const c of contracts) {
+    return contracts.reduce((t, c) => t.then(async () => {
       const bytecode = fs.readFileSync(`${location}/${c}.wasm`);
       const storeCode = new MsgStoreCode(
-          sender.key.accAddress,
-          bytecode.toString("base64")
+        sender.key.accAddress,
+        bytecode.toString("base64")
       );
 
       const result = await send_transaction(sender, [storeCode], fee);
@@ -43,7 +43,7 @@ export default class AnchorbAsset {
         codeId,
         contractAddress: "",
       };
-    }
+    }), Promise.resolve())
   }
 
   public async instantiate_hub(sender: Wallet, fee?: StdFee): Promise<void> {
@@ -58,7 +58,7 @@ export default class AnchorbAsset {
           er_threshold: "1",
           reward_denom: "uusd",
         },
-        null,
+        undefined,
         fee
     );
     if (isTxError(init)) {
@@ -82,7 +82,7 @@ export default class AnchorbAsset {
           hub_contract: `${this.contractInfo["anchor_basset_hub"].contractAddress}`,
           reward_denom: "uusd",
         },
-        null,
+        undefined,
         fee
     );
     if (isTxError(init)) {
@@ -113,7 +113,7 @@ export default class AnchorbAsset {
           },
           hub_contract: `${this.contractInfo["anchor_basset_hub"].contractAddress}`,
         },
-        null,
+        undefined,
         fee
     );
     if (isTxError(init)) {
@@ -139,7 +139,7 @@ export default class AnchorbAsset {
             contract_address: `${this.contractInfo["anchor_basset_reward"].contractAddress}`,
           },
         },
-        null,
+        undefined,
         fee,
     );
 
@@ -155,7 +155,9 @@ export default class AnchorbAsset {
             contract: "token",
             contract_address: `${this.contractInfo["anchor_basset_token"].contractAddress}`,
           },
-        }
+        },
+        undefined,
+        fee
     );
 
     if (isTxError(msg2)) {

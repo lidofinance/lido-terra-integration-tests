@@ -24,7 +24,7 @@ export default class TerraSwap {
   }
 
   public async storeCodes(sender: Wallet, location: string, fee?: StdFee): Promise<void> {
-    for (const c of contracts) {
+    return contracts.reduce((t, c) => t.then(async () => {
       const bytecode = fs.readFileSync(`${location}/${c}.wasm`);
       const storeCode = new MsgStoreCode(
         sender.key.accAddress,
@@ -41,7 +41,8 @@ export default class TerraSwap {
         codeId,
         contractAddress: "",
       };
-    }
+    }), Promise.resolve())
+   
   }
 
   public async instantiate_terraswap(sender: Wallet, fee?: StdFee): Promise<void> {
@@ -52,7 +53,7 @@ export default class TerraSwap {
         token_code_id: this.contractInfo.terraswap_token.codeId,
         pair_code_id: this.contractInfo.terraswap_pair.codeId,
       },
-      null,
+      undefined,
       fee
     );
 

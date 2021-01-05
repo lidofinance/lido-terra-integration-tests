@@ -16,11 +16,32 @@ export async function anchor(owner: Wallet): Promise<Contracts> {
         path.resolve(locationBase, './terraswap/artifacts'),
         fixedFeeForInit
     )
-    await anchor.instantiate(fixedFeeForInit)
+    await anchor.instantiate(fixedFeeForInit, {
+        basset: {
+            epoch_period: 86,
+            unbonding_period: 602,
+        },
+        overseer: {
+            epoch_period: 60,
+            price_timeframe: 60,
+        },
+        liquidation: {
+            price_timeframe: 60
+        }
+    })
 
     const basset = anchor.bAsset;
     const moneyMarket = anchor.moneyMarket;
     const terraswap = anchor.terraswap;
+
+    // register ALL validators
+    const validators = await owner.lcd.staking.validators()
+
+    console.log("registering validators...")
+    await validators.reduce((t, v) => t.then(() => {
+        console.log(v.operator_address)
+        return basset.register_validator(owner, v.operator_address, fixedFeeForInit)
+    }), Promise.resolve())
 
     return {
         "bLunaHub": basset.contractInfo["anchor_basset_hub"].contractAddress,

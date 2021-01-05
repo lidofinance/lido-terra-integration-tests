@@ -194,14 +194,15 @@ export default class AnchorbAsset {
 
   public async register_validator(
       sender: Wallet,
-      validator: string
+      validator: string,
+      fee?: StdFee
   ): Promise<void> {
     const contract = this.contractInfo.anchor_basset_hub.contractAddress;
     const registerValidatorExecution = await execute(sender, contract, {
       register_validator: {
         validator: `${validator}`,
       },
-    });
+    }, undefined, fee);
     if (isTxError(registerValidatorExecution)) {
       throw new Error(`Couldn't run: ${registerValidatorExecution.raw_log}`);
     }

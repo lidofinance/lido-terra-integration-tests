@@ -4,6 +4,20 @@ import terraswap from "./terraswap_helper";
 import { StdFee, Wallet } from "@terra-money/terra.js";
 import { execute } from "./flow/execution";
 
+interface CustomInstantiationParam {
+  basset?: {
+    epoch_period?: number,
+    unbonding_period?: number,
+  },
+  overseer?: {
+    epoch_period?: number,
+    price_timeframe?: number,
+  },
+  liquidation?: {
+    price_timeframe?: number
+  }
+}
+
 export default class Anchor {
   public bAsset: basset;
   public moneyMarket: mMarket;
@@ -28,8 +42,8 @@ export default class Anchor {
     await this.terraswap.storeCodes(this.owner, terraswapLocation, fee);
   }
 
-  public async instantiate(fee?: StdFee): Promise<void> {
-    await this.bAsset.instantiate_hub(this.owner, {}, fee);
+  public async instantiate(fee?: StdFee, params?: CustomInstantiationParam): Promise<void> {
+    await this.bAsset.instantiate_hub(this.owner, params?.basset, fee);
     await this.bAsset.instantiate_reward(this.owner, {}, fee);
     await this.bAsset.instantiate_token(this.owner, {}, fee);
     await this.bAsset.register_contracts(this.owner,{}, fee);
@@ -44,7 +58,7 @@ export default class Anchor {
     await this.moneyMarket.instantiate_oracle(this.owner, {}, fee);
     await this.moneyMarket.instantiate_liquidation(
       this.owner,
-        {},
+      params?.liquidation,
       fee
     );
 
@@ -57,7 +71,8 @@ export default class Anchor {
     );
 
     await this.moneyMarket.instantiate_overseer(
-      this.owner, {},
+      this.owner,
+      params?.overseer,
       fee
     );
     const bassetReward = this.bAsset.contractInfo["anchor_basset_reward"]

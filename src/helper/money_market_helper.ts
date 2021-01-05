@@ -499,8 +499,8 @@ export default class MoneyMarket {
     distribution_threshold?: string,
     target_deposit_rate?: string,
     buffer_distribution_rate?: string,
-    epoch_period?: string,
-    price_timeframe?: string
+    epoch_period?: number,
+    price_timeframe?: number
   ): Promise<void> {
     const contract = this.contractInfo["moneymarket_overseer"].contractAddress;
     const configExecution = await execute(sender, contract, {

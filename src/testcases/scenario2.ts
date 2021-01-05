@@ -46,9 +46,9 @@ async function main() {
         ],
         validators: [
             Testkit.validatorInitRequest('valA', new Coin('uluna', new Int(1000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
-            Testkit.validatorInitRequest('valB', new Coin('uluna', new Int(1000000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
-            Testkit.validatorInitRequest('valC', new Coin('uluna', new Int(1000000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
-            Testkit.validatorInitRequest('valD', new Coin('uluna', new Int(1000000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
+            Testkit.validatorInitRequest('valB', new Coin('uluna', new Int("100000000000000000")), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
+            Testkit.validatorInitRequest('valC', new Coin('uluna', new Int("100000000000000000")), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
+            Testkit.validatorInitRequest('valD', new Coin('uluna', new Int("100000000000000000")), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
         ],
         auto_inject: {
             validator_rounds: ['valB', 'valC', 'valD', 'valA']
@@ -265,7 +265,7 @@ async function main() {
     await mustPass(basset.finish(a))
 
     //block 121
-    await mustPass(moneyMarket.deposit_stable(b, 9000000000000))
+    await mustPass(moneyMarket.deposit_stable(b, 10000000000000))
 
     //block 122
     const marketAddr = moneyMarket.contractInfo["moneymarket_market"].contractAddress;
@@ -295,7 +295,7 @@ async function main() {
     await mustFail(moneyMarket.borrow_stable(a, 1500000000000, undefined))
 
     //block 127
-    await mustPass(moneyMarket.borrow_stable(a, 50000000000, undefined))
+    await mustPass(moneyMarket.borrow_stable(a, 1000000000, undefined))
 
     //block 128
     await mustPass(basset.update_global_index(a))
@@ -327,7 +327,7 @@ async function main() {
     await mustFail(moneyMarket.overseer_unlock_collateral(a, [[basset.contractInfo["anchor_basset_token"].contractAddress, "10000000000000"]]))
 
     //block 134
-    await mustPass(moneyMarket.withdraw_collateral(a, 150000000000))
+    //await mustPass(moneyMarket.withdraw_collateral(a, 150000000000))
 
     //block 135
     await mustFail(moneyMarket.withdraw_collateral(a, 990000000000))
@@ -335,17 +335,17 @@ async function main() {
     //block 136-149
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
 
-    console.log("saving state...")
-    fs.writeFileSync("2_block149_state.json", JSON.stringify(await mantleState.getState(), null, 2))
-
     //block 150
     //await mustPass(basset.update_global_index(a))
 
     //block 151
     await mustPass(moneyMarket.execute_epoch_operations(a))
 
+    console.log("saving state...")
+    fs.writeFileSync("2_block151_state.json", JSON.stringify(await mantleState.getState(), null, 2))
+
     //block 152
-    await mustPass(moneyMarket.repay_stable(a, 200000000000))
+    // await mustPass(moneyMarket.repay_stable(a, 200000000000))
 
     //block 153 - 165
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 13))
@@ -370,7 +370,7 @@ async function main() {
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
 
     // Testing msgs when oracle is off, not included in scenario itself
-
+    await mustFail(moneyMarket.liquidate_collateral(c, aKey.accAddress))
     // await mustFail(moneyMarket.borrow_stable(a, 100, undefined))
     // await mustFail(moneyMarket.repay_stable(a, 100))
     // await mustFail(moneyMarket.overseer_lock_collateral(a,

@@ -60,7 +60,7 @@ export default class Anchor {
       12,
       0.00000000951,
       0.00000001522,
-      0.1,
+      1,
       30
     );
     const bassetReward = this.bAsset.contractInfo["anchor_basset_reward"]

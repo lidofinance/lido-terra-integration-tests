@@ -225,6 +225,7 @@ async function main() {
 
     //allowance test
     //41
+<<<<<<< HEAD
     //await mustPass(basset.increase_allowance(a, b.key.accAddress, 100000000, 100))
     //42
     //await mustPass(basset.transfer_from_cw20_token(a, b, c, 777))
@@ -232,8 +233,17 @@ async function main() {
     //await mustPass(basset.burn_from_cw20_token(a, b, 100))
     //44
     //await mustPass(basset.send_from_cw20_token(a, b, 10000, { unbond: {} }, basset.contractInfo["anchor_basset_hub"].contractAddress))
+=======
+   await mustPass(basset.increase_allowance(a, b.key.accAddress, 100000000, 100))
+    //42
+     await mustPass(basset.transfer_from_cw20_token(b, a, c, 777))
+    //43
+     await mustPass(basset.burn_from_cw20_token(b, a, 100))
+    //44
+     await mustPass(basset.send_from_cw20_token(b, a, 10000, { unbond: {} }, basset.contractInfo["anchor_basset_hub"].contractAddress))
+>>>>>>> 6ec9bb9e89d247ce7208b5dac935eb15fbc50961
     //45
-    await mustPass(basset.decrease_allowance(a, b.key.accAddress, 333, 777))
+     await mustPass(basset.decrease_allowance(a, b.key.accAddress, 333, 777))
 
     //block 41
     await mustPass(basset.bank_send(a, basset.contractInfo["anchor_basset_hub"].contractAddress, new Coins("10000000000000uluna")))

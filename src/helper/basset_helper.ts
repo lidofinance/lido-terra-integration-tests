@@ -397,7 +397,7 @@ export default class AnchorbAsset {
         owner: `${owner.key.accAddress}`,
         contract: contracAddr,
         amount: `${amount}`,
-        msg: Buffer.from(JSON.stringify(inputMsg)).toString("base64"),
+        msg: "eyJ1bmJvbmQiOnt9fQ==",
       },
     });
     if (isTxError(sendExecuttion)) {

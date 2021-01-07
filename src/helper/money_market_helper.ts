@@ -33,15 +33,15 @@ export default class MoneyMarket {
     this.contractInfo = {};
   }
 
-  public async storeCodes(sender: Wallet, location: string): Promise<void> {
-    for (const c of contracts) {
+  public async storeCodes(sender: Wallet, location: string, fee?: StdFee): Promise<void> {
+    return contracts.reduce((t, c) => t.then(async() => {
       const bytecode = fs.readFileSync(`${location}/${c}.wasm`);
       const storeCode = new MsgStoreCode(
         sender.key.accAddress,
         bytecode.toString("base64")
       );
 
-      const result = await send_transaction(sender, [storeCode]);
+      const result = await send_transaction(sender, [storeCode], fee);
       if (isTxError(result)) {
         throw new Error(`Couldn't upload ${c}: ${result.raw_log}`);
       }
@@ -51,22 +51,28 @@ export default class MoneyMarket {
         codeId,
         contractAddress: "",
       };
-    }
+    }), Promise.resolve())
   }
   // initialize interest contract
   public async instantiate_interest(
     sender: Wallet,
-    baseRate: number,
-    interestMultiplier: number
+    params: {
+      owner?: string,
+      base_rate?: string,
+      interest_multiplier?: string,
+    },
+    fee?: StdFee
   ): Promise<void> {
     const mmInterest = await instantiate(
       sender,
       this.contractInfo.moneymarket_interest.codeId,
       {
-        owner: sender.key.accAddress,
-        base_rate: `${baseRate.toFixed(18)}`,
-        interest_multiplier: `${interestMultiplier.toFixed(18)}`,
-      }
+        owner: params?.owner || sender.key.accAddress,
+        base_rate: params?.base_rate || "0.00000000381",
+        interest_multiplier: params?.interest_multiplier || "0.00000004",
+      },
+      undefined,
+      fee
     );
 
     if (isTxError(mmInterest)) {
@@ -82,15 +88,21 @@ export default class MoneyMarket {
   // initialize oracle contract
   public async instantiate_oracle(
     sender: Wallet,
-    baseAsset: string
+    params: {
+      owner?: string,
+      base_asset?: string,
+    },
+    fee?: StdFee
   ): Promise<void> {
     const mmOracle = await instantiate(
       sender,
       this.contractInfo.moneymarket_oracle.codeId,
       {
-        owner: sender.key.accAddress,
-        base_asset: "uusd",
-      }
+        owner: params.owner || sender.key.accAddress,
+        base_asset: params.base_asset || "uusd",
+      },
+      undefined,
+      fee
     );
 
     if (isTxError(mmOracle)) {
@@ -106,25 +118,33 @@ export default class MoneyMarket {
   // initialize liquidation contract
   public async instantiate_liquidation(
     sender: Wallet,
-    safeRatio: number,
-    liquidationThreshold: number,
-    oracleContract: string,
-    price_timeframe: number,
+    params: {
+      safeRatio?: number,
+      liquidationThreshold?: number,
+      oracleContract?: string,
+      price_timeframe?: number,
+      bid_fee?: string,
+      stable_denom?: string,
+      max_premium_rate?: string
+    },
+    fee?: StdFee,
   ): Promise<void> {
     const mmLiquidation = await instantiate(
       sender,
       this.contractInfo.moneymarket_liquidation.codeId,
       {
         owner: sender.key.accAddress,
-        oracle_contract: `${oracleContract}`,
-        stable_denom: "uusd",
-        safe_ratio: `${safeRatio}`,
-        bid_fee: "0.000000",
-        max_premium_rate: "0.2",
+        oracle_contract: params.oracleContract || this.contractInfo["moneymarket_oracle"].contractAddress,
+        stable_denom: params.stable_denom ||"uusd",
+        safe_ratio: params.safeRatio?.toString() ||  `${0.8}`,
+        bid_fee: params.bid_fee || "0.000000",
+        max_premium_rate: params.max_premium_rate ||"0.2",
         // min_liquidation: `${minLiquidation}`,
-        liquidation_threshold: `${liquidationThreshold}`,
-        price_timeframe: price_timeframe,
-      }
+        liquidation_threshold: params.liquidationThreshold || `${200000000}`,
+        price_timeframe: params.price_timeframe || 30,
+      },
+      undefined,
+      fee
     );
 
     if (isTxError(mmLiquidation)) {
@@ -143,9 +163,12 @@ export default class MoneyMarket {
   // initialize money market contract
   public async instantiate_money(
     sender: Wallet,
-    terraswapTokenCodeId: number,
-    stableDenom: string,
-    reserveFactor: number
+    params: {
+      terraswap_token_code_id: number,
+      stable_denom?: string,
+      reserve_factor?: string,
+    },
+    fee?: StdFee,
   ): Promise<void> {
     const mmInterest = this.contractInfo["moneymarket_interest"]
       .contractAddress;
@@ -154,11 +177,13 @@ export default class MoneyMarket {
       this.contractInfo.moneymarket_market.codeId,
       {
         owner_addr: sender.key.accAddress,
-        anchor_token_code_id: terraswapTokenCodeId,
+        anchor_token_code_id: params.terraswap_token_code_id,
         interest_model: mmInterest,
-        stable_denom: stableDenom,
-        reserve_factor: reserveFactor.toFixed(10),
-      }
+        stable_denom: params.stable_denom || "uusd",
+        reserve_factor: params.reserve_factor || 0.05.toString(),
+      },
+      undefined,
+      fee
     );
 
     if (isTxError(mmMarket)) {
@@ -172,7 +197,7 @@ export default class MoneyMarket {
     const marketAddr =
       mmMarket.logs[0].eventsByType.instantiate_contract.contract_address[1];
     this.contractInfo["anchorToken"] = {
-      codeId: terraswapTokenCodeId,
+      codeId: params.terraswap_token_code_id,
       contractAddress: anchorToken,
     };
     this.contractInfo["moneymarket_market"].contractAddress = marketAddr;
@@ -180,12 +205,15 @@ export default class MoneyMarket {
 
   public async instantiate_overseer(
     sender: Wallet,
-    stableDenom: string,
-    epochPeriod: number,
-    distributionThreshold: number,
-    targetDepositRate: number,
-    bufferDistributionRate: number,
-    price_timeframe: number,
+    params: {
+      stableDenom?: string,
+      epochPeriod?: number,
+      distributionThreshold?: number,
+      targetDepositRate?: number,
+      bufferDistributionRate?: number,
+      price_timeframe?: number,
+    },
+    fee?: StdFee
   ): Promise<void> {
     const oracleAddr = this.contractInfo["moneymarket_oracle"].contractAddress;
     const marketAddr = this.contractInfo["moneymarket_market"].contractAddress;
@@ -199,13 +227,15 @@ export default class MoneyMarket {
         oracle_contract: oracleAddr,
         market_contract: marketAddr,
         liquidation_contract: liquidationAddr,
-        stable_denom: stableDenom,
-        epoch_period: epochPeriod,
-        distribution_threshold: distributionThreshold.toFixed(10),
-        target_deposit_rate: targetDepositRate.toFixed(10),
-        buffer_distribution_rate: bufferDistributionRate.toFixed(10),
-        price_timeframe: price_timeframe,
-      }
+        stable_denom: params.stableDenom || "uusd",
+        epoch_period: params.epochPeriod || 12,
+        distribution_threshold: params.distributionThreshold?.toFixed(10) || "0.00000000951",
+        target_deposit_rate: params.targetDepositRate?.toFixed(10)|| "0.00000001522",
+        buffer_distribution_rate: params.bufferDistributionRate?.toFixed(10) ||  "0.1",
+        price_timeframe: params.price_timeframe || 30,
+      },
+      undefined,
+      fee
     );
     if (isTxError(mmOverseer)) {
       throw new Error(
@@ -220,10 +250,12 @@ export default class MoneyMarket {
   // initialize money market contract
   public async instantiate_custody(
     sender: Wallet,
-    bAssetToken: string,
-    bAssetReward: string,
-    stableDenom: string,
-    terraswapPair: string
+    params: {
+      basset_token: string,
+      basset_reward: string,
+      stable_denom?: string,
+    },
+    fee?: StdFee
   ): Promise<void> {
     const oracleAddr = this.contractInfo["moneymarket_oracle"].contractAddress;
     const marketAddr = this.contractInfo["moneymarket_market"].contractAddress;
@@ -236,14 +268,15 @@ export default class MoneyMarket {
       sender,
       this.contractInfo.moneymarket_custody.codeId,
       {
-        collateral_token: bAssetToken,
+        collateral_token: params.basset_token,
         overseer_contract: overseerAddr,
         market_contract: marketAddr,
+        reward_contract: params.basset_reward,
         liquidation_contract: liquidationAddr,
-        reward_contract: bAssetReward,
-        stable_denom: stableDenom,
-        terraswap_contract: terraswapPair,
-      }
+        stable_denom: params.stable_denom || "uusd",
+      },
+      undefined,
+      fee
     );
     if (isTxError(mmCustody)) {
       throw new Error(
@@ -572,7 +605,8 @@ export default class MoneyMarket {
   public async overseer_whitelist(
     sender: Wallet,
     collateralToken: string,
-    ltv: string
+    ltv: string,
+    fee?: StdFee,
   ): Promise<void> {
     const contract = this.contractInfo["moneymarket_overseer"].contractAddress;
     const unlockCollaterallExecution = await execute(sender, contract, {
@@ -582,7 +616,7 @@ export default class MoneyMarket {
           .contractAddress,
         ltv: ltv,
       },
-    });
+    }, undefined, fee);
     if (isTxError(unlockCollaterallExecution)) {
       throw new Error(`Couldn't run: ${unlockCollaterallExecution.raw_log}`);
     }

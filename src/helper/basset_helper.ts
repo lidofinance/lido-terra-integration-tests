@@ -10,6 +10,12 @@ import {
 import * as fs from "fs";
 import { execute, instantiate, send_transaction } from "./flow/execution";
 
+
+type Mint = {
+  minter: string,
+  cap?:number
+};
+
 const contracts = [
   "anchor_basset_hub",
   "anchor_basset_reward",
@@ -25,15 +31,15 @@ export default class AnchorbAsset {
     this.contractInfo = {};
   }
 
-  public async storeCodes(sender: Wallet, location: string): Promise<void> {
-    for (const c of contracts) {
+  public async storeCodes(sender: Wallet, location: string, fee?: StdFee): Promise<void> {
+    return contracts.reduce((t, c) => t.then(async () => {
       const bytecode = fs.readFileSync(`${location}/${c}.wasm`);
       const storeCode = new MsgStoreCode(
         sender.key.accAddress,
         bytecode.toString("base64")
       );
 
-      const result = await send_transaction(sender, [storeCode]);
+      const result = await send_transaction(sender, [storeCode], fee);
       if (isTxError(result)) {
         throw new Error(`Couldn't upload ${c}: ${result.raw_log}`);
       }
@@ -43,21 +49,31 @@ export default class AnchorbAsset {
         codeId,
         contractAddress: "",
       };
-    }
+    }), Promise.resolve())
   }
 
-  public async instantiate_hub(sender: Wallet): Promise<void> {
+  public async instantiate_hub(sender: Wallet, params: {
+    epoch_period?: number,
+    underlying_coin_denom?: string,
+    unbonding_period?: number,
+    peg_recovery_fee?: string,
+    er_threshold?: string,
+    reward_denom?: string,
+  } , fee?: StdFee): Promise<void> {
     const init = await instantiate(
-      sender,
-      this.contractInfo.anchor_basset_hub.codeId,
-      {
-        epoch_period: 30,
-        underlying_coin_denom: "uluna",
-        unbonding_period: 211,
-        peg_recovery_fee: "0.001",
-        er_threshold: "1",
-        reward_denom: "uusd",
-      }
+        sender,
+        this.contractInfo.anchor_basset_hub.codeId,
+        {
+          //FIXME: The epoch period and unbonding period must be changed
+          epoch_period: params.epoch_period || 30,
+          underlying_coin_denom: params.underlying_coin_denom || "uluna",
+          unbonding_period: params.unbonding_period || 211,
+          peg_recovery_fee: params.peg_recovery_fee||"0.001",
+          er_threshold: params.er_threshold || "0.98",
+          reward_denom: params.reward_denom||"uusd",
+        },
+        undefined,
+        fee
     );
     if (isTxError(init)) {
       throw new Error(`Couldn't instantiate: ${init.raw_log}`);
@@ -72,14 +88,19 @@ export default class AnchorbAsset {
     );
   }
 
-  public async instantiate_reward(sender: Wallet): Promise<void> {
+  public async instantiate_reward(sender: Wallet, params: {
+    hub_contract?: string,
+    reward_denom?: string
+  }, fee?: StdFee): Promise<void> {
     const init = await instantiate(
-      sender,
-      this.contractInfo.anchor_basset_reward.codeId,
-      {
-        hub_contract: `${this.contractInfo["anchor_basset_hub"].contractAddress}`,
-        reward_denom: "uusd",
-      }
+        sender,
+        this.contractInfo.anchor_basset_reward.codeId,
+        {
+          hub_contract: params.hub_contract ||`${this.contractInfo["anchor_basset_hub"].contractAddress}`,
+          reward_denom: params.reward_denom || "uusd",
+        },
+        undefined,
+        fee
     );
     if (isTxError(init)) {
       throw new Error(`Couldn't instantiate: ${init.raw_log}`);
@@ -94,21 +115,30 @@ export default class AnchorbAsset {
     );
   }
 
-  public async instantiate_token(sender: Wallet): Promise<void> {
+  public async instantiate_token(sender: Wallet, params: {
+    name?: string,
+    symbol?: string,
+    decimals?: number,
+    initial_balances?: object,
+    mint?: Mint,
+    hub_contract?: string
+  },  fee?: StdFee): Promise<void> {
     const init = await instantiate(
-      sender,
-      this.contractInfo.anchor_basset_token.codeId,
-      {
-        name: "bluna",
-        symbol: "BLUNA",
-        decimals: 6,
-        initial_balances: [],
-        mint: {
-          minter: `${this.contractInfo["anchor_basset_hub"].contractAddress}`,
-          cap: null,
+        sender,
+        this.contractInfo.anchor_basset_token.codeId,
+        {
+          name: params.name||"bluna",
+          symbol: params.symbol || "BLUNA",
+          decimals: params.decimals || 6,
+          initial_balances: params.initial_balances || [],
+          mint: {
+            minter: params.mint?.minter ||`${this.contractInfo["anchor_basset_hub"].contractAddress}`,
+            cap: params.mint?.cap || null,
+          },
+          hub_contract: params.hub_contract ||`${this.contractInfo["anchor_basset_hub"].contractAddress}`,
         },
-        hub_contract: `${this.contractInfo["anchor_basset_hub"].contractAddress}`,
-      }
+        undefined,
+        fee
     );
     if (isTxError(init)) {
       throw new Error(`Couldn't instantiate: ${init.raw_log}`);
@@ -123,16 +153,21 @@ export default class AnchorbAsset {
     );
   }
 
-  public async register_contracts(sender: Wallet) {
+  public async register_contracts(sender: Wallet, params: {
+    reward_address?: string,
+    token_address?: string
+  }, fee?: StdFee) {
     const msg = await execute(
-      sender,
-      this.contractInfo["anchor_basset_hub"].contractAddress,
-      {
-        register_subcontracts: {
-          contract: "reward",
-          contract_address: `${this.contractInfo["anchor_basset_reward"].contractAddress}`,
+        sender,
+        this.contractInfo["anchor_basset_hub"].contractAddress,
+        {
+          register_subcontracts: {
+            contract: "reward",
+            contract_address: params.reward_address ||`${this.contractInfo["anchor_basset_reward"].contractAddress}`,
+          },
         },
-      }
+        undefined,
+        fee,
     );
 
     if (isTxError(msg)) {
@@ -140,14 +175,16 @@ export default class AnchorbAsset {
     }
 
     const msg2 = await execute(
-      sender,
-      this.contractInfo["anchor_basset_hub"].contractAddress,
-      {
-        register_subcontracts: {
-          contract: "token",
-          contract_address: `${this.contractInfo["anchor_basset_token"].contractAddress}`,
+        sender,
+        this.contractInfo["anchor_basset_hub"].contractAddress,
+        {
+          register_subcontracts: {
+            contract: "token",
+            contract_address: params.token_address ||`${this.contractInfo["anchor_basset_token"].contractAddress}`,
+          },
         },
-      }
+        undefined,
+        fee
     );
 
     if (isTxError(msg2)) {
@@ -156,15 +193,16 @@ export default class AnchorbAsset {
   }
 
   public async register_validator(
-    sender: Wallet,
-    validator: string
+      sender: Wallet,
+      validator: string,
+      fee?: StdFee
   ): Promise<void> {
     const contract = this.contractInfo.anchor_basset_hub.contractAddress;
     const registerValidatorExecution = await execute(sender, contract, {
       register_validator: {
         validator: `${validator}`,
       },
-    });
+    }, undefined, fee);
     if (isTxError(registerValidatorExecution)) {
       throw new Error(`Couldn't run: ${registerValidatorExecution.raw_log}`);
     }
@@ -215,18 +253,18 @@ export default class AnchorbAsset {
     peg_recovery_fee?: string,
     er_threshold?: string,
     reward_denom?: string,
-  }): Promise<void> {
+  }, fee?: StdFee): Promise<void> {
     const contract = this.contractInfo.anchor_basset_hub.contractAddress;
     const paramsExecution = await execute(sender, contract, {
       update_params: {
-        epoch_period: params.epoch_period || 31,
-        underlying_coin_denom: params.underlying_coin_denom || "uluna",
-        unbonding_period: params.unbonding_period || 211,
-        peg_recovery_fee: params.peg_recovery_fee || "0.001",
-        er_threshold: params.er_threshold || "1",
-        reward_denom: params.reward_denom || "uusd",
+        epoch_period: params?.epoch_period || 31,
+        underlying_coin_denom: params?.underlying_coin_denom || "uluna",
+        unbonding_period: params?.unbonding_period || 211,
+        peg_recovery_fee: params?.peg_recovery_fee || "0.001",
+        er_threshold: params?.er_threshold || "1",
+        reward_denom: params?.reward_denom || "uusd",
       },
-    });
+    }, undefined, fee);
     if (isTxError(paramsExecution)) {
       throw new Error(`Couldn't run: ${paramsExecution.raw_log}`);
     }

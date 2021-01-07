@@ -23,15 +23,15 @@ export default class TerraSwap {
     this.contractInfo = {};
   }
 
-  public async storeCodes(sender: Wallet, location: string): Promise<void> {
-    for (const c of contracts) {
+  public async storeCodes(sender: Wallet, location: string, fee?: StdFee): Promise<void> {
+    return contracts.reduce((t, c) => t.then(async () => {
       const bytecode = fs.readFileSync(`${location}/${c}.wasm`);
       const storeCode = new MsgStoreCode(
         sender.key.accAddress,
         bytecode.toString("base64")
       );
 
-      const result = await send_transaction(sender, [storeCode]);
+      const result = await send_transaction(sender, [storeCode], fee);
       if (isTxError(result)) {
         throw new Error(`Couldn't upload ${c}: ${result.raw_log}`);
       }
@@ -41,17 +41,20 @@ export default class TerraSwap {
         codeId,
         contractAddress: "",
       };
-    }
+    }), Promise.resolve())
+   
   }
 
-  public async instantiate_terraswap(sender: Wallet): Promise<void> {
+  public async instantiate_terraswap(sender: Wallet, fee?: StdFee): Promise<void> {
     const terraswapFactory = await instantiate(
       sender,
       this.contractInfo.terraswap_factory.codeId,
       {
         token_code_id: this.contractInfo.terraswap_token.codeId,
         pair_code_id: this.contractInfo.terraswap_pair.codeId,
-      }
+      },
+      undefined,
+      fee
     );
 
     if (isTxError(terraswapFactory)) {

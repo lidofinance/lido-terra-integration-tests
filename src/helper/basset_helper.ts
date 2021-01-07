@@ -253,18 +253,18 @@ export default class AnchorbAsset {
     peg_recovery_fee?: string,
     er_threshold?: string,
     reward_denom?: string,
-  }): Promise<void> {
+  }, fee?: StdFee): Promise<void> {
     const contract = this.contractInfo.anchor_basset_hub.contractAddress;
     const paramsExecution = await execute(sender, contract, {
       update_params: {
-        epoch_period: params.epoch_period||31,
-        underlying_coin_denom: params.underlying_coin_denom ||"uluna",
-        unbonding_period: params.unbonding_period ||211,
-        peg_recovery_fee: params.peg_recovery_fee || "0.001",
-        er_threshold: params.er_threshold || "1",
-        reward_denom: params.reward_denom||"uusd",
+        epoch_period: params.epoch_period,
+        underlying_coin_denom: params.underlying_coin_denom,
+        unbonding_period: params.unbonding_period,
+        peg_recovery_fee: params.peg_recovery_fee,
+        er_threshold: params.er_threshold,
+        reward_denom: params.reward_denom,
       },
-    });
+    }, undefined, fee);
     if (isTxError(paramsExecution)) {
       throw new Error(`Couldn't run: ${paramsExecution.raw_log}`);
     }

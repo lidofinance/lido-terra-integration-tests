@@ -1,5 +1,6 @@
 import { LCDClient, MnemonicKey, Wallet } from "@terra-money/terra.js";
 import { anchor } from "./ops";
+import { updatebLunaParams } from './update-params'
 
 const args = process.argv.slice(2)
 

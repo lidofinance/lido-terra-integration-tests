@@ -58,8 +58,8 @@ export default class MoneyMarket {
     sender: Wallet,
     params: {
       owner?: string,
-      baseRate?: number,
-      interestMultiplier?: number,
+      base_rate?: string,
+      interest_multiplier?: string,
     },
     fee?: StdFee
   ): Promise<void> {
@@ -67,9 +67,9 @@ export default class MoneyMarket {
       sender,
       this.contractInfo.moneymarket_interest.codeId,
       {
-        owner: params.owner || sender.key.accAddress,
-        base_rate: params.baseRate?.toFixed(18) || "0.00000000381",
-        interest_multiplier: params.interestMultiplier?.toFixed(18) || "0.00000004",
+        owner: params?.owner || sender.key.accAddress,
+        base_rate: params?.base_rate || "0.00000000381",
+        interest_multiplier: params?.interest_multiplier || "0.00000004",
       },
       undefined,
       fee
@@ -90,7 +90,7 @@ export default class MoneyMarket {
     sender: Wallet,
     params: {
       owner?: string,
-      baseAsset?: string,
+      base_asset?: string,
     },
     fee?: StdFee
   ): Promise<void> {
@@ -99,7 +99,7 @@ export default class MoneyMarket {
       this.contractInfo.moneymarket_oracle.codeId,
       {
         owner: params.owner || sender.key.accAddress,
-        base_asset: params.baseAsset || "uusd",
+        base_asset: params.base_asset || "uusd",
       },
       undefined,
       fee
@@ -164,9 +164,9 @@ export default class MoneyMarket {
   public async instantiate_money(
     sender: Wallet,
     params: {
-      terraswapTokenCodeId: number,
-      stableDenom: string,
-      reserveFactor?: number,
+      terraswap_token_code_id: number,
+      stable_denom?: string,
+      reserve_factor?: string,
     },
     fee?: StdFee,
   ): Promise<void> {
@@ -177,10 +177,10 @@ export default class MoneyMarket {
       this.contractInfo.moneymarket_market.codeId,
       {
         owner_addr: sender.key.accAddress,
-        anchor_token_code_id: params.terraswapTokenCodeId,
+        anchor_token_code_id: params.terraswap_token_code_id,
         interest_model: mmInterest,
-        stable_denom: params.stableDenom ||"uusd",
-        reserve_factor: params.reserveFactor?.toFixed(10)|| 0.05.toString(),
+        stable_denom: params.stable_denom || "uusd",
+        reserve_factor: params.reserve_factor || 0.05.toString(),
       },
       undefined,
       fee
@@ -197,7 +197,7 @@ export default class MoneyMarket {
     const marketAddr =
       mmMarket.logs[0].eventsByType.instantiate_contract.contract_address[1];
     this.contractInfo["anchorToken"] = {
-      codeId: params.terraswapTokenCodeId,
+      codeId: params.terraswap_token_code_id,
       contractAddress: anchorToken,
     };
     this.contractInfo["moneymarket_market"].contractAddress = marketAddr;
@@ -251,10 +251,9 @@ export default class MoneyMarket {
   public async instantiate_custody(
     sender: Wallet,
     params: {
-      bAssetToken: string,
-      bAssetReward: string,
-      stableDenom?: string,
-      terraswapPair: string,
+      basset_token: string,
+      basset_reward: string,
+      stable_denom?: string,
     },
     fee?: StdFee
   ): Promise<void> {
@@ -269,13 +268,12 @@ export default class MoneyMarket {
       sender,
       this.contractInfo.moneymarket_custody.codeId,
       {
-        collateral_token: params.bAssetToken,
+        collateral_token: params.basset_token,
         overseer_contract: overseerAddr,
         market_contract: marketAddr,
+        reward_contract: params.basset_reward,
         liquidation_contract: liquidationAddr,
-        reward_contract: params.bAssetReward,
-        stable_denom: params.stableDenom || "uusd",
-        terraswap_contract: params.terraswapPair,
+        stable_denom: params.stable_denom || "uusd",
       },
       undefined,
       fee

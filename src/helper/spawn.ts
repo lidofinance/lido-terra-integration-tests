@@ -4,16 +4,45 @@ import terraswap from "./terraswap_helper";
 import { StdFee, Wallet } from "@terra-money/terra.js";
 import { execute } from "./flow/execution";
 
+// https://terra-money.quip.com/lR4sAHcX3yiB/WebApp-Dev-Page-Deployment#UKCACAa6MDK
 interface CustomInstantiationParam {
   basset?: {
     epoch_period?: number,
     unbonding_period?: number,
+    underlying_coin_denom?: string,
+    peg_recovery_fee?: string,
+    er_threshold?: string,
+    reward_denom?: string,
   },
   overseer?: {
+    stable_denom?: string,
     epoch_period?: number,
+    distribution_threshold?: string,
+    target_deposit_rate?: string,
+    buffer_distribution_rate?: string,
     price_timeframe?: number,
   },
+  market?: {
+    stable_denom?: string,
+    reserve_factor?: string,
+  },
+  custody?: {
+    stable_denom?: string,
+  },
+  interest?: {
+    owner?: string,
+    base_rate?: string,
+    interest_multiplier?: string,
+  },
+  oracle?: {
+    base_asset?: string,
+  }
   liquidation?: {
+    stable_denom?: string,
+    safe_ratio?: string,
+    bid_fee?: string,
+    max_premium_rate?: string,
+    liquidation_threshold?: string,
     price_timeframe?: number
   }
 }
@@ -52,10 +81,14 @@ export default class Anchor {
 
     await this.moneyMarket.instantiate_interest(
       this.owner,
-        {},
+      params?.interest,
       fee,
     );
-    await this.moneyMarket.instantiate_oracle(this.owner, {}, fee);
+    await this.moneyMarket.instantiate_oracle(
+      this.owner,
+      params?.oracle,
+      fee
+    );
     await this.moneyMarket.instantiate_liquidation(
       this.owner,
       params?.liquidation,
@@ -63,10 +96,11 @@ export default class Anchor {
     );
 
     await this.moneyMarket.instantiate_money(
-      this.owner,{terraswapTokenCodeId : this.terraswap.contractInfo["terraswap_token"].codeId,
-          stableDenom: undefined,
-          reserveFactor: undefined
-        },
+      this.owner,
+      {
+        ...params?.market,
+        terraswap_token_code_id: this.terraswap.contractInfo["terraswap_token"].codeId
+      },
       fee
     );
 
@@ -75,20 +109,18 @@ export default class Anchor {
       params?.overseer,
       fee
     );
+
     const bassetReward = this.bAsset.contractInfo["anchor_basset_reward"]
       .contractAddress;
     const bassetToken = this.bAsset.contractInfo["anchor_basset_token"]
       .contractAddress;
-    const terraswapPair = this.terraswap.contractInfo["terraswap_pair"]
-      .contractAddress;
     await this.moneyMarket.instantiate_custody(
       this.owner,
-        {
-          bAssetToken: bassetToken,
-          bAssetReward: bassetReward,
-          stableDenom: null,
-          terraswapPair: terraswapPair,
-        },
+      {
+        ...params.custody,
+        basset_token: bassetToken,
+        basset_reward: bassetReward,
+      },
       fee
     );
     await this.moneyMarket.overseer_whitelist(this.owner, bassetToken, "0.5", fee);

@@ -532,8 +532,8 @@ export default class MoneyMarket {
     distribution_threshold?: string,
     target_deposit_rate?: string,
     buffer_distribution_rate?: string,
-    epoch_period?: string,
-    price_timeframe?: string
+    epoch_period?: number,
+    price_timeframe?: number
   ): Promise<void> {
     const contract = this.contractInfo["moneymarket_overseer"].contractAddress;
     const configExecution = await execute(sender, contract, {
@@ -676,16 +676,16 @@ export default class MoneyMarket {
 
   public async interest_update_config(
     sender: Wallet,
-    market_balance: string,
-    total_liabilities: string,
-    total_reserves: string
+    owner: string,
+    base_rate: string,
+    interest_multiplier: string
   ): Promise<void> {
     const contract = this.contractInfo["moneymarket_interest"].contractAddress;
     const updateExecution = await execute(sender, contract, {
       update_config: {
-        market_balance: market_balance,
-        total_liabilities: total_liabilities,
-        total_reserves: total_reserves,
+        owner: owner,
+        base_rate: base_rate,
+        total_reserves: interest_multiplier,
       },
     });
     if (isTxError(updateExecution)) {
@@ -702,7 +702,7 @@ export default class MoneyMarket {
     bid_fee?: string,
     max_premium_rate?: string,
     liquidation_threshold?: string,
-    price_timeframe?: string,
+    price_timeframe?: number,
   ): Promise<void> {
     const contract = this.contractInfo["moneymarket_liquidation"]
       .contractAddress;

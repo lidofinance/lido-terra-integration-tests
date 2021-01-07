@@ -80,11 +80,11 @@ export default class AnchorbAsset {
     }
 
     const contractAddress =
-        init.logs[0].eventsByType.instantiate_contract.contract_address[0];
+      init.logs[0].eventsByType.instantiate_contract.contract_address[0];
     this.contractInfo.anchor_basset_hub.contractAddress = contractAddress;
 
     console.log(
-        `anchor_basset_hub: { codeId: ${this.contractInfo.anchor_basset_hub.codeId}, contractAddress: "${this.contractInfo.anchor_basset_hub.contractAddress}"},`
+      `anchor_basset_hub: { codeId: ${this.contractInfo.anchor_basset_hub.codeId}, contractAddress: "${this.contractInfo.anchor_basset_hub.contractAddress}"},`
     );
   }
 
@@ -107,11 +107,11 @@ export default class AnchorbAsset {
     }
 
     const contractAddress =
-        init.logs[0].eventsByType.instantiate_contract.contract_address[0];
+      init.logs[0].eventsByType.instantiate_contract.contract_address[0];
     this.contractInfo.anchor_basset_reward.contractAddress = contractAddress;
 
     console.log(
-        `anchor_basset_reward: { codeId: ${this.contractInfo.anchor_basset_reward.codeId}, contractAddress: "${this.contractInfo.anchor_basset_reward.contractAddress}"},`
+      `anchor_basset_reward: { codeId: ${this.contractInfo.anchor_basset_reward.codeId}, contractAddress: "${this.contractInfo.anchor_basset_reward.contractAddress}"},`
     );
   }
 
@@ -145,11 +145,11 @@ export default class AnchorbAsset {
     }
 
     const contractAddress =
-        init.logs[0].eventsByType.instantiate_contract.contract_address[0];
+      init.logs[0].eventsByType.instantiate_contract.contract_address[0];
     this.contractInfo.anchor_basset_token.contractAddress = contractAddress;
 
     console.log(
-        `anchor_basset_token: { codeId: ${this.contractInfo.anchor_basset_token.codeId}, contractAddress: "${this.contractInfo.anchor_basset_token.contractAddress}"},`
+      `anchor_basset_token: { codeId: ${this.contractInfo.anchor_basset_token.codeId}, contractAddress: "${this.contractInfo.anchor_basset_token.contractAddress}"},`
     );
   }
 
@@ -209,8 +209,8 @@ export default class AnchorbAsset {
   }
 
   public async deregister_validator(
-      sender: Wallet,
-      validator: string
+    sender: Wallet,
+    validator: string
   ): Promise<void> {
     const contract = this.contractInfo.anchor_basset_hub.contractAddress;
     const deregisterValidatorExecution = await execute(sender, contract, {
@@ -224,29 +224,29 @@ export default class AnchorbAsset {
   }
 
   public async bond(
-      sender: Wallet,
-      amount: number,
-      validator: string
+    sender: Wallet,
+    amount: number,
+    validator: string
   ): Promise<void> {
     const coin = new Coin("uluna", amount);
     const coins = new Coins([coin]);
     const contract = this.contractInfo["anchor_basset_hub"].contractAddress;
     const bondExecution = await execute(
-        sender,
-        contract,
-        {
-          bond: {
-            validator: `${validator}`,
-          },
+      sender,
+      contract,
+      {
+        bond: {
+          validator: `${validator}`,
         },
-        coins
+      },
+      coins
     );
     if (isTxError(bondExecution)) {
       throw new Error(`Couldn't run: ${bondExecution.raw_log}`);
     }
   }
 
-  public async params(sender: Wallet ,params: {
+  public async params(sender: Wallet, params: {
     epoch_period?: number,
     underlying_coin_denom?: string,
     unbonding_period?: number,
@@ -257,12 +257,12 @@ export default class AnchorbAsset {
     const contract = this.contractInfo.anchor_basset_hub.contractAddress;
     const paramsExecution = await execute(sender, contract, {
       update_params: {
-        epoch_period: params.epoch_period,
-        underlying_coin_denom: params.underlying_coin_denom,
-        unbonding_period: params.unbonding_period,
-        peg_recovery_fee: params.peg_recovery_fee,
-        er_threshold: params.er_threshold,
-        reward_denom: params.reward_denom,
+        epoch_period: params?.epoch_period || 31,
+        underlying_coin_denom: params?.underlying_coin_denom || "uluna",
+        unbonding_period: params?.unbonding_period || 211,
+        peg_recovery_fee: params?.peg_recovery_fee || "0.001",
+        er_threshold: params?.er_threshold || "1",
+        reward_denom: params?.reward_denom || "uusd",
       },
     }, undefined, fee);
     if (isTxError(paramsExecution)) {
@@ -271,10 +271,10 @@ export default class AnchorbAsset {
   }
 
   public async update_config(
-      sender: Wallet,
-      owner?: string,
-      reward_contract?: string,
-      token_contract?: string
+    sender: Wallet,
+    owner?: string,
+    reward_contract?: string,
+    token_contract?: string
   ): Promise<void> {
     const contract = this.contractInfo.anchor_basset_hub.contractAddress;
     const paramsExecution = await execute(sender, contract, {
@@ -340,8 +340,8 @@ export default class AnchorbAsset {
   }
 
   public async reward_update_global(
-      sender: Wallet,
-      prev_balance: string
+    sender: Wallet,
+    prev_balance: string
   ): Promise<void> {
     const contract = this.contractInfo.anchor_basset_reward.contractAddress;
     const updateGlobalExe = await execute(sender, contract, {
@@ -353,8 +353,8 @@ export default class AnchorbAsset {
   }
 
   public async reward_update_denom(
-      sender: Wallet,
-      reward_denom?: string
+    sender: Wallet,
+    reward_denom?: string
   ): Promise<void> {
     const contract = this.contractInfo.anchor_basset_reward.contractAddress;
     const updateDenomExe = await execute(sender, contract, {
@@ -366,9 +366,9 @@ export default class AnchorbAsset {
   }
 
   public async reward_increase_balance(
-      sender: Wallet,
-      address?: string,
-      amount?: string
+    sender: Wallet,
+    address?: string,
+    amount?: string
   ): Promise<void> {
     const contract = this.contractInfo.anchor_basset_reward.contractAddress;
     const increaseExe = await execute(sender, contract, {
@@ -380,9 +380,9 @@ export default class AnchorbAsset {
   }
 
   public async reward_decrease_balance(
-      sender: Wallet,
-      address?: string,
-      amount?: string
+    sender: Wallet,
+    address?: string,
+    amount?: string
   ): Promise<void> {
     const contract = this.contractInfo.anchor_basset_reward.contractAddress;
     const decreaseExe = await execute(sender, contract, {
@@ -394,9 +394,9 @@ export default class AnchorbAsset {
   }
 
   public async mint_cw20_token(
-      sender: Wallet,
-      recipient: string,
-      amount: number
+    sender: Wallet,
+    recipient: string,
+    amount: number
   ): Promise<void> {
     const contract = this.contractInfo.anchor_basset_token.contractAddress;
     const sendExecuttion = await execute(sender, contract, {
@@ -411,10 +411,10 @@ export default class AnchorbAsset {
   }
 
   public async send_cw20_token(
-      sender: Wallet,
-      amount: number,
-      inputMsg: object,
-      contracAddr: string
+    sender: Wallet,
+    amount: number,
+    inputMsg: object,
+    contracAddr: string
   ): Promise<void> {
     const contract = this.contractInfo.anchor_basset_token.contractAddress;
     const sendExecuttion = await execute(sender, contract, {
@@ -430,16 +430,16 @@ export default class AnchorbAsset {
   }
 
   public async send_from_cw20_token(
-      sender: Wallet,
-      owner: Wallet,
-      amount: number,
-      inputMsg: object,
-      contracAddr: string
+    sender: Wallet,
+    owner: Wallet,
+    amount: number,
+    inputMsg: object,
+    contracAddr: string
   ): Promise<void> {
     const contract = this.contractInfo.anchor_basset_token.contractAddress;
     const sendExecuttion = await execute(sender, contract, {
       send_from: {
-        owner: owner,
+        owner: `${owner.key.accAddress}`,
         contract: contracAddr,
         amount: `${amount}`,
         msg: Buffer.from(JSON.stringify(inputMsg)).toString("base64"),
@@ -451,9 +451,9 @@ export default class AnchorbAsset {
   }
 
   public async transfer_cw20_token(
-      sender: Wallet,
-      rcv: Wallet,
-      amount: number
+    sender: Wallet,
+    rcv: Wallet,
+    amount: number
   ): Promise<void> {
     const contract = this.contractInfo.anchor_basset_token.contractAddress;
     const transferExecuttion = await execute(sender, contract, {
@@ -468,10 +468,10 @@ export default class AnchorbAsset {
   }
 
   public async transfer_from_cw20_token(
-      sender: Wallet,
-      owner: Wallet,
-      rcv: Wallet,
-      amount: number
+    sender: Wallet,
+    owner: Wallet,
+    rcv: Wallet,
+    amount: number
   ): Promise<void> {
     const contract = this.contractInfo.anchor_basset_token.contractAddress;
     const transferExecuttion = await execute(sender, contract, {
@@ -499,9 +499,9 @@ export default class AnchorbAsset {
   }
 
   public async burn_from_cw20_token(
-      sender: Wallet,
-      owner: Wallet,
-      amount: number
+    sender: Wallet,
+    owner: Wallet,
+    amount: number
   ): Promise<void> {
     const contract = this.contractInfo.anchor_basset_token.contractAddress;
     const transferExecuttion = await execute(sender, contract, {
@@ -516,23 +516,23 @@ export default class AnchorbAsset {
   }
 
   public async increase_allowance(
-      sender: Wallet,
-      spender: string,
-      amount: number,
-      height: number
+    sender: Wallet,
+    spender: string,
+    amount: number,
+    height: number
   ): Promise<void> {
     const execution = await execute(
-        sender,
-        this.contractInfo.anchor_basset_token.contractAddress,
-        {
-          increase_allowance: {
-            spender: spender,
-            amount: `${amount}`,
-            expires: {
-              at_height: `${height}`,
-            },
+      sender,
+      this.contractInfo.anchor_basset_token.contractAddress,
+      {
+        increase_allowance: {
+          spender: spender,
+          amount: `${amount}`,
+          expires: {
+            never: {},
           },
-        }
+        },
+      }
     );
     if (isTxError(execution)) {
       throw new Error(`Couldn't run: ${execution.raw_log}`);
@@ -540,23 +540,23 @@ export default class AnchorbAsset {
   }
 
   public async decrease_allowance(
-      sender: Wallet,
-      spender: string,
-      amount: number,
-      height: number
+    sender: Wallet,
+    spender: string,
+    amount: number,
+    height: number
   ): Promise<void> {
     const execution = await execute(
-        sender,
-        this.contractInfo.anchor_basset_token.contractAddress,
-        {
-          decrease_allowance: {
-            spender: spender,
-            amount: `${amount}`,
-            expires: {
-              at_height: `${height}`,
-            },
+      sender,
+      this.contractInfo.anchor_basset_token.contractAddress,
+      {
+        decrease_allowance: {
+          spender: spender,
+          amount: `${amount}`,
+          expires: {
+            at_height: height,
           },
-        }
+        },
+      }
     );
     if (isTxError(execution)) {
       throw new Error(`Couldn't run: ${execution.raw_log}`);
@@ -564,9 +564,9 @@ export default class AnchorbAsset {
   }
 
   public async bank_send(
-      sender: Wallet,
-      receiver: string,
-      amount: Coins
+    sender: Wallet,
+    receiver: string,
+    amount: Coins
   ): Promise<void> {
     const msg = await execute_bank(sender, amount, receiver);
     if (isTxError(msg)) {
@@ -576,9 +576,9 @@ export default class AnchorbAsset {
 }
 
 async function execute_bank(
-    sender: Wallet,
-    amount: Coins,
-    to: string
+  sender: Wallet,
+  amount: Coins,
+  to: string
 ): ReturnType<typeof send_transaction> {
   return await send_transaction(sender, [
     new MsgSend(sender.key.accAddress, to, amount),

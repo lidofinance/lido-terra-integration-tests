@@ -126,7 +126,11 @@ async function main() {
 
     // await testkit.inject(validators[0].validator_address) -> 아무 Tx 없이 지나가는 경우의 테스팅
 
-    await anchor.bAsset.register_validator(ownerWallet, validators[0].validator_address)
+    await mustPass(anchor.bAsset.register_validator(ownerWallet, validators[0].validator_address))
+    //erase these
+    await mustPass(anchor.bAsset.register_validator(ownerWallet, validators[1].validator_address))
+    await mustPass(anchor.bAsset.register_validator(ownerWallet, validators[2].validator_address))
+    await mustPass(anchor.bAsset.register_validator(ownerWallet, validators[3].validator_address))
 
     const basset = anchor.bAsset;
     const moneyMarket = anchor.moneyMarket;
@@ -178,8 +182,33 @@ async function main() {
     //block 30
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
 
+    // type err 뜸
+    // await mustPass(moneyMarket.overseer_update_config(ownerWallet, owner.accAddress, undefined, undefined, "0.66", "0.1234", "0.777", 30, 60))
+    // await mustPass(moneyMarket.market_update_config(ownerWallet, owner.accAddress, "0.15", undefined))
+    // await mustFail(moneyMarket.market_update_config(valAWallet, owner.accAddress, "0.15", undefined))
+    // await mustFail(moneyMarket.overseer_update_config(valAWallet, undefined, undefined, undefined, "0.66", "0.1234", "0.777", 30, 60))
+    console.log("saving state...")
+    fs.writeFileSync("1_update_param.json", JSON.stringify(await mantleState.getState(), null, 2))
+
     //block 31
+
+    //testing dereg and redelegaton function
     await mustPass(basset.bond(a, 20000000000000, validators[0].validator_address))
+
+    await mustPass(basset.bond(a, 333333333333, validators[1].validator_address))
+
+    await mustPass(basset.bond(a, 333333333333, validators[2].validator_address))
+
+    await mustPass(basset.bond(a, 333333333333, validators[3].validator_address))
+    console.log("saving state...")
+    fs.writeFileSync("1_block32_state.json", JSON.stringify(await mantleState.getState(), null, 2))
+
+    //await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    await mustPass(basset.deregister_validator(ownerWallet, validators[1].validator_address))
+
+    console.log("saving state...")
+    fs.writeFileSync("1_block33_state.json", JSON.stringify(await mantleState.getState(), null, 2))
 
     //block 32 - 40
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
@@ -235,7 +264,7 @@ async function main() {
     //block 57
     await basset.send_cw20_token(
         a,
-        20000000000000,
+        333333333333,
         { unbond: {} },
         basset.contractInfo["anchor_basset_hub"].contractAddress
     )
@@ -245,7 +274,7 @@ async function main() {
     //block 58
     await mustPass(basset.send_cw20_token(
         a,
-        1000000,
+        333333333333,
         { unbond: {} },
         basset.contractInfo["anchor_basset_hub"].contractAddress
     ))
@@ -264,6 +293,12 @@ async function main() {
 
     //block 91 - 119
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 29))
+    await mustPass(basset.send_cw20_token(
+        a,
+        333333333333,
+        { unbond: {} },
+        basset.contractInfo["anchor_basset_hub"].contractAddress
+    ))
 
     //block 120
     await mustPass(basset.finish(a))
@@ -288,6 +323,18 @@ async function main() {
         { deposit_collateral: {} },
         custody
     ))
+
+    //failtest erase this
+    await mustFail(basset.send_cw20_token(
+        a,
+        300000000000000,
+        { deposit_collateral: {} },
+        custody
+    ))
+
+
+    //erase this
+    //await mustFail(moneyMarket.custody_lock_collateral(a, a.key.accAddress, "100"))
 
     //block 124
     await mustPass(moneyMarket.overseer_lock_collateral(
@@ -322,9 +369,12 @@ async function main() {
     //block 131
     await mustPass(moneyMarket.deposit_stable(b, 1000000))
 
+    //erase this
+    await mustFail(moneyMarket.custody_unlock_collateral(a, a.key.accAddress, "100"))
+
     //block 132
-    await mustPass(moneyMarket.overseer_unlock_collateral(a,
-        [[basset.contractInfo["anchor_basset_token"].contractAddress, "100000000000"]]))
+    await mustFail(moneyMarket.overseer_unlock_collateral(a,
+        [[basset.contractInfo["anchor_basset_token"].contractAddress, "100000000000000"]]))
 
     //block 133
     await mustFail(moneyMarket.overseer_unlock_collateral(a,
@@ -348,7 +398,7 @@ async function main() {
     await mustPass(moneyMarket.execute_epoch_operations(a))
 
     //block 152
-    await mustPass(moneyMarket.repay_stable(a, 400000000000))
+    await mustPass(moneyMarket.repay_stable(a, 100000000000))
 
     //block 153 - 165
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 13))
@@ -374,12 +424,20 @@ async function main() {
 
     // Testing msgs when oracle is off, not included in scenario itself
 
-    // await mustFail(moneyMarket.borrow_stable(a, 100, undefined))
-    // await mustFail(moneyMarket.repay_stable(a, 100))
-    // await mustFail(moneyMarket.overseer_lock_collateral(a,
-    //     [[basset.contractInfo["anchor_basset_token"].contractAddress, "100"]]))
-    // await mustFail(moneyMarket.overseer_unlock_collateral(a,
-    //     [[basset.contractInfo["anchor_basset_token"].contractAddress, "100"]]))
+
+    await mustFail(moneyMarket.overseer_unlock_collateral(a, [[basset.contractInfo["anchor_basset_token"].contractAddress, "100"]]))
+    await mustPass(moneyMarket.repay_stable(a, 100))
+    await mustFail(moneyMarket.borrow_stable(a, 100, undefined))
+    await mustPass(moneyMarket.overseer_lock_collateral(a,
+        [[basset.contractInfo["anchor_basset_token"].contractAddress, "100"]]))
+    await mustPass(moneyMarket.withdraw_collateral(a, 100))
+    await mustPass(basset.send_cw20_token(
+        a,
+        100,
+        { deposit_collateral: {} },
+        custody
+    ))
+
 
     const previousOracleFeed2 = await testkit.registerAutomaticTx(configureMMOracle(
         owner,
@@ -392,6 +450,12 @@ async function main() {
     // block 173
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
     //한블록 더 써야 하는 이유는 ,오라클 바뀌는 것 보다 autotx관련 오퍼레이션이 뒤에 들어가기 때문
+
+    //test user mimic
+    await mustFail(moneyMarket.custody_swap(a))
+    await mustFail(moneyMarket.liquidation(a, a.key.accAddress))
+    await mustFail(moneyMarket.custody_distribute_hook(a))
+    await mustFail(moneyMarket.custody_distribute_rewards(a))
 
     // block 174
     await mustFail(moneyMarket.liquidate_collateral(c, aKey.accAddress))

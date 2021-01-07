@@ -73,7 +73,7 @@ export const getCoreState = async (
       (r) => r.DistributionDelegatorsDelegatorAddrRewardsValidatorAddr.Result
     )
     .then((rs) => rs.map((r) => ({ denom: r.Denom, amount: r.Amount })))
-    .catch(console.log);
+    .catch(() => { });
 
   const validator_info: any = await (async () => {
     const validator_list = await makeQuery(

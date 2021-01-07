@@ -208,16 +208,23 @@ export default class AnchorbAsset {
     }
   }
 
-  public async params(sender: Wallet): Promise<void> {
+  public async params(sender: Wallet, params: {
+    epoch_period?: number,
+    underlying_coin_denom?: string,
+    unbonding_period?: number,
+    peg_recovery_fee?: string,
+    er_threshold?: string,
+    reward_denom?: string,
+  }): Promise<void> {
     const contract = this.contractInfo.anchor_basset_hub.contractAddress;
     const paramsExecution = await execute(sender, contract, {
       update_params: {
-        epoch_time: 31,
-        underlying_coin_denom: "uluna",
-        undelegated_epoch: 7,
-        peg_recovery_fee: "0.001",
-        er_threshold: "1",
-        swap_denom: "uusd",
+        epoch_period: params.epoch_period || 31,
+        underlying_coin_denom: params.underlying_coin_denom || "uluna",
+        unbonding_period: params.unbonding_period || 211,
+        peg_recovery_fee: params.peg_recovery_fee || "0.001",
+        er_threshold: params.er_threshold || "1",
+        reward_denom: params.reward_denom || "uusd",
       },
     });
     if (isTxError(paramsExecution)) {
@@ -397,7 +404,7 @@ export default class AnchorbAsset {
         owner: `${owner.key.accAddress}`,
         contract: contracAddr,
         amount: `${amount}`,
-        msg: "eyJ1bmJvbmQiOnt9fQ==",
+        msg: Buffer.from(JSON.stringify(inputMsg)).toString("base64"),
       },
     });
     if (isTxError(sendExecuttion)) {

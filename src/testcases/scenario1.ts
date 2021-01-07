@@ -195,7 +195,11 @@ async function main() {
     //testing dereg and redelegaton function
     await mustPass(basset.bond(a, 20000000000000, validators[0].validator_address))
 
-    await mustPass(basset.bond(a, 100000000000, validators[1].validator_address))
+    await mustPass(basset.bond(a, 333333333333, validators[1].validator_address))
+
+    await mustPass(basset.bond(a, 333333333333, validators[2].validator_address))
+
+    await mustPass(basset.bond(a, 333333333333, validators[3].validator_address))
     console.log("saving state...")
     fs.writeFileSync("1_block32_state.json", JSON.stringify(await mantleState.getState(), null, 2))
 
@@ -260,7 +264,7 @@ async function main() {
     //block 57
     await basset.send_cw20_token(
         a,
-        20000000000000,
+        333333333333,
         { unbond: {} },
         basset.contractInfo["anchor_basset_hub"].contractAddress
     )
@@ -270,7 +274,7 @@ async function main() {
     //block 58
     await mustPass(basset.send_cw20_token(
         a,
-        1000000,
+        333333333333,
         { unbond: {} },
         basset.contractInfo["anchor_basset_hub"].contractAddress
     ))
@@ -289,6 +293,12 @@ async function main() {
 
     //block 91 - 119
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 29))
+    await mustPass(basset.send_cw20_token(
+        a,
+        333333333333,
+        { unbond: {} },
+        basset.contractInfo["anchor_basset_hub"].contractAddress
+    ))
 
     //block 120
     await mustPass(basset.finish(a))

@@ -127,10 +127,6 @@ async function main() {
     // await testkit.inject(validators[0].validator_address) -> 아무 Tx 없이 지나가는 경우의 테스팅
 
     await mustPass(anchor.bAsset.register_validator(ownerWallet, validators[0].validator_address))
-    //erase these
-    await mustPass(anchor.bAsset.register_validator(ownerWallet, validators[1].validator_address))
-    await mustPass(anchor.bAsset.register_validator(ownerWallet, validators[2].validator_address))
-    await mustPass(anchor.bAsset.register_validator(ownerWallet, validators[3].validator_address))
 
     const basset = anchor.bAsset;
     const moneyMarket = anchor.moneyMarket;
@@ -182,79 +178,77 @@ async function main() {
     //block 30
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
 
-    console.log("saving state...")
-    fs.writeFileSync("1_update_param.json", JSON.stringify(await mantleState.getState(), null, 2))
-
     //block 31
     //testing dereg and redelegaton function
     await mustPass(basset.bond(a, 20000000000000, validators[0].validator_address))
-    console.log("saving state...")
-    fs.writeFileSync("cw20_31_state.json", JSON.stringify(await mantleState.getState(), null, 2))
-
+    //await mustPass(basset.bond(b, 100, validators[0].validator_address))
+    await mustPass(basset.transfer_cw20_token(b, a, 100))
+    return
     //basic cases start//
-
-    await mustFail(basset.transfer_cw20_token(c, a, 10000))
-    //block 32
-    await mustPass(basset.burn_cw20_token(a, 1000000000))
+    //block32
+    //await mustFail(basset.transfer_cw20_token(c, a, 10000))
 
     //block 33
-    await mustFail(basset.burn_cw20_token(a, 20000000000000))
+    //await mustPass(basset.burn_cw20_token(a, 1000000000))
 
     //block 34
-    await mustFail(basset.burn_cw20_token(b, 10000000000000))
+    //await mustFail(basset.burn_cw20_token(a, 20000000000000))
 
     //block 35
-    await mustFail(basset.send_cw20_token(a, 1000000, {}, b.key.accAddress))
+    //await mustFail(basset.burn_cw20_token(b, 10000000000000))
 
     //block 36
-    await mustFail(basset.send_cw20_token(b, 1000000, {}, a.key.accAddress))
+    //await mustFail(basset.send_cw20_token(a, 1000000, {}, b.key.accAddress))
 
     //block 37
-    await mustFail(basset.send_cw20_token(a, 1000000, {}, basset.contractInfo["anchor_basset_hub"].contractAddress))
+    //await mustFail(basset.send_cw20_token(b, 1000000, {}, a.key.accAddress))
 
     //block 38
-    await mustFail(basset.mint_cw20_token(b, a.key.accAddress, 100000000))
+    //await mustPass(basset.send_cw20_token(a, 1000000, { unbond: {} }, basset.contractInfo["anchor_basset_hub"].contractAddress))
 
     //block 39
-    await mustFail(basset.increase_allowance(a, a.key.accAddress, 1000, 100))
+    await mustFail(basset.mint_cw20_token(b, a.key.accAddress, 100000000))
 
     //block 40
+    await mustFail(basset.increase_allowance(a, a.key.accAddress, 100000, 100))
+
+    //block 41
+    await mustPass(basset.increase_allowance(a, b.key.accAddress, 100000, 50))
     await mustFail(basset.decrease_allowance(a, a.key.accAddress, 1000, 100))
+    await mustPass(basset.decrease_allowance(a, b.key.accAddress, 999, 999))
+    //delete allowance
+    //should fail as we delete allowance
+    await mustPass(basset.burn_from_cw20_token(b, a, 1))
+    await mustPass(basset.transfer_from_cw20_token(b, a, c, 100))
 
     //basic cases end//
 
     //allowance test
-    //41
-<<<<<<< HEAD
-    //await mustPass(basset.increase_allowance(a, b.key.accAddress, 100000000, 100))
+    //owner - wallet have bLuna, spender - user get allowance
     //42
-    //await mustPass(basset.transfer_from_cw20_token(a, b, c, 777))
-    //43
-    //await mustPass(basset.burn_from_cw20_token(a, b, 100))
-    //44
-    //await mustPass(basset.send_from_cw20_token(a, b, 10000, { unbond: {} }, basset.contractInfo["anchor_basset_hub"].contractAddress))
-=======
-   await mustPass(basset.increase_allowance(a, b.key.accAddress, 100000000, 100))
-    //42
-     await mustPass(basset.transfer_from_cw20_token(b, a, c, 777))
-    //43
-     await mustPass(basset.burn_from_cw20_token(b, a, 100))
-    //44
-     await mustPass(basset.send_from_cw20_token(b, a, 10000, { unbond: {} }, basset.contractInfo["anchor_basset_hub"].contractAddress))
->>>>>>> 6ec9bb9e89d247ce7208b5dac935eb15fbc50961
-    //45
-     await mustPass(basset.decrease_allowance(a, b.key.accAddress, 333, 777))
+    // await mustPass(basset.increase_allowance(a, b.key.accAddress, 100000000000000, 100))
+    // await mustPass(basset.burn_from_cw20_token(b, a, 100000))
+    // await mustPass(basset.transfer_from_cw20_token(b, a, c, 77777))
+    // //43
+    // //await mustPass(basset.transfer_from_cw20_token(b, a, c, 1))
+    // //44
+    // //await mustPass(basset.burn_from_cw20_token(b, a, 1))
+    // //45
 
-    //block 41
-    await mustPass(basset.bank_send(a, basset.contractInfo["anchor_basset_hub"].contractAddress, new Coins("10000000000000uluna")))
+    await mustPass(basset.send_from_cw20_token(b, a, 9999, { unbond: {} }, basset.contractInfo["anchor_basset_hub"].contractAddress))
+    //46
+    //erase these
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 37))
+    await mustPass(basset.finish(b))
 
-    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+    // await mustPass(basset.decrease_allowance(a, b.key.accAddress, 333, 777))
+    // //block 47
+    // //await mustPass(basset.bank_send(a, basset.contractInfo["anchor_basset_hub"].contractAddress, new Coins("10000000000000uluna")))
+    // //block 48
+    // await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
 
     //allowance testing
-    // await musFail
-
-    console.log("saving state...")
-    fs.writeFileSync("cw20_33_state.json", JSON.stringify(await mantleState.getState(), null, 2))
+    //await musFail
 
 }
 

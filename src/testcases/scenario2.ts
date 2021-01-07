@@ -46,9 +46,9 @@ async function main() {
         ],
         validators: [
             Testkit.validatorInitRequest('valA', new Coin('uluna', new Int(1000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
-            Testkit.validatorInitRequest('valB', new Coin('uluna', new Int("100000000000000000")), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
-            Testkit.validatorInitRequest('valC', new Coin('uluna', new Int("100000000000000000")), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
-            Testkit.validatorInitRequest('valD', new Coin('uluna', new Int("100000000000000000")), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
+            Testkit.validatorInitRequest('valB', new Coin('uluna', new Int(1000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
+            Testkit.validatorInitRequest('valC', new Coin('uluna', new Int(1000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
+            Testkit.validatorInitRequest('valD', new Coin('uluna', new Int(1000000000000)), new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))),
         ],
         auto_inject: {
             validator_rounds: ['valB', 'valC', 'valD', 'valA']
@@ -265,7 +265,7 @@ async function main() {
     await mustPass(basset.finish(a))
 
     //block 121
-    await mustPass(moneyMarket.deposit_stable(b, 10000000000000))
+    await mustPass(moneyMarket.deposit_stable(b, 1000000000000))
 
     //block 122
     const marketAddr = moneyMarket.contractInfo["moneymarket_market"].contractAddress;
@@ -295,16 +295,13 @@ async function main() {
     await mustFail(moneyMarket.borrow_stable(a, 1500000000000, undefined))
 
     //block 127
-    await mustPass(moneyMarket.borrow_stable(a, 1000000000, undefined))
+    await mustPass(moneyMarket.borrow_stable(a, 500000000000, undefined))
 
     //block 128
     await mustPass(basset.update_global_index(a))
 
     //block 129
     await mustPass(moneyMarket.execute_epoch_operations(a))
-
-    //erase this
-    await mustPass(basset.update_global_index(a))
 
     console.log("saving state...")
     fs.writeFileSync("2_block130_state.json", JSON.stringify(await mantleState.getState(), null, 2))
@@ -336,7 +333,7 @@ async function main() {
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
 
     //block 150
-    //await mustPass(basset.update_global_index(a))
+    await mustPass(basset.update_global_index(a))
 
     //block 151
     await mustPass(moneyMarket.execute_epoch_operations(a))

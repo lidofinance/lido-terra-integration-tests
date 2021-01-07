@@ -182,30 +182,15 @@ async function main() {
     //block 30
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
 
-    // type err 뜸
-    // await mustPass(moneyMarket.overseer_update_config(ownerWallet, owner.accAddress, undefined, undefined, "0.66", "0.1234", "0.777", 30, 60))
-    // await mustPass(moneyMarket.market_update_config(ownerWallet, owner.accAddress, "0.15", undefined))
-    // await mustFail(moneyMarket.market_update_config(valAWallet, owner.accAddress, "0.15", undefined))
-    // await mustFail(moneyMarket.overseer_update_config(valAWallet, undefined, undefined, undefined, "0.66", "0.1234", "0.777", 30, 60))
-    console.log("saving state...")
-    fs.writeFileSync("1_update_param.json", JSON.stringify(await mantleState.getState(), null, 2))
-
     //block 31 - User register validator test
     await mustFail(anchor.bAsset.register_validator(a, validators[0].validator_address))
 
     //testing dereg and redelegaton function
-    await mustPass(basset.bond(a, 20000000000000, validators[0].validator_address))
+    await mustPass(basset.bond(a, 1500, validators[0].validator_address))
+    await mustPass(basset.bond(a, 2000, validators[1].validator_address))
 
-    await mustPass(basset.bond(a, 100000000000, validators[1].validator_address))
-    console.log("saving state...")
-    fs.writeFileSync("1_block32_state.json", JSON.stringify(await mantleState.getState(), null, 2))
-
-    //await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
-
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 3))
     await mustPass(basset.deregister_validator(ownerWallet, validators[1].validator_address))
-
-    console.log("saving state...")
-    fs.writeFileSync("1_block33_state.json", JSON.stringify(await mantleState.getState(), null, 2))
 
     //block 32 - 40
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
@@ -226,8 +211,6 @@ async function main() {
     // Oracle slashing happen at the block 49
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 5))
 
-    //user try to bond more than they have
-    await mustFail(basset.bond(a, 200000000000000, validators[0].validator_address))
     //test owener register dead validator
     await mustFail(anchor.bAsset.register_validator(ownerWallet, validators[3].validator_address))
     //owner dereg non-whitelisted validator
@@ -235,24 +218,15 @@ async function main() {
     //user dereg whitelisted validator
     await mustFail(anchor.bAsset.deregister_validator(a, validators[0].validator_address))
 
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 2))
+
     //user with 0 bluna try to unbond
     await mustPass(basset.send_cw20_token(
-        b,
-        2000000000000000000000,
+        a,
+        3000,
         { unbond: {} },
         basset.contractInfo["anchor_basset_hub"].contractAddress
     ))
-
-    // updated on master
-    //await mustFail(basset.params(a))
-
-    //user with 0 bluna try to claimreward
-    await mustFail(basset.reward(b))
-
-
-    //block 51 unjail & revive oracle
-    // unjail & re-register oracle votes
-    await mustPass(unjail(valAWallet))
 
 
 }
@@ -261,7 +235,7 @@ main()
     .then(() => console.log('done'))
     .then(async () => {
         console.log("saving state...")
-        fs.writeFileSync("1_actions.json", JSON.stringify(getRecord(), null, 2))
-        fs.writeFileSync("1_state.json", JSON.stringify(await mantleState.getState(), null, 2))
+        fs.writeFileSync("blunafail_actions.json", JSON.stringify(getRecord(), null, 2))
+        fs.writeFileSync("blunafail_state.json", JSON.stringify(await mantleState.getState(), null, 2))
     })
     .catch(console.log)

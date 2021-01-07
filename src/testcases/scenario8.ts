@@ -12,6 +12,7 @@ import { emptyBlockWithFixedGas } from "../helper/flow/gas-station";
 import { repeat } from '../helper/flow/repeat'
 import { unjail } from '../helper/validator-operation/unjail'
 import { gql } from "graphql-request";
+import { configureMMOracle } from "../helper/oracle/mm-oracle";
 
 let mantleState: MantleState
 

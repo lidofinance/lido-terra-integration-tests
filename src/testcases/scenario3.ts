@@ -363,22 +363,24 @@ async function main() {
     //block 172
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
 
-    // Testing msgs when oracle is off, not included in scenario itself
-
-    // await mustFail(moneyMarket.borrow_stable(a, 100, undefined))
-    // await mustFail(moneyMarket.repay_stable(a, 100))
-    // await mustFail(moneyMarket.overseer_lock_collateral(a,
-    //     [[basset.contractInfo["anchor_basset_token"].contractAddress, "100"]]))
-    // await mustFail(moneyMarket.overseer_unlock_collateral(a,
-    //     [[basset.contractInfo["anchor_basset_token"].contractAddress, "100"]]))
-
     const previousOracleFeed2 = await testkit.registerAutomaticTx(configureMMOracle(
-        owner,
+        a.key,
         anchor.moneyMarket.contractInfo["moneymarket_oracle"].contractAddress,
         anchor.bAsset.contractInfo["anchor_basset_token"].contractAddress,
         0.18867924528301886792452830188679245
     ))
-    // // change MM oracle price to 0.75
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 2))
+
+    // Testing msgs when oracle is off, not included in scenario itself
+
+    await mustFail(moneyMarket.borrow_stable(a, 100, undefined))
+    await mustFail(moneyMarket.repay_stable(a, 100))
+    await mustFail(moneyMarket.overseer_lock_collateral(a,
+        [[basset.contractInfo["anchor_basset_token"].contractAddress, "100"]]))
+    await mustFail(moneyMarket.overseer_unlock_collateral(a,
+        [[basset.contractInfo["anchor_basset_token"].contractAddress, "100"]]))
+
 
     // block 173
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))

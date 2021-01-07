@@ -1,12 +1,20 @@
 {
   "compilerOptions": {
-    "target": "esnext",
-    "types": ["node"],
+    "target": "es2019",
+    "types": [
+      "node"
+    ],
     "module": "commonjs",
-    "lib": ["esnext"],
+    "lib": [
+      "esnext"
+    ],
     "outDir": "lib",
     "resolveJsonModule": true,
   },
-  "include": ["./src/**/*"],
-  "exclude": ["./src/**/*.test.ts"]
+  "include": [
+    "./src/**/*"
+  ],
+  "exclude": [
+    "./src/**/*.test.ts"
+  ]
 }

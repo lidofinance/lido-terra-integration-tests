@@ -217,7 +217,7 @@ async function main() {
     //43
     await mustPass(moneyMarket.liquidation_retract_bid(c, basset.contractInfo["anchor_basset_token"].contractAddress))
     //44
-    await mustPass(moneyMarket.liquidation_submit_bid(c, basset.contractInfo["anchor_basset_token"].contractAddress, "0.2", "2000000uusd"))
+    await mustPass(moneyMarket.liquidation_submit_bid(c, basset.contractInfo["anchor_basset_token"].contractAddress, "0.2", "3000000uusd"))
     //45
     await mustFail(basset.send_cw20_token(a, 1000000, {
         execute_bid: {

@@ -239,7 +239,7 @@ async function main() {
     await mustFail(moneyMarket.borrow_stable(a, 1500000000000, undefined))
 
     //block 127
-    await mustPass(moneyMarket.borrow_stable(a, 400000000000, undefined))
+    await mustPass(moneyMarket.borrow_stable(a, 350000000000, undefined))
 
     //block 128
     await mustPass(basset.update_global_index(a))
@@ -249,34 +249,24 @@ async function main() {
     //epoch state
     //{\"deposit_rate\":\"0\",\"last_executed_height\":129,\"prev_a_token_supply\":\"700000000000\",\"prev_exchange_rate\":\"1\"}"
 
-    //block 130-149
-    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 20))
-    //epoch state
-    //{\"deposit_rate\":\"0\",\"last_executed_height\":129,\"prev_a_token_supply\":\"700000000000\",\"prev_exchange_rate\":\"1\"}"
-    //market state
-    //{\"global_interest_index\":\"1.000000396240008607\",\"last_interest_updated\":127,\"total_liabilities\":\"400000000000\",\"total_reserves\":\"0\"}
+    //block 130-139
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
 
     //block 150
     await mustPass(basset.update_global_index(a))
     //save state to see staking reward flow
-    console.log("saving state...")
-    fs.writeFileSync("3_state.json", JSON.stringify(await mantleState.getState(), null, 2))
 
     //block 151
-    //newuratio = ((151-129)*dr*700000000000+400000000000)/700000000000
-    //
     await mustPass(moneyMarket.execute_epoch_operations(a))
-    //epoch state
-    //{\"deposit_rate\":\"0.0000000095\",\"last_executed_height\":151,\"prev_a_token_supply\":\"700000000000\",\"prev_exchange_rate\":\"1.000000209\"}"
-    // expected result : prev_exchange_rate = ((9.5e-09*22*700000+700000)/700000) = 1.000000209
-    //maybe need to consider reserve?
-    //market state
-    //"{\"global_interest_index\":\"1.000000396240008607\",\"last_interest_updated\":127,\"total_liabilities\":\"400000000000\",\"total_reserves\":\"0\"}"
 
     //block 152
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
-
-    return
 
     //block 152 - 165
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
@@ -286,6 +276,7 @@ async function main() {
 
     //block 167
     await mustPass(moneyMarket.execute_epoch_operations(a))
+    //{\"deposit_rate\":\"0.000000014476443949\",\"last_executed_height\":168,\"prev_a_token_supply\":\"700000000000\",\"prev_exchange_rate\":\"1.00000059353440816\"}
 }
 
 main()

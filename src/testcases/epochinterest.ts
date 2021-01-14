@@ -277,6 +277,1546 @@ async function main() {
     //block 167
     await mustPass(moneyMarket.execute_epoch_operations(a))
     //{\"deposit_rate\":\"0.000000014476443949\",\"last_executed_height\":168,\"prev_a_token_supply\":\"700000000000\",\"prev_exchange_rate\":\"1.00000059353440816\"}
+
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    //140
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+
+    //141 - 149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+    //save state to see staking reward flow
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    //block 152 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
 }
 
 main()

@@ -5,7 +5,7 @@
   "total_reserves": "0",
   "aust_supply": "0",
   "oraclePrice": {
-    "last_updated_base": 1610424639,
+    "last_updated_base": 1610599187,
     "last_updated_quote": 9999999999,
     "rate": "1"
   },
@@ -34,7 +34,7 @@
     "liquidation_threshold": "200000000",
     "max_premium_rate": "0.2",
     "oracle_contract": "terra1pcknsatx5ceyfu6zvtmz3yr8auumzrdts4ax4a",
-    "owner": "terra1wystae9rpxvzznwrekr93a6rygvwnfdc9q3d65",
+    "owner": "terra1lfxqmrycdtwuzqzx6zd05yp6t8gsge69udp0sw",
     "price_timeframe": 30,
     "safe_ratio": "0.8",
     "stable_denom": "uusd"
@@ -56,16 +56,32 @@
       "bids": []
     }
   ],
-  "block_time": 1610424639,
-  "block_proposer": "terravaloper1y9qf05cvp8dmvtwmp0lkyqel6y6evus6f48ptj",
+  "block_time": 1610599187,
+  "block_proposer": "terravaloper1twg7xfjnttemm34hv3uw0p4w8mdsfvlpluttt0",
   "reward": [
     {
       "denom": "uusd",
       "amount": "239433.551198240000000000"
     }
   ],
-  "terravaloper1sc6pgv70m5qy5uw35ds2tswz5vyhs9gmd2cg7a": {
-    "valaddr": "terravaloper1sc6pgv70m5qy5uw35ds2tswz5vyhs9gmd2cg7a",
+  "terravaloper19yxtr87rax78c8wza52a98r4k9cme3kl0qqyde": {
+    "valaddr": "terravaloper19yxtr87rax78c8wza52a98r4k9cme3kl0qqyde",
+    "commission": "0.000000000000000000",
+    "rewardsPool": {
+      "denoms": [
+        {
+          "denom": "uusd",
+          "amount": "118789490.382904429747900000"
+        }
+      ]
+    },
+    "delegators": {
+      "terra19yxtr87rax78c8wza52a98r4k9cme3kl00vea2": "1000000000000",
+      "terra18vd8fpwxzck93qlwghaj6arh4p7c5n896xzem5": "20000000000"
+    }
+  },
+  "terravaloper1f9u60vqm40nrvpntrpgds04dtw4tsstsrr7vqu": {
+    "valaddr": "terravaloper1f9u60vqm40nrvpntrpgds04dtw4tsstsrr7vqu",
     "commission": "0.000000000000000000",
     "rewardsPool": {
       "denoms": [
@@ -77,11 +93,11 @@
     },
     "delegators": {
       "terra18vd8fpwxzck93qlwghaj6arh4p7c5n896xzem5": "10000000000",
-      "terra1sc6pgv70m5qy5uw35ds2tswz5vyhs9gmd954ww": "1000000000000"
+      "terra1f9u60vqm40nrvpntrpgds04dtw4tsstsrvj3s0": "1000000000000"
     }
   },
-  "terravaloper13wl93qv0e50qklyg7azrlqgjsy8w7hxx9rmudc": {
-    "valaddr": "terravaloper13wl93qv0e50qklyg7azrlqgjsy8w7hxx9rmudc",
+  "terravaloper1fw93ywaedj6j8a3qvz7r8jduqp8t7rs4dm6ce2": {
+    "valaddr": "terravaloper1fw93ywaedj6j8a3qvz7r8jduqp8t7rs4dm6ce2",
     "commission": "0.000000000000000000",
     "rewardsPool": {
       "denoms": [
@@ -93,27 +109,11 @@
     },
     "delegators": {
       "terra18vd8fpwxzck93qlwghaj6arh4p7c5n896xzem5": "10000000000",
-      "terra13wl93qv0e50qklyg7azrlqgjsy8w7hxx9vhpat": "1000000000000"
+      "terra1fw93ywaedj6j8a3qvz7r8jduqp8t7rs4d5k9fe": "1000000000000"
     }
   },
-  "terravaloper1kagrfrqw856kaulv57kjpw7jsczuq2tj9hm967": {
-    "valaddr": "terravaloper1kagrfrqw856kaulv57kjpw7jsczuq2tj9hm967",
-    "commission": "0.000000000000000000",
-    "rewardsPool": {
-      "denoms": [
-        {
-          "denom": "uusd",
-          "amount": "118789490.382904429747900000"
-        }
-      ]
-    },
-    "delegators": {
-      "terra18vd8fpwxzck93qlwghaj6arh4p7c5n896xzem5": "20000000000",
-      "terra1kagrfrqw856kaulv57kjpw7jsczuq2tj9chc2d": "1000000000000"
-    }
-  },
-  "terravaloper1c5d37wtsqdtnpk0a9nkxzhw9g38f9mnesfedef": {
-    "valaddr": "terravaloper1c5d37wtsqdtnpk0a9nkxzhw9g38f9mnesfedef",
+  "terravaloper17r203zjtvyu50v68r3kmzha083nv8lwkrlfm7q": {
+    "valaddr": "terravaloper17r203zjtvyu50v68r3kmzha083nv8lwkrlfm7q",
     "commission": "0.000000000000000000",
     "rewardsPool": {
       "denoms": [
@@ -125,12 +125,12 @@
     },
     "delegators": {
       "terra18vd8fpwxzck93qlwghaj6arh4p7c5n896xzem5": "10000000000",
-      "terra1c5d37wtsqdtnpk0a9nkxzhw9g38f9mnesx4sf6": "1000000000000"
+      "terra17r203zjtvyu50v68r3kmzha083nv8lwkrs9xwn": "1000000000000"
     }
   },
   "accountBalances": [
     {
-      "address": "terra187xaeegtgt5skg0kshwfnawusy59j0k0j6lspy",
+      "address": "terra1868gylk3lnzt4d677qxx0vcjt5tmkpdrw7skpa",
       "balance": [
         {
           "Amount": "1000000000000000000",
@@ -155,7 +155,7 @@
       ]
     },
     {
-      "address": "terra1vylpxhq8377ea70gcle388cc939eqxslteln47",
+      "address": "terra1hhul9tzknx2l999q283yu3szf2pps89el69ttd",
       "balance": [
         {
           "Amount": "1000000000000000000",
@@ -180,7 +180,7 @@
       ]
     },
     {
-      "address": "terra1c4wd03lywgkpqrkvrq0dl4hr926nrypsw2z6uz",
+      "address": "terra1tudac0xh736nfy2nz693d0mnwjvzzawkz9cxw5",
       "balance": [
         {
           "Amount": "1000000000000000000",
@@ -211,17 +211,17 @@
   },
   "whitelist": {
     "validators": [
-      "terravaloper13wl93qv0e50qklyg7azrlqgjsy8w7hxx9rmudc",
-      "terravaloper1c5d37wtsqdtnpk0a9nkxzhw9g38f9mnesfedef",
-      "terravaloper1kagrfrqw856kaulv57kjpw7jsczuq2tj9hm967",
-      "terravaloper1sc6pgv70m5qy5uw35ds2tswz5vyhs9gmd2cg7a"
+      "terravaloper17r203zjtvyu50v68r3kmzha083nv8lwkrlfm7q",
+      "terravaloper19yxtr87rax78c8wza52a98r4k9cme3kl0qqyde",
+      "terravaloper1f9u60vqm40nrvpntrpgds04dtw4tsstsrr7vqu",
+      "terravaloper1fw93ywaedj6j8a3qvz7r8jduqp8t7rs4dm6ce2"
     ]
   },
   "actual_unbonded_amount": "0",
   "exchange_rate": "1",
-  "last_index_modification": 1610424609,
+  "last_index_modification": 1610599157,
   "last_processed_batch": 0,
-  "last_unbonded_time": 1610424399,
+  "last_unbonded_time": 1610598947,
   "prev_hub_balance": "0",
   "total_bond_amount": "50000000000",
   "total_issued": {
@@ -242,17 +242,17 @@
   },
   "global_index": "0.00002949076",
   "holder_map": {
-    "terra1c4wd03lywgkpqrkvrq0dl4hr926nrypsw2z6uz": {
+    "terra1868gylk3lnzt4d677qxx0vcjt5tmkpdrw7skpa": {
       "balance": "10000000000",
       "index": "0.00002949076",
       "pending_reward": "0"
     },
-    "terra187xaeegtgt5skg0kshwfnawusy59j0k0j6lspy": {
+    "terra1hhul9tzknx2l999q283yu3szf2pps89el69ttd": {
       "balance": "10000000000",
       "index": "0.00002949076",
       "pending_reward": "0"
     },
-    "terra1vylpxhq8377ea70gcle388cc939eqxslteln47": {
+    "terra1tudac0xh736nfy2nz693d0mnwjvzzawkz9cxw5": {
       "balance": "10000000000",
       "index": "0.00002949076",
       "pending_reward": "0"

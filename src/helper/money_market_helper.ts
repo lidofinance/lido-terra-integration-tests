@@ -158,7 +158,8 @@ export default class MoneyMarket {
         interest_model: mmInterest,
         stable_denom: stableDenom,
         reserve_factor: reserveFactor.toFixed(10),
-      }
+      },
+      new Coins("1000000uusd"),
     );
 
     if (isTxError(mmMarket)) {

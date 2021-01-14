@@ -3,7 +3,7 @@ import * as path from 'path'
 import * as fs from 'fs'
 import { mustFail, mustPass } from "../helper/flow/must";
 import { getRecord } from "../helper/flow/record";
-import { registerChainOracleVote } from "../helper/oracle/chain-oracle";
+import { registerChainOraclePrevote, registerChainOracleVote } from "../helper/oracle/chain-oracle";
 import Anchor, { Asset } from "../helper/spawn";
 import { MantleState } from "../mantle-querier/MantleState";
 import { Testkit } from '../testkit/testkit'
@@ -12,6 +12,7 @@ import { emptyBlockWithFixedGas } from "../helper/flow/gas-station";
 import { repeat } from '../helper/flow/repeat'
 import { unjail } from '../helper/validator-operation/unjail'
 import { gql } from "graphql-request";
+import { configureMMOracle } from "../helper/oracle/mm-oracle";
 
 let mantleState: MantleState
 

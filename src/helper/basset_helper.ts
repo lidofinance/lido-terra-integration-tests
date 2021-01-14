@@ -529,7 +529,7 @@ export default class AnchorbAsset {
           spender: spender,
           amount: `${amount}`,
           expires: {
-            never: {},
+            at_height: height,
           },
         },
       }

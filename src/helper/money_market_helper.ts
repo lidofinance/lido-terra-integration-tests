@@ -182,7 +182,7 @@ export default class MoneyMarket {
         stable_denom: params.stable_denom || "uusd",
         reserve_factor: params.reserve_factor || 0.05.toString(),
       },
-      undefined,
+      new Coins("1000000uusd"),
       fee
     );
 

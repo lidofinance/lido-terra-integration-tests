@@ -1,7 +1,7 @@
 node_modules/
 yarn-error.log
 keystore.db
-yarn.locke
+yarn.lock
 
 # IDEs
 *.iml

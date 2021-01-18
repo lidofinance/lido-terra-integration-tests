@@ -13,6 +13,7 @@ interface CustomInstantiationParam {
     peg_recovery_fee?: string,
     er_threshold?: string,
     reward_denom?: string,
+    validator?: string
   },
   overseer?: {
     stable_denom?: string,
@@ -72,7 +73,7 @@ export default class Anchor {
   }
 
   public async instantiate(fee?: StdFee, params?: CustomInstantiationParam): Promise<void> {
-    await this.bAsset.instantiate_hub(this.owner, {}, fee);
+    await this.bAsset.instantiate_hub(this.owner, {validator: params.basset.validator}, fee);
     await this.bAsset.instantiate_reward(this.owner, {}, fee);
     await this.bAsset.instantiate_token(this.owner, {}, fee);
     await this.bAsset.register_contracts(this.owner,{}, fee);

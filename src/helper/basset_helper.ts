@@ -59,7 +59,10 @@ export default class AnchorbAsset {
     peg_recovery_fee?: string,
     er_threshold?: string,
     reward_denom?: string,
+    validator?: string
   } , fee?: StdFee): Promise<void> {
+    const coin = new Coin("uluna", 1000000);
+    const coins = new Coins([coin]);
     const init = await instantiate(
         sender,
         this.contractInfo.anchor_basset_hub.codeId,
@@ -71,8 +74,9 @@ export default class AnchorbAsset {
           peg_recovery_fee: params.peg_recovery_fee||"0.001",
           er_threshold: params.er_threshold || "0.98",
           reward_denom: params.reward_denom||"uusd",
+          validator: params.validator
         },
-        undefined,
+        coins,
         fee
     );
     if (isTxError(init)) {
@@ -130,7 +134,7 @@ export default class AnchorbAsset {
           name: params.name||"bluna",
           symbol: params.symbol || "BLUNA",
           decimals: params.decimals || 6,
-          initial_balances: params.initial_balances || [],
+          initial_balances: params.initial_balances || [{"address": `${this.contractInfo['anchor_basset_hub'].contractAddress}`, "amount":"1000000"}],
           mint: {
             minter: params.mint?.minter ||`${this.contractInfo["anchor_basset_hub"].contractAddress}`,
             cap: params.mint?.cap || null,
@@ -323,6 +327,16 @@ export default class AnchorbAsset {
     const contract = this.contractInfo.anchor_basset_reward.contractAddress;
     const rewardExe = await execute(sender, contract, {
       claim_rewards: { recipient: null },
+    });
+    if (isTxError(rewardExe)) {
+      throw new Error(`Couldn't run: ${rewardExe.raw_log}`);
+    }
+  }
+
+  public async reward2(sender: Wallet, address: string): Promise<void> {
+    const contract = this.contractInfo.anchor_basset_reward.contractAddress;
+    const rewardExe = await execute(sender, contract, {
+      claim_rewards: { recipient: address },
     });
     if (isTxError(rewardExe)) {
       throw new Error(`Couldn't run: ${rewardExe.raw_log}`);
@@ -529,7 +543,7 @@ export default class AnchorbAsset {
           spender: spender,
           amount: `${amount}`,
           expires: {
-            at_height: height,
+            never: {},
           },
         },
       }

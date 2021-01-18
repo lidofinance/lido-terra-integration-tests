@@ -107,7 +107,7 @@ export default class MoneyMarket {
 
     if (isTxError(mmOracle)) {
       throw new Error(
-        `Couldn't upload ${this.contractInfo.moneymarket_.codeId}: ${mmOracle.raw_log}`
+        `Couldn't upload ${this.contractInfo["moneymarket_oracle"].codeId}: ${mmOracle.raw_log}`
       );
     }
     const oracleAddr =

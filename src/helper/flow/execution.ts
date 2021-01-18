@@ -83,7 +83,7 @@ export async function send_transaction(
         .catch(() => {
           // noop if mantle couldn't be connected
         })
-        .then(() => new Promise(resolve => setTimeout(resolve, 10)))
+        .then(() => new Promise(resolve => setTimeout(resolve, 1000)))
 
       return result;
     })

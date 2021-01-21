@@ -6,6 +6,9 @@ import { Contracts } from "../mantle-querier/types"
 const locationBase = path.resolve(__dirname, "../../")
 
 export async function anchor(owner: Wallet): Promise<Contracts> {
+    // register ALL validators
+    const validators = await owner.lcd.staking.validators()
+
     const anchor = new Anchor(owner)
     const fixedFeeForInit = new StdFee(6000000, "2000000uusd")
     await anchor.store_contracts(
@@ -22,7 +25,8 @@ export async function anchor(owner: Wallet): Promise<Contracts> {
             unbonding_period: 86415,
             peg_recovery_fee: "0.001",
             er_threshold: "1.0",
-            reward_denom: "uusd"
+            reward_denom: "uusd",
+            validator: validators[0].operator_address // for tequila
         },
         overseer: {
             stable_denom: "uusd",
@@ -59,9 +63,6 @@ export async function anchor(owner: Wallet): Promise<Contracts> {
     const basset = anchor.bAsset;
     const moneyMarket = anchor.moneyMarket;
     const terraswap = anchor.terraswap;
-
-    // register ALL validators
-    const validators = await owner.lcd.staking.validators()
 
     console.log("registering validators...")
     await validators.reduce((t, v) => t.then(() => {

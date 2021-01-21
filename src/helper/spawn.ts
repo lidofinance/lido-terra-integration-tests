@@ -13,6 +13,7 @@ interface CustomInstantiationParam {
     peg_recovery_fee?: string,
     er_threshold?: string,
     reward_denom?: string,
+    validator?: string
   },
   overseer?: {
     stable_denom?: string,

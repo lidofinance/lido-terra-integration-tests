@@ -37,12 +37,12 @@ export async function execute(
   ], fee);
 }
 
-const mantleStateForBlockResponse = new MantleState(
-  null,
-  [],
-  [],
-  "http://localhost:1337"
-);
+// const mantleStateForBlockResponse = new MantleState(
+//   null,
+//   [],
+//   [],
+//   "http://localhost:1337"
+// );
 
 export async function send_transaction(
   sender: Wallet,
@@ -59,30 +59,33 @@ export async function send_transaction(
     )
     .then((tx) => sender.lcd.tx.broadcast(tx))
     .then(async (result) => {
+      console.log(result)
       console.error(result.txhash)
-      await mantleStateForBlockResponse
-        .query(
-          gql`
-            query {
-              BlockState {
-                ResponseDeliverTx {
-                  GasWanted
-                }
-              }
-            }
-          `,
-          {}
-        )
-        .then((r) =>
-          r.BlockState.ResponseDeliverTx.reduce(
-            (p: any, c: { GasWanted: any }) => p + +c.GasWanted,
-            0
-          )
-        )
-        .then(gas => makeRecord(msgs, gas))
-        .catch(() => {
-          // noop if mantle couldn't be connected
-        })
+      // await mantleStateForBlockResponse
+      //   .query(
+      //     gql`
+      //       query {
+      //         BlockState {
+      //           ResponseDeliverTx {
+      //             GasWanted
+      //           }
+      //         }
+      //       }
+      //     `,
+      //     {}
+      //   )
+      await Promise.resolve()
+        // .then((r) =>
+        //   r.BlockState.ResponseDeliverTx.reduce(
+        //     (p: any, c: { GasWanted: any }) => p + +c.GasWanted,
+        //     0
+        //   )
+        // )
+        // .then(gas => makeRecord(msgs, gas))
+        // .catch((e) => {
+        //   console.error(e)
+        //   // noop if mantle couldn't be connected
+        // })
         .then(() => new Promise(resolve => setTimeout(resolve, 1000)))
 
       return result;

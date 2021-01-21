@@ -7,9 +7,7 @@ const locationBase = path.resolve(__dirname, "../../")
 
 export async function anchor(owner: Wallet): Promise<Contracts> {
     const anchor = new Anchor(owner)
-
     const fixedFeeForInit = new StdFee(6000000, "2000000uusd")
-
     await anchor.store_contracts(
         path.resolve(locationBase, './anchor-bAsset-contracts/artifacts'),
         path.resolve(locationBase, './money-market-contracts/artifacts'),

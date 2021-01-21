@@ -12,9 +12,11 @@ const owner = new MnemonicKey({ mnemonic: args[2] })
 const ownerWallet = new Wallet(lcd, owner)
 
 // check block info
-ownerWallet.lcd.tendermint.blockInfo().then(console.log)
+Promise.resolve()
+    .then(() => ownerWallet.lcd.tendermint.blockInfo().then(console.log))
 
 // run store_code, instantiate, print contract addresses to stdout
-anchor(ownerWallet)
-    .then(contracts => console.log(contracts))
-    .catch(console.error)
+    .then(() => anchor(ownerWallet)
+        .then(contracts => console.log(contracts))
+        .catch(console.error)
+    )

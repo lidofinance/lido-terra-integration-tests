@@ -72,7 +72,7 @@ export default class Anchor {
   }
 
   public async instantiate(fee?: StdFee, params?: CustomInstantiationParam): Promise<void> {
-    await this.bAsset.instantiate_hub(this.owner, {}, fee);
+    await this.bAsset.instantiate_hub(this.owner, params?.basset, fee);
     await this.bAsset.instantiate_reward(this.owner, {}, fee);
     await this.bAsset.instantiate_token(this.owner, {}, fee);
     await this.bAsset.register_contracts(this.owner,{}, fee);
@@ -81,17 +81,17 @@ export default class Anchor {
 
     await this.moneyMarket.instantiate_interest(
       this.owner,
-        {},
+      params?.interest,
       fee,
     );
     await this.moneyMarket.instantiate_oracle(
       this.owner,
-        {},
+      params?.oracle,
       fee
     );
     await this.moneyMarket.instantiate_liquidation(
       this.owner,
-        {},
+      params?.liquidation,
       fee
     );
 
@@ -106,7 +106,7 @@ export default class Anchor {
 
     await this.moneyMarket.instantiate_overseer(
       this.owner,
-        {},
+      params?.overseer,
       fee
     );
 
@@ -117,7 +117,7 @@ export default class Anchor {
     await this.moneyMarket.instantiate_custody(
       this.owner,
       {
-        stable_denom: null,
+        ...params?.custody,
         basset_token: bassetToken,
         basset_reward: bassetReward,
       },

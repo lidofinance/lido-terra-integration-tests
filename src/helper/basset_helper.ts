@@ -68,12 +68,12 @@ export default class AnchorbAsset {
         this.contractInfo.anchor_basset_hub.codeId,
         {
           //FIXME: The epoch period and unbonding period must be changed
-          epoch_period: params?.epoch_period || 30,
-          underlying_coin_denom: params?.underlying_coin_denom || "uluna",
-          unbonding_period: params?.unbonding_period || 211,
-          peg_recovery_fee: params?.peg_recovery_fee||"0.001",
-          er_threshold: params?.er_threshold || "0.98",
-          reward_denom: params?.reward_denom||"uusd",
+          epoch_period: params?.epoch_period,
+          underlying_coin_denom: params?.underlying_coin_denom,
+          unbonding_period: params?.unbonding_period ,
+          peg_recovery_fee: params?.peg_recovery_fee,
+          er_threshold: params?.er_threshold,
+          reward_denom: params?.reward_denom,
           validator: params?.validator
         },
         coins,

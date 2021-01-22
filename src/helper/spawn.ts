@@ -5,7 +5,7 @@ import { StdFee, Wallet } from "@terra-money/terra.js";
 import { execute } from "./flow/execution";
 
 // https://terra-money.quip.com/lR4sAHcX3yiB/WebApp-Dev-Page-Deployment#UKCACAa6MDK
-interface CustomInstantiationParam {
+export interface CustomInstantiationParam {
   basset?: {
     epoch_period?: number,
     unbonding_period?: number,
@@ -173,3 +173,4 @@ class NativeToken {
     this.denom = denom;
   }
 }
+

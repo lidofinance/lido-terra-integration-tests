@@ -13,6 +13,7 @@ import { repeat } from '../helper/flow/repeat'
 import { unjail } from '../helper/validator-operation/unjail'
 import { gql } from "graphql-request";
 import { configureMMOracle } from "../helper/oracle/mm-oracle";
+import {setTestParams} from "../parameters/contract-tests-parameteres";
 
 let mantleState: MantleState
 
@@ -111,7 +112,8 @@ async function main() {
         path.resolve(__dirname, "../../money-market-contracts/artifacts"),
         path.resolve(__dirname, "../../terraswap/artifacts"),
     );
-    await anchor.instantiate();
+    const fixedFeeForInit = new StdFee(6000000, "2000000uusd")
+    await anchor.instantiate(fixedFeeForInit, setTestParams(validators[0].validator_address));
 
     // register oracle price feeder
     const previousOracleFeed = await testkit.registerAutomaticTx(configureMMOracle(

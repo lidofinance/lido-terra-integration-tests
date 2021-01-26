@@ -22,6 +22,8 @@ const contracts = [
   "anchor_basset_token",
 ];
 
+type Expire = { at_height: number } | { at_time: number } | { never: {} };
+
 export default class AnchorbAsset {
   public contractInfo: {
     [contractName: string]: { codeId: number; contractAddress: string };
@@ -528,12 +530,11 @@ export default class AnchorbAsset {
       throw new Error(`Couldn't run: ${transferExecuttion.raw_log}`);
     }
   }
-
   public async increase_allowance(
     sender: Wallet,
     spender: string,
     amount: number,
-    height: number
+    expire: Expire
   ): Promise<void> {
     const execution = await execute(
       sender,
@@ -542,9 +543,7 @@ export default class AnchorbAsset {
         increase_allowance: {
           spender: spender,
           amount: `${amount}`,
-          expires: {
-            never: {},
-          },
+          expires: expire
         },
       }
     );

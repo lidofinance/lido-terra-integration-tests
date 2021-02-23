@@ -29,6 +29,15 @@ export default class TerraSwap {
     location: string,
     fee?: StdFee
   ): Promise<void> {
+    this.contractInfo["token_pair"] = {
+      codeId: 0,
+      contractAddress: "",
+    };
+    this.contractInfo["token_token"] = {
+      codeId: 0,
+      contractAddress: "",
+    };
+
     return contracts.reduce(
       (t, c) =>
         t.then(async () => {
@@ -124,6 +133,50 @@ export default class TerraSwap {
     }
   }
 
+  public async provide_anchor_liquidity(
+    sender: Wallet,
+    token_address: string,
+    denom: string,
+    token_amount: number,
+    native_amount: number,
+    slippageTolerance?: string
+  ): Promise<void> {
+    const coin = new Coin(denom, native_amount);
+    const coins = new Coins([coin]);
+    let contract = this.contractInfo["token_pair"].contractAddress;
+    const provideLiquidityExecution = await execute(
+      sender,
+      contract,
+      {
+        provide_liquidity: {
+          assets: [
+            {
+              info: {
+                token: {
+                  contract_addr: token_address,
+                },
+              },
+              amount: token_amount.toString(),
+            },
+            {
+              info: {
+                native_token: {
+                  denom: denom,
+                },
+              },
+              amount: native_amount.toString(),
+            },
+          ],
+          slippage_tolerance: slippageTolerance,
+        },
+      },
+      coins
+    );
+    if (isTxError(provideLiquidityExecution)) {
+      throw new Error(`Couldn't run: ${provideLiquidityExecution.raw_log}`);
+    }
+  }
+
   public async create_pair(
     sender: Wallet,
     TokenAddress: string,
@@ -153,6 +206,36 @@ export default class TerraSwap {
       blunaLuna.contract_address[0];
     this.contractInfo["terraswap_pair"].contractAddress =
       blunaLuna.contract_address[1];
+  }
+
+  public async create_anchor_pair(
+    sender: Wallet,
+    TokenAddress: string,
+    denom: string
+  ): Promise<void> {
+    let contract = this.contractInfo["terraswap_factory"].contractAddress;
+    const token = await execute(sender, contract, {
+      create_pair: {
+        asset_infos: [
+          {
+            token: {
+              contract_addr: TokenAddress,
+            },
+          },
+          {
+            native_token: {
+              denom: denom,
+            },
+          },
+        ],
+      },
+    })
+      .then((result) => (isTxError(result) ? Promise.reject() : result))
+      .then((result) => result.logs[0].eventsByType["instantiate_contract"]);
+
+    this.contractInfo["token_token"].contractAddress =
+      token.contract_address[0];
+    this.contractInfo["token_pair"].contractAddress = token.contract_address[1];
   }
 
   public async send_cw20_token(

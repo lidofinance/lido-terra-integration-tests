@@ -96,7 +96,7 @@ export default class Anchor {
     await this.ANC.community_instantiation(this.owner, {}, fee);
 
     //TODO Create Pair
-    await this.terraswap.create_pair(
+    await this.terraswap.create_anchor_pair(
       this.owner,
       this.ANC.contractInfo["token"].contractAddress,
       "uusd"

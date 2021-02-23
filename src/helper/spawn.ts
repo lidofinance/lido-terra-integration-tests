@@ -217,33 +217,63 @@ export default class Anchor {
     await this.moneyMarket.oracle_update_config(this.owner, gov);
     await this.ANC.gov_update_config(this.owner, { owner: gov });
 
+    await this.ANC.transfer_cw20_token(
+      this.owner,
+      this.ANC.contractInfo["airdrop"].contractAddress,
+      100000000000
+    );
+    await this.ANC.transfer_cw20_token(
+      this.owner,
+      this.ANC.contractInfo["community"].contractAddress,
+      100000000000
+    );
+    await this.ANC.transfer_cw20_token(
+      this.owner,
+      this.ANC.contractInfo["staking"].contractAddress,
+      100000000000
+    );
+    await this.ANC.transfer_cw20_token(
+      this.owner,
+      this.ANC.contractInfo["faucet"].contractAddress,
+      100000000000
+    );
+
     //await this.terraswap.instantiate_terraswap(this.owner, fee);
 
     // luna <> bluna Terraswap pair cration
     // ----------------------------------------------------------
-    // await this.terraswap.create_pair(
-    //   this.owner,
-    //   this.bAsset.contractInfo["anchor_basset_token"].contractAddress,
-    //   "uluna"
-    // );
-    //
-    // await this.bAsset.bond(this.owner, 1100000000000, params.basset.validator);
-    //
-    // await this.bAsset.increase_allowance(
-    //   this.owner,
-    //   this.terraswap.contractInfo["terraswap_pair"].contractAddress,
-    //   1000000000000,
-    //   { never: {} }
-    // );
-    //
-    // await this.terraswap.provide_liquidity(
-    //   this.owner,
-    //     this.bAsset.contractInfo["anchor_basset_token"].contractAddress,
-    //   "uluna",
-    //   1000000000000,
-    //     1000000000000,
-    // );
+    await this.terraswap.create_pair(
+      this.owner,
+      this.bAsset.contractInfo["anchor_basset_token"].contractAddress,
+      "uluna"
+    );
+
+    await this.bAsset.bond(this.owner, 1100000000000, params.basset.validator);
+
+    await this.bAsset.increase_allowance(
+      this.owner,
+      this.terraswap.contractInfo["terraswap_pair"].contractAddress,
+      100000000000,
+      { never: {} }
+    );
+
+    await this.terraswap.provide_liquidity(
+      this.owner,
+      this.bAsset.contractInfo["anchor_basset_token"].contractAddress,
+      "uluna",
+      100000000000,
+      100000000000
+    );
     // ----------------------------------------------------------
+
+    await this.bAsset.add_airdrop_info(
+      this.owner,
+      this.ANC.contractInfo["token"].contractAddress,
+      this.ANC.contractInfo["airdrop"].contractAddress,
+      this.terraswap.contractInfo["terraswap_pair"].contractAddress
+    );
+    await this.terraswap.transfer_cw20_token(this.owner, "", 100000000000);
+    await this.ANC.transfer_cw20_token(this.owner, "", 100000000000);
   }
 }
 

@@ -650,6 +650,33 @@ export default class AnchorbAsset {
     }
   }
 
+  public async add_airdrop_info(
+    sender: Wallet,
+    token: string,
+    aidrop: string,
+    pair: string
+  ): Promise<void> {
+    const execution = await execute(
+      sender,
+      this.contractInfo.anchor_basset_token.contractAddress,
+      {
+        add_airdrop_info: {
+          airdrop_token: "ANC",
+          airdrop_info: {
+            airdrop_token_contract: token,
+            airdrop_contract: aidrop,
+            airdrop_swap_contract: pair,
+            swap_belief_price: null,
+            swap_max_spread: null,
+          },
+        },
+      }
+    );
+    if (isTxError(execution)) {
+      throw new Error(`Couldn't run: ${execution.raw_log}`);
+    }
+  }
+
   public async bank_send(
     sender: Wallet,
     receiver: string,

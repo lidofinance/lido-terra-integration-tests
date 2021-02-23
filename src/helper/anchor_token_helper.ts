@@ -355,8 +355,8 @@ export default class AnchorToken {
         decimals: params.decimals,
         initial_balances: params.initial_balances || [
           {
-            address: `${this.contractInfo["anchor_basset_hub"].contractAddress}`,
-            amount: "1000000",
+            address: sender.key.accAddress,
+            amount: "1000000000000",
           },
         ],
         mint: {
@@ -746,6 +746,23 @@ export default class AnchorToken {
     const updateExecution = await execute(sender, contract, { withdraw: {} });
     if (isTxError(updateExecution)) {
       throw new Error(`Couldn't run: ${updateExecution.raw_log}`);
+    }
+  }
+
+  public async transfer_cw20_token(
+    sender: Wallet,
+    rcv: string,
+    amount: number
+  ): Promise<void> {
+    const contract = this.contractInfo.token.contractAddress;
+    const transferExecuttion = await execute(sender, contract, {
+      transfer: {
+        recipient: rcv,
+        amount: `${amount}`,
+      },
+    });
+    if (isTxError(transferExecuttion)) {
+      throw new Error(`Couldn't run: ${transferExecuttion.raw_log}`);
     }
   }
 }

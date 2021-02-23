@@ -173,4 +173,21 @@ export default class TerraSwap {
       }
     );
   }
+
+  public async transfer_cw20_token(
+    sender: Wallet,
+    rcv: string,
+    amount: number
+  ): Promise<void> {
+    const contract = this.contractInfo.terraswap_token.contractAddress;
+    const transferExecuttion = await execute(sender, contract, {
+      transfer: {
+        recipient: rcv,
+        amount: `${amount}`,
+      },
+    });
+    if (isTxError(transferExecuttion)) {
+      throw new Error(`Couldn't run: ${transferExecuttion.raw_log}`);
+    }
+  }
 }

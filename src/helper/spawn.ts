@@ -122,15 +122,17 @@ export default class Anchor {
             fee
         );
 
-        await this.moneyMarket.instantiate_money(
-            this.owner,
-            {
-                ...params?.market,
-                terraswap_token_code_id: this.terraswap.contractInfo["terraswap_token"]
-                    .codeId,
-            },
-            fee
-        );
+        //TODO: update with new values
+
+        // await this.moneyMarket.instantiate_money(
+        //     this.owner,
+        //     {
+        //         ...params?.market,
+        //         terraswap_token_code_id: this.terraswap.contractInfo["terraswap_token"]
+        //             .codeId,
+        //     },
+        //     fee
+        // );
 
         await this.moneyMarket.instantiate_overseer(
             this.owner,
@@ -142,15 +144,15 @@ export default class Anchor {
             .contractAddress;
         const bassetToken = this.bAsset.contractInfo["anchor_basset_token"]
             .contractAddress;
-        await this.moneyMarket.instantiate_custody(
-            this.owner,
-            {
-                ...params?.custody,
-                basset_token: bassetToken,
-                basset_reward: bassetReward,
-            },
-            fee
-        );
+        // await this.moneyMarket.instantiate_custody(
+        //     this.owner,
+        //     {
+        //         ...params?.custody,
+        //         basset_token: bassetToken,
+        //         basset_reward: bassetReward,
+        //     },
+        //     fee
+        // );
         await this.moneyMarket.overseer_whitelist(
             this.owner,
             bassetToken,

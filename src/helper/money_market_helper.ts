@@ -15,9 +15,17 @@ import * as fs from "fs";
 import { execute, instantiate, send_transaction } from "./flow/execution";
 
 // TODO: anchor_token should be added in contracts.
+
+interface BAssetInfo {
+   name: string,
+      symbol: string,
+      decimals: number,
+}
+
 const contracts = [
-  "moneymarket_custody",
-  "moneymarket_interest",
+  "moneymarket_custody_bluna",
+  "moneymarket_distribution_model",
+  "moneymarket_interest_model",
   "moneymarket_market",
   "moneymarket_oracle",
   "moneymarket_overseer",
@@ -167,20 +175,21 @@ export default class MoneyMarket {
       terraswap_token_code_id: number,
       stable_denom?: string,
       reserve_factor?: string,
+      anc_emission_rate: string,
+      max_borrow_factor: string,
     },
     fee?: StdFee,
   ): Promise<void> {
-    const mmInterest = this.contractInfo["moneymarket_interest"]
-      .contractAddress;
     const mmMarket = await instantiate(
       sender,
       this.contractInfo.moneymarket_market.codeId,
       {
         owner_addr: sender.key.accAddress,
-        anchor_token_code_id: params.terraswap_token_code_id,
-        interest_model: mmInterest,
         stable_denom: params.stable_denom || "uusd",
         reserve_factor: params.reserve_factor || 0.05.toString(),
+        aterra_code_id: params.terraswap_token_code_id,
+        anc_emission_rate:params.anc_emission_rate,
+        max_borrow_factor:params.max_borrow_factor
       },
       new Coins("1000000uusd"),
       fee
@@ -206,6 +215,7 @@ export default class MoneyMarket {
   public async instantiate_overseer(
     sender: Wallet,
     params: {
+      ownerAddr?: string,
       stableDenom?: string,
       epochPeriod?: number,
       distributionThreshold?: number,
@@ -223,7 +233,7 @@ export default class MoneyMarket {
       sender,
       this.contractInfo.moneymarket_overseer.codeId,
       {
-        owner_addr: sender.key.accAddress,
+        owner_addr: params.ownerAddr,
         oracle_contract: oracleAddr,
         market_contract: marketAddr,
         liquidation_contract: liquidationAddr,
@@ -251,9 +261,11 @@ export default class MoneyMarket {
   public async instantiate_custody(
     sender: Wallet,
     params: {
+      owner: string,
       basset_token: string,
       basset_reward: string,
       stable_denom?: string,
+      basset_info: BAssetInfo
     },
     fee?: StdFee
   ): Promise<void> {
@@ -268,12 +280,14 @@ export default class MoneyMarket {
       sender,
       this.contractInfo.moneymarket_custody.codeId,
       {
+        owner: params.owner,
         collateral_token: params.basset_token,
         overseer_contract: overseerAddr,
         market_contract: marketAddr,
         reward_contract: params.basset_reward,
         liquidation_contract: liquidationAddr,
         stable_denom: params.stable_denom || "uusd",
+        basset_info:params.basset_info
       },
       undefined,
       fee
@@ -287,6 +301,41 @@ export default class MoneyMarket {
       mmCustody.logs[0].eventsByType.instantiate_contract.contract_address[0];
     this.contractInfo["moneymarket_custody"].contractAddress = custodyAddr;
   }
+
+  public async instantiate_distribution(
+      sender: Wallet,
+      params: {
+        owner: string,
+        emission_cap: string,
+        increment_multiplier: string,
+        decrement_multiplier?: string,
+      },
+      fee?: StdFee
+  ): Promise<void> {
+
+
+    const mmDestribution = await instantiate(
+        sender,
+        this.contractInfo.moneymarket_distribution_model.codeId,
+        {
+          owner: params.owner,
+          emission_cap: params.emission_cap,
+          increment_multiplier: params.increment_multiplier,
+          decrement_multiplier: params.decrement_multiplier
+        },
+        undefined,
+        fee
+    );
+    if (isTxError(mmDestribution)) {
+      throw new Error(
+          `Couldn't upload ${this.contractInfo.moneymarket_overseer.codeId}: ${mmDestribution.raw_log}`
+      );
+    }
+    const custodyAddr =
+        mmDestribution.logs[0].eventsByType.instantiate_contract.contract_address[0];
+    this.contractInfo["moneymarket_distribution_model"].contractAddress = custodyAddr;
+  }
+
 
   public async borrow(
     sender: Wallet,
@@ -782,4 +831,23 @@ export default class MoneyMarket {
 
   // update config for overseer
 
+  //distribution update config
+  public async distribution_update_config(
+      sender: Wallet,
+      params: {
+        owner: string,
+        emission_cap: string,
+        increment_multiplier: string,
+        decrement_multiplier?: string,
+      }) : Promise<void>{
+    const contract = this.contractInfo.moneymarket_distribution_model.contractAddress;
+    const sendExecution = await execute(sender, contract, {
+      update_config: {
+        owner: params.owner,
+        emission_cap: params.emission_cap,
+        increment_multiplier: params.increment_multiplier,
+        decrement_multiplier: params.decrement_multiplier,
+      }
+    });
+  }
 }

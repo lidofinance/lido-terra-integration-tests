@@ -64,7 +64,7 @@ export default class AnchorbAsset {
         reward_denom?: string,
         validator?: string
     } , fee?: StdFee): Promise<void> {
-        const coin = new Coin("uluna", 1);
+        const coin = new Coin("uluna", 1000000);
         const coins = new Coins([coin]);
         const init = await instantiate(
             sender,

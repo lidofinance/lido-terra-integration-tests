@@ -13,11 +13,7 @@ import * as fs from "fs";
 import { execute, instantiate, send_transaction } from "./flow/execution";
 
 // TODO: anchor_token should be added in contracts.
-const contracts = [
-  "terraswap_pair",
-  "terraswap_factory",
-  "terraswap_token",
-];
+const contracts = ["terraswap_pair", "terraswap_factory", "terraswap_token"];
 
 export default class TerraSwap {
   public contractInfo: {
@@ -36,22 +32,22 @@ export default class TerraSwap {
     return contracts.reduce(
       (t, c) =>
         t.then(async () => {
-            const bytecode = fs.readFileSync(`${location}/${c}.wasm`);
-            const storeCode = new MsgStoreCode(
-              sender.key.accAddress,
-              bytecode.toString("base64")
-            );
+          const bytecode = fs.readFileSync(`${location}/${c}.wasm`);
+          const storeCode = new MsgStoreCode(
+            sender.key.accAddress,
+            bytecode.toString("base64")
+          );
 
-            const result = await send_transaction(sender, [storeCode], fee);
-            if (isTxError(result)) {
-              throw new Error(`Couldn't upload ${c}: ${result.raw_log}`);
-            }
+          const result = await send_transaction(sender, [storeCode], fee);
+          if (isTxError(result)) {
+            throw new Error(`Couldn't upload ${c}: ${result.raw_log}`);
+          }
 
-            const codeId = +result.logs[0].eventsByType.store_code.code_id[0];
-            this.contractInfo[c] = {
-              codeId,
-              contractAddress: "",
-            };
+          const codeId = +result.logs[0].eventsByType.store_code.code_id[0];
+          this.contractInfo[c] = {
+            codeId,
+            contractAddress: "",
+          };
         }),
       Promise.resolve()
     );
@@ -118,7 +114,7 @@ export default class TerraSwap {
               amount: native_amount.toString(),
             },
           ],
-          slippage_tolerance: slippageTolerance ,
+          slippage_tolerance: slippageTolerance,
         },
       },
       coins
@@ -130,7 +126,7 @@ export default class TerraSwap {
 
   public async create_pair(
     sender: Wallet,
-    bAssetTokenAddress: string,
+    TokenAddress: string,
     denom: string
   ): Promise<void> {
     let contract = this.contractInfo["terraswap_factory"].contractAddress;
@@ -139,7 +135,7 @@ export default class TerraSwap {
         asset_infos: [
           {
             token: {
-              contract_addr: bAssetTokenAddress,
+              contract_addr: TokenAddress,
             },
           },
           {

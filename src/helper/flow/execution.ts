@@ -19,9 +19,18 @@ export async function instantiate(
   fee?: StdFee
 ): ReturnType<typeof send_transaction> {
   console.error(`instantiate ${codeId} w/ ${JSON.stringify(initMsg)}`);
-  return await send_transaction(sender, [
-    new MsgInstantiateContract(sender.key.accAddress, codeId, initMsg, tokens),
-  ], fee);
+  return await send_transaction(
+    sender,
+    [
+      new MsgInstantiateContract(
+        sender.key.accAddress,
+        codeId,
+        initMsg,
+        tokens
+      ),
+    ],
+    fee
+  );
 }
 
 export async function execute(
@@ -32,9 +41,18 @@ export async function execute(
   fee?: StdFee
 ): ReturnType<typeof send_transaction> {
   console.error(`execute ${contract} w/ ${JSON.stringify(executeMsg)}`);
-  return await send_transaction(sender, [
-    new MsgExecuteContract(sender.key.accAddress, contract, executeMsg, tokens),
-  ], fee);
+  return await send_transaction(
+    sender,
+    [
+      new MsgExecuteContract(
+        sender.key.accAddress,
+        contract,
+        executeMsg,
+        tokens
+      ),
+    ],
+    fee
+  );
 }
 
 // const mantleStateForBlockResponse = new MantleState(
@@ -47,7 +65,7 @@ export async function execute(
 export async function send_transaction(
   sender: Wallet,
   msgs: Msg[],
-  fee: StdFee = new StdFee(10000000, "1000000uusd"),
+  fee: StdFee = new StdFee(10000000, "1000000uusd")
 ): Promise<BlockTxBroadcastResult> {
   return Promise.resolve()
     .then(() =>
@@ -59,8 +77,8 @@ export async function send_transaction(
     )
     .then((tx) => sender.lcd.tx.broadcast(tx))
     .then(async (result) => {
-      console.log(result)
-      console.error(result.txhash)
+      console.log(result);
+      console.error(result.txhash);
       // await mantleStateForBlockResponse
       //   .query(
       //     gql`
@@ -74,21 +92,20 @@ export async function send_transaction(
       //     `,
       //     {}
       //   )
-      await Promise.resolve()
-        // .then((r) =>
-        //   r.BlockState.ResponseDeliverTx.reduce(
-        //     (p: any, c: { GasWanted: any }) => p + +c.GasWanted,
-        //     0
-        //   )
-        // )
-        // .then(gas => makeRecord(msgs, gas))
-        // .catch((e) => {
-        //   console.error(e)
-        //   // noop if mantle couldn't be connected
-        // })
-        .then(() => new Promise(resolve => setTimeout(resolve, 1000)))
+      await Promise.resolve();
+      // .then((r) =>
+      //   r.BlockState.ResponseDeliverTx.reduce(
+      //     (p: any, c: { GasWanted: any }) => p + +c.GasWanted,
+      //     0
+      //   )
+      // )
+      // .then(gas => makeRecord(msgs, gas))
+      // .catch((e) => {
+      //   console.error(e)
+      //   // noop if mantle couldn't be connected
+      // })
+      // .then(() => new Promise(resolve => setTimeout(resolve, 1000)))
 
       return result;
-    })
-
+    });
 }

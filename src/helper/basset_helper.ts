@@ -155,8 +155,8 @@ export default class AnchorbAsset {
       sender,
       this.contractInfo.anchor_basset_token.codeId,
       {
-        name: params.name || "bonded luna",
-        symbol: params.symbol || "ubluna",
+        name: params.name || "bondedLuna",
+        symbol: params.symbol || "BLUNA",
         decimals: params.decimals || 6,
         initial_balances: params.initial_balances || [
           {
@@ -658,7 +658,7 @@ export default class AnchorbAsset {
   ): Promise<void> {
     const execution = await execute(
       sender,
-      this.contractInfo.anchor_basset_token.contractAddress,
+      this.contractInfo.anchor_airdrop_registry.contractAddress,
       {
         add_airdrop_info: {
           airdrop_token: "ANC",

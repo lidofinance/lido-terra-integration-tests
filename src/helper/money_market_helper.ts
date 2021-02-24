@@ -81,7 +81,7 @@ export default class MoneyMarket {
   ): Promise<void> {
     const mmInterest = await instantiate(
       sender,
-      this.contractInfo.moneymarket_interest.codeId,
+      this.contractInfo.moneymarket_interest_model.codeId,
       {
         owner: params?.owner,
         base_rate: params?.base_rate || "0.000000004069028629",
@@ -94,12 +94,14 @@ export default class MoneyMarket {
 
     if (isTxError(mmInterest)) {
       throw new Error(
-        `Couldn't upload ${this.contractInfo.moneymarket_interest.codeId}: ${mmInterest.raw_log}`
+        `Couldn't upload ${this.contractInfo.moneymarket_interest_model.codeId}: ${mmInterest.raw_log}`
       );
     }
     const interestAddr =
       mmInterest.logs[0].eventsByType.instantiate_contract.contract_address[0];
-    this.contractInfo["moneymarket_interest"].contractAddress = interestAddr;
+    this.contractInfo[
+      "moneymarket_interest_model"
+    ].contractAddress = interestAddr;
   }
 
   // initialize oracle contract
@@ -230,6 +232,7 @@ export default class MoneyMarket {
       ownerAddr?: string;
       stableDenom?: string;
       epochPeriod?: number;
+      collector_contract: string;
       distributionThreshold?: number;
       targetDepositRate?: number;
       bufferDistributionRate?: number;
@@ -249,14 +252,17 @@ export default class MoneyMarket {
         oracle_contract: oracleAddr,
         market_contract: marketAddr,
         liquidation_contract: liquidationAddr,
+        collector_contract: params.collector_contract,
         stable_denom: params.stableDenom || "uusd",
-        epoch_period: params.epochPeriod || 12,
-        distribution_threshold:
-          params.distributionThreshold?.toFixed(10) || "0.00000000951",
+        epoch_period: params.epochPeriod || 3600,
+        threshold_deposit_rate: "0.0000000203",
+        // distribution_threshold:
+        //   params.distributionThreshold?.toFixed(10) || "0.00000000951",
         target_deposit_rate:
-          params.targetDepositRate?.toFixed(10) || "0.00000001522",
-        buffer_distribution_rate:
+          params.targetDepositRate?.toFixed(10) || "0.00000003044",
+        buffer_distribution_factor:
           params.bufferDistributionRate?.toFixed(10) || "0.1",
+        anc_purchase_factor: "0.1",
         price_timeframe: params.price_timeframe || 60,
       },
       undefined,
@@ -293,7 +299,7 @@ export default class MoneyMarket {
 
     const mmCustody = await instantiate(
       sender,
-      this.contractInfo.moneymarket_custody.codeId,
+      this.contractInfo.moneymarket_custody_bluna.codeId,
       {
         owner: params.owner,
         collateral_token: params.basset_token,
@@ -309,12 +315,14 @@ export default class MoneyMarket {
     );
     if (isTxError(mmCustody)) {
       throw new Error(
-        `Couldn't upload ${this.contractInfo.moneymarket_overseer.codeId}: ${mmCustody.raw_log}`
+        `Couldn't upload ${this.contractInfo.moneymarket_custody_bluna.codeId}: ${mmCustody.raw_log}`
       );
     }
     const custodyAddr =
       mmCustody.logs[0].eventsByType.instantiate_contract.contract_address[0];
-    this.contractInfo["moneymarket_custody"].contractAddress = custodyAddr;
+    this.contractInfo[
+      "moneymarket_custody_bluna"
+    ].contractAddress = custodyAddr;
   }
 
   public async instantiate_distribution(
@@ -709,10 +717,12 @@ export default class MoneyMarket {
       contract,
       {
         whitelist: {
+          name: "bondedLuna",
+          symbol: "BLUNA",
           collateral_token: collateralToken,
-          custody_contract: this.contractInfo["moneymarket_custody"]
+          custody_contract: this.contractInfo["moneymarket_custody_bluna"]
             .contractAddress,
-          ltv: ltv,
+          max_ltv: ltv,
         },
       },
       undefined,
@@ -798,7 +808,8 @@ export default class MoneyMarket {
     base_rate: string,
     interest_multiplier: string
   ): Promise<void> {
-    const contract = this.contractInfo["moneymarket_interest"].contractAddress;
+    const contract = this.contractInfo["moneymarket_interest_model"]
+      .contractAddress;
     const updateExecution = await execute(sender, contract, {
       update_config: {
         owner: owner,

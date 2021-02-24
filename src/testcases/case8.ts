@@ -128,7 +128,7 @@ async function main() {
         "mmOracle": moneyMarket.contractInfo["moneymarket_oracle"].contractAddress,
         "mmMarket": moneyMarket.contractInfo["moneymarket_market"].contractAddress,
         "mmOverseer": moneyMarket.contractInfo["moneymarket_overseer"].contractAddress,
-        "mmCustody": moneyMarket.contractInfo["moneymarket_custody"].contractAddress,
+        "mmCustody": moneyMarket.contractInfo["moneymarket_custody_bluna"].contractAddress,
         "mmLiquidation": moneyMarket.contractInfo["moneymarket_liquidation"].contractAddress,
         "anchorToken": moneyMarket.contractInfo["anchorToken"].contractAddress,
         "terraswapFactory": terraswap.contractInfo["terraswap_factory"].contractAddress,

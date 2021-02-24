@@ -55,7 +55,7 @@ export default class AnchorToken {
     return contracts.reduce(
       (t, c) =>
         t.then(async () => {
-          const bytecode = fs.readFileSync(`${location}/${c}.wasm`);
+          const bytecode = fs.readFileSync(`${location}/anchor_${c}.wasm`);
           const storeCode = new MsgStoreCode(
             sender.key.accAddress,
             bytecode.toString("base64")
@@ -79,7 +79,7 @@ export default class AnchorToken {
   public async gov_instantiate(
     sender: Wallet,
     params: {
-      owner?: string;
+      anchor_token?: string;
       quorum?: string;
       threshold?: string;
       voting_period?: number;
@@ -91,18 +91,20 @@ export default class AnchorToken {
     fee?: StdFee
   ): Promise<void> {
     let contract = this.contractInfo["gov"].codeId;
+    let token = this.contractInfo["token"].contractAddress;
     const init = await instantiate(
       sender,
       contract,
       {
-        owner: params.owner || sender.key.accAddress,
+        anchor_token: token,
+        owner: sender.key.accAddress,
         quorum: params.quorum || "0.1",
         threshold: params.threshold || "0.5",
-        voting_period: params.voting_period || "13500",
-        timelock_period: params.timelock_period || "1688",
-        expiration_period: params.expiration_period || "1688",
+        voting_period: params.voting_period || 13500,
+        timelock_period: params.timelock_period || 1688,
+        expiration_period: params.expiration_period || 1688,
         proposal_deposit: params.proposal_deposit || "100000000",
-        snapshot_period: params.snapshot_period || "1688",
+        snapshot_period: params.snapshot_period || 1688,
       },
       undefined,
       fee
@@ -350,19 +352,17 @@ export default class AnchorToken {
       sender,
       this.contractInfo.token.codeId,
       {
-        name: params.name,
-        symbol: params.symbol,
-        decimals: params.decimals,
+        name: params.name || "Test Token",
+        symbol: params.symbol || "TTN",
+        decimals: params.decimals || 6,
         initial_balances: params.initial_balances || [
           {
             address: sender.key.accAddress,
             amount: "1000000000000",
           },
         ],
-        mint: {
-          minter: params.mint?.minter || null,
-          cap: params.mint?.cap || null,
-        },
+        mint: undefined,
+        init_hook: undefined,
       },
       undefined,
       fee
@@ -376,7 +376,7 @@ export default class AnchorToken {
     this.contractInfo.token.contractAddress = contractAddress;
 
     console.log(
-      `anchor_token: { codeId: ${this.contractInfo.token.codeId}, contractAddress: "${this.contractInfo.anchor_basset_token.contractAddress}"},`
+      `anchor_token: { codeId: ${this.contractInfo.token.codeId}, contractAddress: "${this.contractInfo.token.contractAddress}"},`
     );
   }
 

@@ -7,6 +7,7 @@ import AnchorToken from "./anchor_token_helper";
 
 // https://terra-money.quip.com/lR4sAHcX3yiB/WebApp-Dev-Page-Deployment#UKCACAa6MDK
 export interface CustomInstantiationParam {
+  testAccount: string;
   basset?: {
     epoch_period?: number;
     unbonding_period?: number;
@@ -105,7 +106,7 @@ export default class Anchor {
     await this.ANC.staking_instantiation(
       this.owner,
       {
-        staking_token: this.terraswap.contractInfo["terraswap_token"]
+        staking_token: this.terraswap.contractInfo["token_token"]
           .contractAddress,
       },
       fee
@@ -161,7 +162,10 @@ export default class Anchor {
 
     await this.moneyMarket.instantiate_overseer(
       this.owner,
-      params?.overseer,
+      {
+        ...params?.overseer,
+        collector_contract: this.ANC.contractInfo["collector"].contractAddress,
+      },
       fee
     );
 
@@ -178,8 +182,8 @@ export default class Anchor {
     const gov = this.ANC.contractInfo["gov"].contractAddress;
 
     const basset_info: BAssetInfo = {
-      name: "bonded luna",
-      symbol: "ubluna",
+      name: "bondedLuna",
+      symbol: "BLUNA",
       decimals: 6,
     };
 
@@ -272,8 +276,17 @@ export default class Anchor {
       this.ANC.contractInfo["airdrop"].contractAddress,
       this.terraswap.contractInfo["terraswap_pair"].contractAddress
     );
-    await this.terraswap.transfer_cw20_token(this.owner, "", 100000000000);
-    await this.ANC.transfer_cw20_token(this.owner, "", 100000000000);
+
+    await this.terraswap.transfer_cw20_token(
+      this.owner,
+      params.testAccount,
+      100000000000
+    );
+    await this.ANC.transfer_cw20_token(
+      this.owner,
+      params.testAccount,
+      100000000000
+    );
   }
 }
 

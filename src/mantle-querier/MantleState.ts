@@ -5,18 +5,27 @@ import { getMoneyMarketState } from "./money-market";
 import { Addresses, Contracts, Validators } from "./types";
 
 interface ContractAddresses {
-    "bLunaHub": string 
-    "bAssetToken": string 
-    "bAssetReward": string 
-    "mmInterest": string 
-    "mmOracle": string 
-    "mmMarket": string 
-    "mmOverseer": string 
-    "mmCustody": string 
-    "mmLiquidation": string 
-    "anchorToken": string 
-    "terraswapFactory": string 
-    "terraswapPair": string 
+    "bLunaHub": string,
+    "bAssetToken": string,
+    "bAssetReward": string,
+    "bAssetAirdrop": string,
+    "mmInterest": string,
+    "mmOracle": string,
+    "mmMarket": string,
+    "mmOverseer": string,
+    "mmCustody": string,
+    "mmLiquidation": string,
+    "mmdistribution":string,
+    "anchorToken": string,
+    "terraswapFactory": string,
+    "terraswapPair": string,
+    "gov": string,
+    "faucet": string,
+    "collector":string,
+    "community":string,
+    "staking": string,
+    "token": string,
+    "airdrop": string,
 }
 
 export class MantleState {

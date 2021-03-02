@@ -190,37 +190,37 @@ export default class AnchorbAsset {
     );
   }
 
-  // public async instantiate_airdrop(
-  //   sender: Wallet,
-  //   params: {
-  //     hub_contract?: string;
-  //     reward_contract?: string;
-  //   },
-  //   fee?: StdFee
-  // ) {
-  //   const init = await instantiate(
-  //     sender,
-  //     this.contractInfo.anchor_airdrop_registry.codeId,
-  //     {
-  //       hub_contract: this.contractInfo.anchor_basset_hub.contractAddress,
-  //       reward_contract: this.contractInfo.anchor_basset_reward.contractAddress,
-  //     },
-  //     undefined,
-  //     fee
-  //   );
+  public async instantiate_airdrop(
+    sender: Wallet,
+    params: {
+      hub_contract?: string;
+      reward_contract?: string;
+    },
+    fee?: StdFee
+  ) {
+    const init = await instantiate(
+      sender,
+      this.contractInfo.anchor_airdrop_registry.codeId,
+      {
+        hub_contract: this.contractInfo.anchor_basset_hub.contractAddress,
+        reward_contract: this.contractInfo.anchor_basset_reward.contractAddress,
+      },
+      undefined,
+      fee
+    );
 
-  //   if (isTxError(init)) {
-  //     throw new Error(`Couldn't run: ${init.raw_log}`);
-  //   }
+    if (isTxError(init)) {
+      throw new Error(`Couldn't run: ${init.raw_log}`);
+    }
 
-  //   const contractAddress =
-  //     init.logs[0].eventsByType.instantiate_contract.contract_address[0];
-  //   this.contractInfo.anchor_airdrop_registry.contractAddress = contractAddress;
+    const contractAddress =
+      init.logs[0].eventsByType.instantiate_contract.contract_address[0];
+    this.contractInfo.anchor_airdrop_registry.contractAddress = contractAddress;
 
-  //   console.log(
-  //     `anchor_airdrop_registery: { codeId: ${this.contractInfo.anchor_airdrop_registry.codeId}, contractAddress: "${this.contractInfo.anchor_airdrop_registry.contractAddress}"},`
-  //   );
-  // }
+    console.log(
+      `anchor_airdrop_registery: { codeId: ${this.contractInfo.anchor_airdrop_registry.codeId}, contractAddress: "${this.contractInfo.anchor_airdrop_registry.contractAddress}"},`
+    );
+  }
 
   public async register_contracts(
     sender: Wallet,

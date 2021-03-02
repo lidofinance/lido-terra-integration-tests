@@ -42,19 +42,21 @@ export async function getMoneyMarketState(
 
   const overseerBalance = await makeBalanceQuery(contracts.mmOverseer, client);
 
-  const liabilityMap = await makeContractStoreQuery(
+  const borrowerinfoMap = await makeContractStoreQuery(
     contracts.mmMarket,
-    { liabilities: {} },
+    { borrower_infos: {} },
     client
   ).then((r) => {
-    r.liabilities.reduce((m, entity) => {
+    return r.borrower_infos.reduce((m, entity) => {
       m[entity.borrower] = {
-        interest_index: m.interest_index,
-        loan_amount: m.loan_amount,
+        interest_index: entity.interest_index,
+        reward_index: entity.reward_index,
+        loan_amount: entity.loan_amount,
+        pending_rewards: entity.pending_rewards
       };
 
       return m;
-    }, {} as { [address: string]: { interest_index: string; loan_amount: string } });
+    }, {} as { [address: string]: { interest_index: string; reward_index: string; loan_amount: string; pending_rewards: string; } });
   });
 
   const borrowerMap = await makeContractStoreQuery(
@@ -62,7 +64,7 @@ export async function getMoneyMarketState(
     { borrowers: {} },
     client
   ).then((r) => {
-    r.borrowers.reduce((m, entity) => {
+    return r.borrowers.reduce((m, entity) => {
       m[entity.borrower] = {
         balance: entity.balance,
         spendable: entity.spendable,
@@ -105,7 +107,7 @@ export async function getMoneyMarketState(
     { all_collaterals: {} },
     client
   ).then((r) => {
-    r.all_collaterals.reduce((m, entry) => {
+    return r.all_collaterals.reduce((m, entry) => {
       m[entry.borrower] = {
         // NOTE: BLUNA ONLY FOR NOW
         // if other bAssets are allowed, we need to change this reduce func
@@ -187,7 +189,7 @@ export async function getMoneyMarketState(
     marketBalance,
     custodyBalance,
     overseerBalance,
-    liabilityMap,
+    borrowerinfoMap,
     borrowerMap,
     atoken_holder_map,
     ...overseerEpochState,

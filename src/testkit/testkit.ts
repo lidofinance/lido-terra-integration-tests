@@ -7,6 +7,7 @@ export class Testkit {
     chainId!: string
     contextId!: string
     lcd!: LCDClient
+    mantlePort!: number
 
     proposerRounds: string[] = []
     proposerRoundIdx: number = 0
@@ -26,6 +27,7 @@ export class Testkit {
         return this.testkit.post<TestkitInit.Data>("/init", opts).then(r => {
             this.contextId = r.data.identifier
             this.chainId = r.data.chain_id
+            this.mantlePort = r.data.mantle_port
             this.lcd = new LCDClient({
                 URL: `${this.testkitEndpoint}/${r.data.identifier}`,
                 chainID: r.data.chain_id,
@@ -90,7 +92,11 @@ export class Testkit {
     }
 
     deriveLCD(): LCDClient {
-       return this.lcd
+        return this.lcd
+    }
+
+    deriveMantle(): string {
+        return `http://localhost:${this.mantlePort}`
     }
 
     async inject() {
@@ -101,7 +107,7 @@ export class Testkit {
 }
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;; /* types */ ;;;;;;;;;;;;;;
+;;;;;;;;;;;;; /* types */;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 declare module Inject {
 
@@ -248,6 +254,7 @@ export module TestkitInit {
 
     export interface Data {
         identifier: string;
+        mantle_port: number;
         chain_id: string;
         accounts: Account[];
         validators: Validator[];

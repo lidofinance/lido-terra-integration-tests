@@ -27,13 +27,11 @@
         "sig_verify_cost_ed25519": "590",
         "sig_verify_cost_secp256k1": "1000"
       },
-      "accounts": [
-        {
+      "accounts": [{
           "type": "core/Account",
           "value": {
             "address": "terra1dcegyrekltswvyy0xy69ydgxn9x8x32zdtapd8",
-            "coins": [
-              {
+            "coins": [{
                 "denom": "ukrw",
                 "amount": "1000000000000000000"
               },
@@ -63,8 +61,7 @@
           "type": "core/Account",
           "value": {
             "address": "terra1x46rqay4d3cssq8gxxvqz8xt6nwlz4td20k38v",
-            "coins": [
-              {
+            "coins": [{
                 "denom": "ukrw",
                 "amount": "1000000000000000000"
               },
@@ -94,8 +91,7 @@
           "type": "core/Account",
           "value": {
             "address": "terra17lmam6zguazs5q5u6z5mmx76uj63gldnse2pdp",
-            "coins": [
-              {
+            "coins": [{
                 "denom": "ukrw",
                 "amount": "1000000000000000000"
               },
@@ -125,8 +121,7 @@
           "type": "core/Account",
           "value": {
             "address": "terra1757tkx08n0cqrw7p86ny9lnxsqeth0wgp0em95",
-            "coins": [
-              {
+            "coins": [{
                 "denom": "ukrw",
                 "amount": "1000000000000000000"
               },
@@ -156,8 +151,7 @@
           "type": "core/Account",
           "value": {
             "address": "terra199vw7724lzkwz6lf2hsx04lrxfkz09tg8dlp6r",
-            "coins": [
-              {
+            "coins": [{
                 "denom": "ukrw",
                 "amount": "1000000000000000000"
               },
@@ -187,8 +181,7 @@
           "type": "core/Account",
           "value": {
             "address": "terra18wlvftxzj6zt0xugy2lr9nxzu402690ltaf4ss",
-            "coins": [
-              {
+            "coins": [{
                 "denom": "ukrw",
                 "amount": "1000000000000000000"
               },
@@ -218,8 +211,7 @@
           "type": "core/Account",
           "value": {
             "address": "terra1e8ryd9ezefuucd4mje33zdms9m2s90m57878v9",
-            "coins": [
-              {
+            "coins": [{
                 "denom": "ukrw",
                 "amount": "1000000000000000000"
               },
@@ -249,8 +241,7 @@
           "type": "core/Account",
           "value": {
             "address": "terra17tv2hvwpg0ukqgd2y5ct2w54fyan7z0zxrm2f9",
-            "coins": [
-              {
+            "coins": [{
                 "denom": "ukrw",
                 "amount": "1000000000000000000"
               },
@@ -280,8 +271,7 @@
           "type": "core/Account",
           "value": {
             "address": "terra1lkccuqgj6sjwjn8gsa9xlklqv4pmrqg9dx2fxc",
-            "coins": [
-              {
+            "coins": [{
                 "denom": "ukrw",
                 "amount": "1000000000000000000"
               },
@@ -311,8 +301,7 @@
           "type": "core/Account",
           "value": {
             "address": "terra1333veey879eeqcff8j3gfcgwt8cfrg9mq20v6f",
-            "coins": [
-              {
+            "coins": [{
                 "denom": "ukrw",
                 "amount": "1000000000000000000"
               },
@@ -342,8 +331,7 @@
           "type": "core/Account",
           "value": {
             "address": "terra1fmcjjt6yc9wqup2r06urnrd928jhrde6gcld6n",
-            "coins": [
-              {
+            "coins": [{
                 "denom": "ukrw",
                 "amount": "1000000000000000000"
               },
@@ -429,12 +417,10 @@
       "votes": null,
       "proposals": null,
       "deposit_params": {
-        "min_deposit": [
-          {
-            "denom": "uluna",
-            "amount": "10000000"
-          }
-        ],
+        "min_deposit": [{
+          "denom": "uluna",
+          "amount": "10000000"
+        }],
         "max_deposit_period": "172800000000000"
       },
       "voting_params": {
@@ -502,54 +488,48 @@
       "TSLs": []
     },
     "genutil": {
-      "gentxs": [
-        {
-          "type": "core/StdTx",
-          "value": {
-            "msg": [
-              {
-                "type": "staking/MsgCreateValidator",
-                "value": {
-                  "description": {
-                    "moniker": "localterra",
-                    "identity": "",
-                    "website": "https://github.com/terra-project/LocalTerra",
-                    "security_contact": "",
-                    "details": ""
-                  },
-                  "commission": {
-                    "rate": "0.100000000000000000",
-                    "max_rate": "0.200000000000000000",
-                    "max_change_rate": "0.010000000000000000"
-                  },
-                  "min_self_delegation": "1",
-                  "delegator_address": "terra1dcegyrekltswvyy0xy69ydgxn9x8x32zdtapd8",
-                  "validator_address": "terravaloper1dcegyrekltswvyy0xy69ydgxn9x8x32zdy3ua5",
-                  "pubkey": "terravalconspub1zcjduepqn7ju9nnv6fl0l6a24ha3a52s8nm948athu5fy3e05vjpapw3rhksszjl92",
-                  "value": {
-                    "denom": "uluna",
-                    "amount": "1000000000"
-                  }
-                }
+      "gentxs": [{
+        "type": "core/StdTx",
+        "value": {
+          "msg": [{
+            "type": "staking/MsgCreateValidator",
+            "value": {
+              "description": {
+                "moniker": "localterra",
+                "identity": "",
+                "website": "https://github.com/terra-project/LocalTerra",
+                "security_contact": "",
+                "details": ""
+              },
+              "commission": {
+                "rate": "0.100000000000000000",
+                "max_rate": "0.200000000000000000",
+                "max_change_rate": "0.010000000000000000"
+              },
+              "min_self_delegation": "1",
+              "delegator_address": "terra1dcegyrekltswvyy0xy69ydgxn9x8x32zdtapd8",
+              "validator_address": "terravaloper1dcegyrekltswvyy0xy69ydgxn9x8x32zdy3ua5",
+              "pubkey": "terravalconspub1zcjduepqn7ju9nnv6fl0l6a24ha3a52s8nm948athu5fy3e05vjpapw3rhksszjl92",
+              "value": {
+                "denom": "uluna",
+                "amount": "1000000000"
               }
-            ],
-            "fee": {
-              "amount": [],
-              "gas": "200000"
+            }
+          }],
+          "fee": {
+            "amount": [],
+            "gas": "200000"
+          },
+          "signatures": [{
+            "pub_key": {
+              "type": "tendermint/PubKeySecp256k1",
+              "value": "An4JQUJX6KTbh6CvqmDLPhe6knWdqfKYjDvkCl2QE1oc"
             },
-            "signatures": [
-              {
-                "pub_key": {
-                  "type": "tendermint/PubKeySecp256k1",
-                  "value": "An4JQUJX6KTbh6CvqmDLPhe6knWdqfKYjDvkCl2QE1oc"
-                },
-                "signature": "mj0RNoIqzPCfTjWwA0R7jcUBA5Yr820vgk5sFiN98Vx4ifKTU6qtVRCpXExR6B9pDHZ/1PXyGXMp8DEGZQ/Vxg=="
-              }
-            ],
-            "memo": "e9059223d8b9a9539394a05f996f63ce7bb3a405@10.10.20.74:26656"
-          }
+            "signature": "mj0RNoIqzPCfTjWwA0R7jcUBA5Yr820vgk5sFiN98Vx4ifKTU6qtVRCpXExR6B9pDHZ/1PXyGXMp8DEGZQ/Vxg=="
+          }],
+          "memo": "e9059223d8b9a9539394a05f996f63ce7bb3a405@10.10.20.74:26656"
         }
-      ]
+      }]
     },
     "crisis": {
       "constant_fee": {
@@ -574,8 +554,7 @@
         "vote_threshold": "0.340000000000000000",
         "reward_band": "0.020000000000000000",
         "reward_distribution_window": "5256000",
-        "whitelist": [
-          {
+        "whitelist": [{
             "name": "ukrw",
             "tobin_tax": "0.002500000000000000"
           },

@@ -18,7 +18,7 @@ export const setTestParams = (
     },
     overseer: {
       stable_denom: "uusd",
-      epoch_period: 12,
+      epoch_period: 1,
       distribution_threshold: "0.00000000951",
       target_deposit_rate: "0.00000001522",
       buffer_distribution_rate: "0.1",

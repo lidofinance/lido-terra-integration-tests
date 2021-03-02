@@ -160,7 +160,7 @@ export default class MoneyMarket {
         stable_denom: params.stable_denom || "uusd",
         safe_ratio: params.safeRatio?.toString() || "0.8",
         bid_fee: params.bid_fee || "0.01",
-        max_premium_rate: params.max_premium_rate || "0.1",
+        max_premium_rate: params.max_premium_rate || "0.2",
         // min_liquidation: `${minLiquidation}`,
         liquidation_threshold: params.liquidationThreshold || "200",
         price_timeframe: params.price_timeframe || 60,
@@ -202,8 +202,8 @@ export default class MoneyMarket {
         stable_denom: params.stable_denom || "uusd",
         reserve_factor: params.reserve_factor || "0.05",
         aterra_code_id: params.terraswap_token_code_id,
-        anc_emission_rate: params.anc_emission_rate || "0.01",
-        max_borrow_factor: params.max_borrow_factor || "0.95",
+        anc_emission_rate: params.anc_emission_rate || "1000000",
+        max_borrow_factor: params.max_borrow_factor || "0.9",
       },
       new Coins("1000000uusd"),
       fee
@@ -230,8 +230,8 @@ export default class MoneyMarket {
     sender: Wallet,
     params: {
       ownerAddr?: string;
-      stableDenom?: string;
-      epochPeriod?: number;
+      stable_denom?: string;
+      epoch_period?: number;
       collector_contract: string;
       distributionThreshold?: number;
       targetDepositRate?: number;
@@ -253,8 +253,8 @@ export default class MoneyMarket {
         market_contract: marketAddr,
         liquidation_contract: liquidationAddr,
         collector_contract: params.collector_contract,
-        stable_denom: params.stableDenom || "uusd",
-        epoch_period: params.epochPeriod || 3600,
+        stable_denom: params.stable_denom || "uusd",
+        epoch_period: params.epoch_period || 3600,
         threshold_deposit_rate: "0.0000000203",
         // distribution_threshold:
         //   params.distributionThreshold?.toFixed(10) || "0.00000000951",
@@ -340,7 +340,7 @@ export default class MoneyMarket {
       this.contractInfo.moneymarket_distribution_model.codeId,
       {
         owner: params.owner,
-        emission_cap: params.emission_cap || "0.2",
+        emission_cap: params.emission_cap || "1000000",
         increment_multiplier: params.increment_multiplier || "2.0",
         decrement_multiplier: params.decrement_multiplier || "0.9",
       },
@@ -448,6 +448,16 @@ export default class MoneyMarket {
     }
   }
 
+  public async market_claim_rewards(sender: Wallet, to?: string): Promise<void> {
+    const contract = this.contractInfo["moneymarket_market"].contractAddress;
+    const claim_rewards = await execute(sender, contract, {
+      claim_rewards: { to: to },
+    });
+    if (isTxError(claim_rewards)) {
+      throw new Error(`Couldn't run: ${claim_rewards.raw_log}`);
+    }
+  }
+
   public async market_repay_stable(
     sender: Wallet,
     borrower: string,
@@ -520,7 +530,7 @@ export default class MoneyMarket {
     sender: Wallet,
     liquidation_contract?: string
   ): Promise<void> {
-    let contract = this.contractInfo["moneymarket_custody"].contractAddress;
+    let contract = this.contractInfo["moneymarket_custody_bluna"].contractAddress;
     const configExecution = await execute(sender, contract, {
       update_config: {
         liquidation_contract: liquidation_contract,
@@ -536,7 +546,7 @@ export default class MoneyMarket {
     borrower?: string,
     amount?: string
   ): Promise<void> {
-    let contract = this.contractInfo["moneymarket_custody"].contractAddress;
+    let contract = this.contractInfo["moneymarket_custody_bluna_bluna"].contractAddress;
     const lockExecution = await execute(sender, contract, {
       lock_collateral: {
         borrower: borrower,
@@ -553,7 +563,7 @@ export default class MoneyMarket {
     borrower?: string,
     amount?: string
   ): Promise<void> {
-    let contract = this.contractInfo["moneymarket_custody"].contractAddress;
+    let contract = this.contractInfo["moneymarket_custody_bluna"].contractAddress;
     const lockExecution = await execute(sender, contract, {
       unlock_collateral: {
         borrower: borrower,
@@ -566,7 +576,7 @@ export default class MoneyMarket {
   }
 
   public async custody_distribute_rewards(sender: Wallet): Promise<void> {
-    let contract = this.contractInfo["moneymarket_custody"].contractAddress;
+    let contract = this.contractInfo["moneymarket_custody_bluna"].contractAddress;
     const rewardExecution = await execute(sender, contract, {
       distribute_rewards: {},
     });
@@ -576,7 +586,7 @@ export default class MoneyMarket {
   }
 
   public async custody_distribute_hook(sender: Wallet): Promise<void> {
-    let contract = this.contractInfo["moneymarket_custody"].contractAddress;
+    let contract = this.contractInfo["moneymarket_custody_bluna"].contractAddress;
     const hookExecution = await execute(sender, contract, {
       distribute_hook: {},
     });
@@ -586,7 +596,7 @@ export default class MoneyMarket {
   }
 
   public async custody_swap(sender: Wallet): Promise<void> {
-    let contract = this.contractInfo["moneymarket_custody"].contractAddress;
+    let contract = this.contractInfo["moneymarket_custody_bluna"].contractAddress;
     const swapExecution = await execute(sender, contract, {
       swap_to_stable_denom: {},
     });
@@ -614,7 +624,7 @@ export default class MoneyMarket {
     sender: Wallet,
     amount?: number
   ): Promise<void> {
-    let contract = this.contractInfo["moneymarket_custody"].contractAddress;
+    let contract = this.contractInfo["moneymarket_custody_bluna"].contractAddress;
     const withdrawExecution = await execute(sender, contract, {
       withdraw_collateral: {
         amount: `${amount}`,
@@ -695,7 +705,7 @@ export default class MoneyMarket {
     const unlockCollaterallExecution = await execute(sender, contract, {
       update_whitelist: {
         collateral_token: collateralToken,
-        custody_contract: this.contractInfo["moneymarket_custody"]
+        custody_contract: this.contractInfo["moneymarket_custody_bluna"]
           .contractAddress,
         ltv: ltv,
       },

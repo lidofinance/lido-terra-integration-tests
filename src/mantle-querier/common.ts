@@ -25,6 +25,7 @@ export const makeBalanceQuery = (address: string, client: GraphQLClient) =>
     client
   );
 
+
 export const makeContractStoreQuery = (
   contractAddress: string,
   queryMsg: object,

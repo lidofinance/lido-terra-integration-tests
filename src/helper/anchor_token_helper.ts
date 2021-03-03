@@ -15,6 +15,9 @@ import {
 } from "@terra-money/terra.js";
 import * as fs from "fs";
 import { execute, instantiate, send_transaction } from "./flow/execution";
+import { anchor } from "../ops/ops";
+
+type PollStatus = "in_progress" | "passed" | "rejected" | "expired";
 
 export type VoteOption = "yes" | "no";
 
@@ -764,5 +767,91 @@ export default class AnchorToken {
     if (isTxError(transferExecuttion)) {
       throw new Error(`Couldn't run: ${transferExecuttion.raw_log}`);
     }
+  }
+
+  public async get_anc_balance(sender: Wallet, address: string): Promise<any> {
+    let response = await sender.lcd.wasm.contractQuery(
+      this.contractInfo["token"].contractAddress,
+      {
+        balance: {
+          address: address,
+        },
+      }
+    );
+    return response;
+  }
+
+  public async get_gov_state(sender: Wallet): Promise<any> {
+    let response = await sender.lcd.wasm.contractQuery(
+      this.contractInfo["gov"].contractAddress,
+      {
+        state: {},
+      }
+    );
+    return response;
+  }
+
+  public async get_gov_staker(sender: Wallet, address: string): Promise<any> {
+    let response = await sender.lcd.wasm.contractQuery(
+      this.contractInfo["gov"].contractAddress,
+      {
+        staker: {
+          address: address,
+        },
+      }
+    );
+    return response;
+  }
+
+  public async get_gov_polls(
+    sender: Wallet,
+    filter: PollStatus,
+    startAfter?: number,
+    limit?: number
+  ): Promise<any> {
+    let response = await sender.lcd.wasm.contractQuery(
+      this.contractInfo["gov"].contractAddress,
+      {
+        polls: {
+          filter: filter,
+          start_after: startAfter,
+          limit: limit,
+          order_by: "asc",
+        },
+      }
+    );
+    return response;
+  }
+
+  public async get_staking_state(
+    sender: Wallet,
+    blockHeight: number
+  ): Promise<any> {
+    let response = await sender.lcd.wasm.contractQuery(
+      this.contractInfo["staking"].contractAddress,
+      {
+        state: {
+          block_height: blockHeight,
+        },
+      }
+    );
+    return response;
+  }
+
+  public async get_staking_staker_info(
+    sender: Wallet,
+    blockHeight: number,
+    staker: string
+  ): Promise<any> {
+    let response = await sender.lcd.wasm.contractQuery(
+      this.contractInfo["staking"].contractAddress,
+      {
+        staker_info: {
+          staker: staker,
+          block_height: blockHeight,
+        },
+      }
+    );
+    return response;
   }
 }

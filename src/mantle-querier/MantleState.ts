@@ -3,6 +3,7 @@ import { getBlunaState } from "./bLuna";
 import { getCoreState } from "./core";
 import { getMoneyMarketState } from "./money-market";
 import { Addresses, Contracts, Validators } from "./types";
+import {getANCState} from "./anchor-token";
 
 interface ContractAddresses {
     "bLunaHub": string,
@@ -50,11 +51,13 @@ export class MantleState {
         return Promise.all([
             getMoneyMarketState(this.client, this.addresses, this.validators, this.contracts),
             getCoreState(this.client, this.addresses, this.validators, this.contracts),
-            getBlunaState(this.client, this.addresses, this.validators, this.contracts)
-        ]).then(([mm, core, bluna]) => ({
+            getBlunaState(this.client, this.addresses, this.validators, this.contracts),
+            getANCState(this.client, this.addresses, this.validators, this.contracts)
+        ]).then(([mm, core,bluna , anc]) => ({
             ...mm,
             ...core,
-            ...bluna
+            ...bluna,
+            ...anc
         }))
     }
 

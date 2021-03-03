@@ -342,7 +342,7 @@ export default class MoneyMarket {
       {
         owner: params.owner,
         emission_cap: params.emission_cap || "1000000",
-        emission_floor: params.emission_cap || "1000000",
+        emission_floor: params.emission_floor || "1000000",
         increment_multiplier: params.increment_multiplier || "1.0",
         decrement_multiplier: params.decrement_multiplier || "1.0",
       },

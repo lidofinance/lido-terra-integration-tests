@@ -49,6 +49,14 @@ export class Testkit {
         return this.testkit.delete(`/${this.contextId}/automatic_tx/${atxId}`)
     }
 
+    async registerAutomaticInjection(opt: AutomaticInjectionRequest) {
+        return this.testkit.post(`/${this.contextId}/automatic_injection`, opt)
+    }
+
+    async clearAutomaticInjection() {
+        return this.testkit.delete(`/${this.contextId}/automatic_injection`)
+    }
+
     static walletToAccountRequest(accountName: string, w: MnemonicKey): AddAccountRequest {
         return {
             account_name: accountName,

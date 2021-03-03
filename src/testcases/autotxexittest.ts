@@ -430,11 +430,19 @@ async function main() {
     await testkit.clearAllAutomaticTxs()
 
     //block 171
-    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 200))
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+
+    // stop auto injection
+    await testkit.clearAutomaticInjection()
 
     await mustPass(moneyMarket.market_claim_rewards(c))
     await mustPass(moneyMarket.market_claim_rewards(b))
     await mustPass(moneyMarket.market_claim_rewards(a))
+    await testkit.inject()
+
+    await testkit.registerAutomaticInjection({
+        validator_rounds: ["valB", "valC", "valD", "valA"],
+    })
 }
 
 main()

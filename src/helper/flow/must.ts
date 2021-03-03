@@ -2,7 +2,7 @@ export const mustPass = <T>(action: Promise<T>): Promise<T> => {
   return action
     .then((r) => r)
     .catch((e) => {
-      throw new Error(`Action failed w/ msg ${e}`);
+      throw new Error(`Action failed w/ msg ${e}, ${e.data}`);
     });
 };
 

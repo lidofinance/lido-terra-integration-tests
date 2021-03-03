@@ -330,6 +330,7 @@ export default class MoneyMarket {
     params: {
       owner?: string;
       emission_cap?: string;
+      emission_floor?: string;
       increment_multiplier?: string;
       decrement_multiplier?: string;
     },
@@ -341,8 +342,9 @@ export default class MoneyMarket {
       {
         owner: params.owner,
         emission_cap: params.emission_cap || "1000000",
-        increment_multiplier: params.increment_multiplier || "2.0",
-        decrement_multiplier: params.decrement_multiplier || "0.9",
+        emission_floor: params.emission_cap || "1000000",
+        increment_multiplier: params.increment_multiplier || "1.0",
+        decrement_multiplier: params.decrement_multiplier || "1.0",
       },
       undefined,
       fee
@@ -932,6 +934,7 @@ export default class MoneyMarket {
     params: {
       owner: string;
       emission_cap: string;
+      emission_floor: string;
       increment_multiplier: string;
       decrement_multiplier?: string;
     }
@@ -942,6 +945,7 @@ export default class MoneyMarket {
       update_config: {
         owner: params.owner,
         emission_cap: params.emission_cap,
+        emission_floor: params.emission_floor,
         increment_multiplier: params.increment_multiplier,
         decrement_multiplier: params.decrement_multiplier,
       },

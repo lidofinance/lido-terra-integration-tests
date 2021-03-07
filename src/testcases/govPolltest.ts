@@ -28,6 +28,7 @@ import { unjail } from "../helper/validator-operation/unjail";
 import { gql } from "graphql-request";
 import { configureMMOracle } from "../helper/oracle/mm-oracle";
 import { setTestParams } from "../parameters/contract-tests-parameteres";
+import AnchorToken from "../helper/anchor_token_helper";
 
 let mantleState: MantleState;
 
@@ -38,7 +39,6 @@ async function main() {
     const aKey = new MnemonicKey();
     const bKey = new MnemonicKey();
     const cKey = new MnemonicKey();
-    const dKey = new MnemonicKey();
     const owner = new MnemonicKey();
 
     const validatorAKey = new MnemonicKey();
@@ -53,7 +53,6 @@ async function main() {
             Testkit.walletToAccountRequest("a", aKey),
             Testkit.walletToAccountRequest("b", bKey),
             Testkit.walletToAccountRequest("c", cKey),
-            Testkit.walletToAccountRequest("d", dKey),
             Testkit.walletToAccountRequest("valA", validatorAKey),
             Testkit.walletToAccountRequest("valB", validatorBKey),
             Testkit.walletToAccountRequest("valC", validatorCKey),
@@ -285,10 +284,10 @@ async function main() {
     //block 68
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
 
-    await mustPass(anc.transfer_cw20_token(a, dKey.accAddress, 100000000000))
-
     //block 69
     await mustPass(basset.bond(a, 20000000000000, validators[0].validator_address))
+    await mustPass(basset.bond(b, 20000000000000, validators[0].validator_address))
+    await mustPass(basset.bond(c, 20000000000000, validators[0].validator_address))
 
     //block 70
     await mustPass(basset.bond(a, 333333333333, validators[1].validator_address))
@@ -347,41 +346,10 @@ async function main() {
 
     //block 95
     await mustPass(basset.bond(a, 20000000000000, validators[0].validator_address))
-    await mustPass(basset.bond(b, 20000000000000, validators[0].validator_address))
-    await mustPass(basset.bond(c, 20000000000000, validators[0].validator_address))
 
-    //block 97
-    await basset.send_cw20_token(
-        a,
-        333333333333,
-        { unbond: {} },
-        basset.contractInfo["anchor_basset_hub"].contractAddress
-    )
-
-    //block 98
-    await mustPass(basset.send_cw20_token(
-        a,
-        333333333333,
-        { unbond: {} },
-        basset.contractInfo["anchor_basset_hub"].contractAddress
-    ))
-
-    //block 99 - 159
-    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 51))
-
-    //block 159
-    await mustPass(basset.send_cw20_token(
-        a,
-        333333333333,
-        { unbond: {} },
-        basset.contractInfo["anchor_basset_hub"].contractAddress
-    ))
-
-    //block 160
-    await mustPass(basset.finish(a))
 
     //block 161
-    await mustPass(moneyMarket.deposit_stable(b, 10000000000000))
+    await mustPass(moneyMarket.deposit_stable(b, 2000000000000))
 
     //block 163
     const custody = moneyMarket.contractInfo["moneymarket_custody_bluna"].contractAddress;
@@ -407,46 +375,49 @@ async function main() {
     ))
 
 
+    //block 165
+    await mustFail(moneyMarket.custody_lock_collateral(a, a.key.accAddress, "100"))
+
     //block 166
     await mustPass(moneyMarket.overseer_lock_collateral(
         a, [[basset.contractInfo["anchor_basset_token"].contractAddress, "2000000000000"]])
     )
+
     await mustPass(moneyMarket.overseer_lock_collateral(
         b, [[basset.contractInfo["anchor_basset_token"].contractAddress, "2000000000000"]])
     )
+
     await mustPass(moneyMarket.overseer_lock_collateral(
         c, [[basset.contractInfo["anchor_basset_token"].contractAddress, "2000000000000"]])
     )
 
     //block 169
-    await mustPass(moneyMarket.borrow_stable(a, 100000000000, undefined))
-    await mustPass(moneyMarket.borrow_stable(b, 100000000000, undefined))
-    await mustPass(moneyMarket.borrow_stable(c, 100000000000, undefined))
+    await mustPass(moneyMarket.borrow_stable(a, 500000000000, undefined))
+    await mustPass(moneyMarket.borrow_stable(b, 500000000000, undefined))
+    await mustPass(moneyMarket.borrow_stable(c, 500000000000, undefined))
 
     //block 170
     await mustPass(basset.update_global_index(a))
 
     await testkit.clearAllAutomaticTxs()
 
-    // //block 171
-    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 20000))
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 100))
 
-    await mustPass(moneyMarket.repay_stable(a, 10000000000))
-    await mustPass(moneyMarket.repay_stable(b, 10000000000))
-    await mustPass(moneyMarket.repay_stable(c, 10000000000))
-
-    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 20000))
-    // // stop auto injection
-    // await testkit.clearAutomaticInjection()
-
-    await mustPass(moneyMarket.market_claim_rewards(c))
-    await mustPass(moneyMarket.market_claim_rewards(b))
+    //block 171
     await mustPass(moneyMarket.market_claim_rewards(a))
-    // await testkit.inject()
-
-    // await testkit.registerAutomaticInjection({
-    //     validator_rounds: ["valB", "valC", "valD", "valA"],
-    // })
+    await mustPass(moneyMarket.market_claim_rewards(b))
+    await mustPass(moneyMarket.market_claim_rewards(c))
+    await mustPass(anc.gov_stake_voting(a, { amount: "10", }))
+    await mustPass(anc.gov_stake_voting(b, { amount: "1", }))
+    await mustPass(anc.gov_stake_voting(c, { amount: "1", }))
+    await mustPass(anc.gov_create_poll(a, { amount: "1", title: "blah", description: "fuck" }))
+    await mustPass(anc.gov_cast_vote(a, { poll_id: 1, vote: "yes", amount: "10" }))
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 5))
+    await mustPass(anc.gov_snapshot_poll(a, { poll_id: 1 }))
+    await mustPass(anc.gov_cast_vote(b, { poll_id: 1, vote: "no", amount: "1" }))
+    await mustPass(anc.gov_cast_vote(c, { poll_id: 1, vote: "no", amount: "1" }))
+    await mustPass(anc.gov_stake_voting(a, { amount: "100" }))
+    await mustPass(anc.gov_end_poll(a, { poll_id: 1 }))
 }
 
 main()
@@ -454,11 +425,11 @@ main()
     .then(async () => {
         console.log("saving state...");
         fs.writeFileSync(
-            "autotxexit_action.json",
+            "govPolltest_action.json",
             JSON.stringify(getRecord(), null, 2)
         );
         fs.writeFileSync(
-            "autotxexit_state.json",
+            "govPolltest_state.json",
             JSON.stringify(await mantleState.getState(), null, 2)
         );
     })

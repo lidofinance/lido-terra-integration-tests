@@ -33,12 +33,11 @@ let mantleState: MantleState;
 
 async function main() {
     const testkit = new Testkit("http://localhost:11317");
-    const genesis = require("../testkit/genesis2.json");
+    const genesis = require("../testkit/genesis.json");
 
     const aKey = new MnemonicKey();
     const bKey = new MnemonicKey();
     const cKey = new MnemonicKey();
-    const dKey = new MnemonicKey();
     const owner = new MnemonicKey();
 
     const validatorAKey = new MnemonicKey();
@@ -53,7 +52,6 @@ async function main() {
             Testkit.walletToAccountRequest("a", aKey),
             Testkit.walletToAccountRequest("b", bKey),
             Testkit.walletToAccountRequest("c", cKey),
-            Testkit.walletToAccountRequest("d", dKey),
             Testkit.walletToAccountRequest("valA", validatorAKey),
             Testkit.walletToAccountRequest("valB", validatorBKey),
             Testkit.walletToAccountRequest("valC", validatorCKey),
@@ -279,50 +277,38 @@ async function main() {
         response.validators.map((val) => val.validator_address),
         testkit.deriveMantle()
     );
-    //block 67
+    //block 29
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
 
-    //block 68
+    //block 30
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
 
-    await mustPass(anc.transfer_cw20_token(a, dKey.accAddress, 100000000000))
-
-    //block 69
+    //block 31
     await mustPass(basset.bond(a, 20000000000000, validators[0].validator_address))
 
-    //block 70
-    await mustPass(basset.bond(a, 333333333333, validators[1].validator_address))
+    //block 32 - 40
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
 
-    //block 71
-    await mustPass(basset.bond(a, 333333333333, validators[2].validator_address))
-
-    //block 72
-    await mustPass(basset.bond(a, 333333333333, validators[3].validator_address))
-
-    //block 73
-    await mustPass(basset.deregister_validator(ownerWallet, validators[1].validator_address))
-
-    //block 74 - 80
-    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 7))
-
-    //block 81 - 85
+    //block 41~45
     // deregister oracle vote and waste 5 blocks
     const prevotesToClear = initialPrevotes[0]
     const votesToClear = initialVotes[0]
 
     await testkit.clearAutomaticTx(prevotesToClear.id)
     await testkit.clearAutomaticTx(votesToClear.id)
-    await repeat(5, async () => {
+    await repeat(10, async () => {
         await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
     })
 
-    //block 86 - 90
-    // Oracle slashing happen at the block 89
+    //block 46 - 50
+    // Oracle slashing happen at the block 49
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 5))
 
-    //block 91 unjail & revive oracle
+    //block 51 unjail & revive oracle
     // unjail & re-register oracle votes
     await mustPass(unjail(valAWallet))
+    console.log("saving state...")
+    fs.writeFileSync("4_block51_state.json", JSON.stringify(await mantleState.getState(), null, 2))
 
     const currentBlockHeight = await mantleState.getCurrentBlockHeight()
 
@@ -342,49 +328,86 @@ async function main() {
         currentBlockHeight + 1
     ))
 
-    //block 92 - 94
+    //block 52 - 54
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 3))
 
-    //block 95
+    //block 55
     await mustPass(basset.bond(a, 20000000000000, validators[0].validator_address))
-    await mustPass(basset.bond(b, 20000000000000, validators[0].validator_address))
-    await mustPass(basset.bond(c, 20000000000000, validators[0].validator_address))
 
-    //block 97
+    //block 56
+    await mustPass(basset.transfer_cw20_token(a, b, 10000000))
+
+    //block 57
     await basset.send_cw20_token(
         a,
-        333333333333,
+        20000000000000,
         { unbond: {} },
         basset.contractInfo["anchor_basset_hub"].contractAddress
     )
 
-    //block 98
+    //block 58
     await mustPass(basset.send_cw20_token(
         a,
-        333333333333,
+        1000000,
         { unbond: {} },
         basset.contractInfo["anchor_basset_hub"].contractAddress
     ))
 
-    //block 99 - 159
-    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 51))
+    //block 59 - 66
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 8))
 
-    //block 159
-    await mustPass(basset.send_cw20_token(
-        a,
-        333333333333,
-        { unbond: {} },
-        basset.contractInfo["anchor_basset_hub"].contractAddress
+    //block 67
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+    //unbond 1
+
+    //block 68 - 89
+    //oracle slashing happen at the block 79
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 22))
+
+    // unjail & re-register oracle votes
+    //block 90
+    await mustPass(unjail(valAWallet))
+    console.log("saving state...")
+    fs.writeFileSync("4_block90_state.json", JSON.stringify(await mantleState.getState(), null, 2))
+
+    const currentBlockHeight2 = await mantleState.getCurrentBlockHeight()
+
+    // // register vote for valA
+    const previousVote2 = await testkit.registerAutomaticTx(registerChainOracleVote(
+        validators[0].account_name,
+        validators[0].Msg.delegator_address,
+        validators[0].Msg.validator_address,
+        currentBlockHeight2 + 2,
     ))
 
-    //block 160
+    // register votes
+    const previousPrevote2 = await testkit.registerAutomaticTx(registerChainOraclePrevote(
+        validators[0].account_name,
+        validators[0].Msg.delegator_address,
+        validators[0].Msg.validator_address,
+        currentBlockHeight2 + 1
+    ))
+
+    //block 91 - 119
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 29))
+
+    //block 120
     await mustPass(basset.finish(a))
 
-    //block 161
-    await mustPass(moneyMarket.deposit_stable(b, 10000000000000))
+    //block 121
+    await mustPass(moneyMarket.deposit_stable(b, 1000000000000))
 
-    //block 163
-    const custody = moneyMarket.contractInfo["moneymarket_custody_bluna"].contractAddress;
+    //block 122
+    const marketAddr = moneyMarket.contractInfo["moneymarket_market"].contractAddress;
+    await mustPass(moneyMarket.send_cw20_token(
+        b,
+        300000000000,
+        { redeem_stable: {} },
+        marketAddr
+    ))
+
+    //block 123
+    const custody = moneyMarket.contractInfo["moneymarket_custody"].contractAddress;
     await mustPass(basset.send_cw20_token(
         a,
         3000000000000,
@@ -392,61 +415,105 @@ async function main() {
         custody
     ))
 
-    await mustPass(basset.send_cw20_token(
-        b,
-        3000000000000,
-        { deposit_collateral: {} },
-        custody
-    ))
+    //block 124
+    await mustPass(moneyMarket.overseer_lock_collateral(a, [[basset.contractInfo["anchor_basset_token"].contractAddress, "2000000000000"]]))
 
-    await mustPass(basset.send_cw20_token(
-        c,
-        3000000000000,
-        { deposit_collateral: {} },
-        custody
-    ))
+    //block 125
+    await mustFail(moneyMarket.overseer_lock_collateral(a, [[basset.contractInfo["anchor_basset_token"].contractAddress, "1500000000000"]]))
 
+    //block 126
+    await mustFail(moneyMarket.borrow_stable(a, 1500000000000, undefined))
 
-    //block 166
-    await mustPass(moneyMarket.overseer_lock_collateral(
-        a, [[basset.contractInfo["anchor_basset_token"].contractAddress, "2000000000000"]])
-    )
-    await mustPass(moneyMarket.overseer_lock_collateral(
-        b, [[basset.contractInfo["anchor_basset_token"].contractAddress, "2000000000000"]])
-    )
-    await mustPass(moneyMarket.overseer_lock_collateral(
-        c, [[basset.contractInfo["anchor_basset_token"].contractAddress, "2000000000000"]])
-    )
+    //block 127
+    await mustPass(moneyMarket.borrow_stable(a, 300000000000, undefined))
 
-    //block 169
-    await mustPass(moneyMarket.borrow_stable(a, 100000000000, undefined))
-    await mustPass(moneyMarket.borrow_stable(b, 100000000000, undefined))
-    await mustPass(moneyMarket.borrow_stable(c, 100000000000, undefined))
-
-    //block 170
+    //block 128
     await mustPass(basset.update_global_index(a))
 
-    await testkit.clearAllAutomaticTxs()
+    //block 129
+    await mustPass(moneyMarket.execute_epoch_operations(a))
 
-    // //block 171
-    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 20000))
+    // block 130
+    await mustFail(moneyMarket.send_cw20_token(
+        b,
+        50000000000000,
+        { redeem_stable: {} },
+        moneyMarket.contractInfo["moneymarket_market"].contractAddress
+    ))
 
-    await mustPass(moneyMarket.repay_stable(a, 10000000000))
-    await mustPass(moneyMarket.repay_stable(b, 10000000000))
-    await mustPass(moneyMarket.repay_stable(c, 10000000000))
+    //block 131
+    await mustPass(moneyMarket.deposit_stable(b, 1000000))
 
-    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 20000))
-    // // stop auto injection
-    // await testkit.clearAutomaticInjection()
+    //block 132
+    await mustPass(moneyMarket.overseer_unlock_collateral(a, [[basset.contractInfo["anchor_basset_token"].contractAddress, "100000000000"]]))
 
-    await mustPass(moneyMarket.market_claim_rewards(c))
-    await mustPass(moneyMarket.market_claim_rewards(b))
-    await mustPass(moneyMarket.market_claim_rewards(a))
-    // await testkit.inject()
+    //block 133
+    await mustFail(moneyMarket.overseer_unlock_collateral(a, [[basset.contractInfo["anchor_basset_token"].contractAddress, "10000000000000"]]))
 
-    // await testkit.registerAutomaticInjection({
-    //     validator_rounds: ["valB", "valC", "valD", "valA"],
-    // })
+    //block 134
+    await mustPass(moneyMarket.withdraw_collateral(a, 150000000000))
+
+    //block 135
+    await mustFail(moneyMarket.withdraw_collateral(a, 990000000000))
+
+    //block 136-149
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+
+    console.log("saving state...")
+    fs.writeFileSync("4_block149_state.json", JSON.stringify(await mantleState.getState(), null, 2))
+
+    //block 150
+    await mustPass(basset.update_global_index(a))
+
+    //block 151
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 152
+    await mustPass(moneyMarket.borrow_stable(a, 300000000000, undefined))
+
+    //block 153 - 165
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 13))
+
+    //block 166
+    await mustPass(basset.update_global_index(a))
+
+    //block 167
+    await mustPass(moneyMarket.execute_epoch_operations(a))
+
+    //block 168
+    await mustFail(moneyMarket.overseer_unlock_collateral(a, [[basset.contractInfo["anchor_basset_token"].contractAddress, "30000000000"]]))
+
+    // block 169
+    await mustPass(moneyMarket.liquidation_submit_bid(c, basset.contractInfo["anchor_basset_token"].contractAddress, "0.2", "100000000000uusd"))
+
+    // block 170 
+    await mustFail(moneyMarket.liquidate_collateral(c, aKey.accAddress))
+    await testkit.clearAutomaticTx(previousOracleFeed.id)
+
+    //block 172
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+
+    await mustFail(moneyMarket.borrow_stable(a, 100, undefined))
+    await mustFail(moneyMarket.repay_stable(a, 100))
+    await mustFail(moneyMarket.overseer_lock_collateral(a,
+        [[basset.contractInfo["anchor_basset_token"].contractAddress, "100"]]))
+    await mustFail(moneyMarket.overseer_unlock_collateral(a,
+        [[basset.contractInfo["anchor_basset_token"].contractAddress, "100"]]))
+
+    const previousOracleFeed2 = await testkit.registerAutomaticTx(configureMMOracle(
+        owner,
+        anchor.moneyMarket.contractInfo["moneymarket_oracle"].contractAddress,
+        anchor.bAsset.contractInfo["anchor_basset_token"].contractAddress,
+        0.18867924528301886792452830188679245
+    ))
+    // // change MM oracle price to 0.75
+
+    // block 173
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+    //한블록 더 써야 하는 이유는 ,오라클 바뀌는 것 보다 autotx관련 오퍼레이션이 뒤에 들어가기 때문
+
+    // block 174
+    await mustFail(moneyMarket.liquidate_collateral(c, aKey.accAddress))
 }
 
 main()
@@ -454,12 +521,20 @@ main()
     .then(async () => {
         console.log("saving state...");
         fs.writeFileSync(
-            "autotxexit_action.json",
+            "liquidationpricechange_action.json",
             JSON.stringify(getRecord(), null, 2)
         );
         fs.writeFileSync(
-            "autotxexit_state.json",
+            "liquidationpricechange_state.json",
             JSON.stringify(await mantleState.getState(), null, 2)
         );
     })
     .catch(console.log);
+
+
+
+
+
+
+
+

@@ -160,7 +160,7 @@ export default class MoneyMarket {
         stable_denom: params.stable_denom || "uusd",
         safe_ratio: params.safeRatio?.toString() || "0.8",
         bid_fee: params.bid_fee || "0.01",
-        max_premium_rate: params.max_premium_rate || "0.2",
+        max_premium_rate: params.max_premium_rate || "0.3",
         // min_liquidation: `${minLiquidation}`,
         liquidation_threshold: params.liquidationThreshold || "200",
         price_timeframe: params.price_timeframe || 60,

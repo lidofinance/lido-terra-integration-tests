@@ -33,12 +33,11 @@ let mantleState: MantleState;
 
 async function main() {
     const testkit = new Testkit("http://localhost:11317");
-    const genesis = require("../testkit/genesis2.json");
+    const genesis = require("../testkit/genesis.json");
 
     const aKey = new MnemonicKey();
     const bKey = new MnemonicKey();
     const cKey = new MnemonicKey();
-    const dKey = new MnemonicKey();
     const owner = new MnemonicKey();
 
     const validatorAKey = new MnemonicKey();
@@ -53,7 +52,6 @@ async function main() {
             Testkit.walletToAccountRequest("a", aKey),
             Testkit.walletToAccountRequest("b", bKey),
             Testkit.walletToAccountRequest("c", cKey),
-            Testkit.walletToAccountRequest("d", dKey),
             Testkit.walletToAccountRequest("valA", validatorAKey),
             Testkit.walletToAccountRequest("valB", validatorBKey),
             Testkit.walletToAccountRequest("valC", validatorCKey),
@@ -279,174 +277,116 @@ async function main() {
         response.validators.map((val) => val.validator_address),
         testkit.deriveMantle()
     );
-    //block 67
+
+
+    //block 29
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
 
-    //block 68
+    //block 30
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
 
-    await mustPass(anc.transfer_cw20_token(a, dKey.accAddress, 100000000000))
-
-    //block 69
+    //block 31
     await mustPass(basset.bond(a, 20000000000000, validators[0].validator_address))
 
-    //block 70
-    await mustPass(basset.bond(a, 333333333333, validators[1].validator_address))
-
-    //block 71
-    await mustPass(basset.bond(a, 333333333333, validators[2].validator_address))
-
-    //block 72
-    await mustPass(basset.bond(a, 333333333333, validators[3].validator_address))
-
-    //block 73
-    await mustPass(basset.deregister_validator(ownerWallet, validators[1].validator_address))
-
-    //block 74 - 80
-    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 7))
-
-    //block 81 - 85
-    // deregister oracle vote and waste 5 blocks
-    const prevotesToClear = initialPrevotes[0]
-    const votesToClear = initialVotes[0]
-
-    await testkit.clearAutomaticTx(prevotesToClear.id)
-    await testkit.clearAutomaticTx(votesToClear.id)
-    await repeat(5, async () => {
-        await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
-    })
-
-    //block 86 - 90
-    // Oracle slashing happen at the block 89
-    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 5))
-
-    //block 91 unjail & revive oracle
-    // unjail & re-register oracle votes
-    await mustPass(unjail(valAWallet))
-
-    const currentBlockHeight = await mantleState.getCurrentBlockHeight()
-
-    // // register vote for valA
-    const previousVote = await testkit.registerAutomaticTx(registerChainOracleVote(
-        validators[0].account_name,
-        validators[0].Msg.delegator_address,
-        validators[0].Msg.validator_address,
-        currentBlockHeight + 2,
-    ))
-
-    // register votes
-    const previousPrevote = await testkit.registerAutomaticTx(registerChainOraclePrevote(
-        validators[0].account_name,
-        validators[0].Msg.delegator_address,
-        validators[0].Msg.validator_address,
-        currentBlockHeight + 1
-    ))
-
-    //block 92 - 94
+    //block 32 - 34
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 3))
 
-    //block 95
+    //success test
+    //35
     await mustPass(basset.bond(a, 20000000000000, validators[0].validator_address))
-    await mustPass(basset.bond(b, 20000000000000, validators[0].validator_address))
-    await mustPass(basset.bond(c, 20000000000000, validators[0].validator_address))
+    //36
+    await mustPass(moneyMarket.liquidation_submit_bid(c, basset.contractInfo["anchor_basset_token"].contractAddress, "0.2", "5000000uusd"))
+    //37
+    await mustPass(moneyMarket.liquidation_retract_bid(c, basset.contractInfo["anchor_basset_token"].contractAddress, "1000000"))
+    //38
+    await mustPass(moneyMarket.liquidation_retract_bid(c, basset.contractInfo["anchor_basset_token"].contractAddress))
+    //39
+    await mustPass(moneyMarket.liquidation_submit_bid(c, basset.contractInfo["anchor_basset_token"].contractAddress, "0.2", "5000000uusd"))
+    //40
+    await mustPass(basset.send_cw20_token(a, 1000000, {
+        execute_bid: {
+            liquidator: c.key.accAddress,
+            repay_addr: a.key.accAddress,
+            fee_addr: a.key.accAddress
 
-    //block 97
-    await basset.send_cw20_token(
-        a,
-        333333333333,
-        { unbond: {} },
-        basset.contractInfo["anchor_basset_hub"].contractAddress
-    )
+        }
+    }, moneyMarket.contractInfo["moneymarket_liquidation"].contractAddress))
 
-    //block 98
-    await mustPass(basset.send_cw20_token(
-        a,
-        333333333333,
-        { unbond: {} },
-        basset.contractInfo["anchor_basset_hub"].contractAddress
+    //fail test
+    //41 
+    await mustFail(moneyMarket.liquidation_submit_bid(c, basset.contractInfo["anchor_basset_token"].contractAddress, "0.2", "2000000ukrw"))
+    //42
+    await mustFail(moneyMarket.liquidation_retract_bid(c, basset.contractInfo["anchor_basset_token"].contractAddress, "1000000"))
+    //43
+    await mustPass(moneyMarket.liquidation_retract_bid(c, basset.contractInfo["anchor_basset_token"].contractAddress))
+    //44
+    await mustPass(moneyMarket.liquidation_submit_bid(c, basset.contractInfo["anchor_basset_token"].contractAddress, "0.2", "3000000uusd"))
+    //45
+    await mustFail(basset.send_cw20_token(a, 1000000, {
+        execute_bid: {
+            liquidator: b.key.accAddress,
+            repay_addr: a.key.accAddress,
+            fee_addr: a.key.accAddress
+        }
+    }, moneyMarket.contractInfo["moneymarket_liquidation"].contractAddress))
+
+    //allowance execute bid test
+    //46
+    await mustPass(basset.increase_allowance(a, b.key.accAddress, 5000000, { "never": {} }))
+    //47
+    await mustPass(basset.send_from_cw20_token(b, a, 1000000, {
+        execute_bid: {
+            liquidator: c.key.accAddress,
+            repay_addr: b.key.accAddress,
+            fee_addr: b.key.accAddress
+        }
+    }, moneyMarket.contractInfo["moneymarket_liquidation"].contractAddress))
+    //48-57
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+    //58 should fail as allowance expired
+    await mustFail(basset.send_from_cw20_token(b, a, 1000000, {
+        execute_bid: {
+            liquidator: c.key.accAddress,
+            repay_addr: a.key.accAddress,
+            fee_addr: a.key.accAddress
+        }
+    }, moneyMarket.contractInfo["moneymarket_liquidation"].contractAddress))
+
+    //change oracle price and test execute bid
+    //change oracle price to 0.5(previously 1)
+    //60
+    await testkit.clearAutomaticTx(previousOracleFeed.id)
+    const previousOracleFeed2 = await testkit.registerAutomaticTx(configureMMOracle(
+        owner,
+        anchor.moneyMarket.contractInfo["moneymarket_oracle"].contractAddress,
+        anchor.bAsset.contractInfo["anchor_basset_token"].contractAddress,
+        0.01
     ))
+    //need to pass at least one block
+    //61
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
 
-    //block 99 - 159
-    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 51))
+    //allowance testing
+    //62
+    await mustPass(basset.increase_allowance(a, b.key.accAddress, 5000000, { "never": {} }))
+    //63
+    await mustPass(basset.send_from_cw20_token(b, a, 1000000, {
+        execute_bid: {
+            liquidator: c.key.accAddress,
+            repay_addr: a.key.accAddress,
+            fee_addr: a.key.accAddress
+        }
+    }, moneyMarket.contractInfo["moneymarket_liquidation"].contractAddress))
+    // normal testing
+    //64
+    await mustPass(basset.send_cw20_token(a, 1000000, {
+        execute_bid: {
+            liquidator: c.key.accAddress,
+            repay_addr: a.key.accAddress,
+            fee_addr: a.key.accAddress
+        }
+    }, moneyMarket.contractInfo["moneymarket_liquidation"].contractAddress))
 
-    //block 159
-    await mustPass(basset.send_cw20_token(
-        a,
-        333333333333,
-        { unbond: {} },
-        basset.contractInfo["anchor_basset_hub"].contractAddress
-    ))
-
-    //block 160
-    await mustPass(basset.finish(a))
-
-    //block 161
-    await mustPass(moneyMarket.deposit_stable(b, 10000000000000))
-
-    //block 163
-    const custody = moneyMarket.contractInfo["moneymarket_custody_bluna"].contractAddress;
-    await mustPass(basset.send_cw20_token(
-        a,
-        3000000000000,
-        { deposit_collateral: {} },
-        custody
-    ))
-
-    await mustPass(basset.send_cw20_token(
-        b,
-        3000000000000,
-        { deposit_collateral: {} },
-        custody
-    ))
-
-    await mustPass(basset.send_cw20_token(
-        c,
-        3000000000000,
-        { deposit_collateral: {} },
-        custody
-    ))
-
-
-    //block 166
-    await mustPass(moneyMarket.overseer_lock_collateral(
-        a, [[basset.contractInfo["anchor_basset_token"].contractAddress, "2000000000000"]])
-    )
-    await mustPass(moneyMarket.overseer_lock_collateral(
-        b, [[basset.contractInfo["anchor_basset_token"].contractAddress, "2000000000000"]])
-    )
-    await mustPass(moneyMarket.overseer_lock_collateral(
-        c, [[basset.contractInfo["anchor_basset_token"].contractAddress, "2000000000000"]])
-    )
-
-    //block 169
-    await mustPass(moneyMarket.borrow_stable(a, 100000000000, undefined))
-    await mustPass(moneyMarket.borrow_stable(b, 100000000000, undefined))
-    await mustPass(moneyMarket.borrow_stable(c, 100000000000, undefined))
-
-    //block 170
-    await mustPass(basset.update_global_index(a))
-
-    await testkit.clearAllAutomaticTxs()
-
-    // //block 171
-    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 20000))
-
-    await mustPass(moneyMarket.repay_stable(a, 10000000000))
-    await mustPass(moneyMarket.repay_stable(b, 10000000000))
-    await mustPass(moneyMarket.repay_stable(c, 10000000000))
-
-    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 20000))
-    // // stop auto injection
-    // await testkit.clearAutomaticInjection()
-
-    await mustPass(moneyMarket.market_claim_rewards(c))
-    await mustPass(moneyMarket.market_claim_rewards(b))
-    await mustPass(moneyMarket.market_claim_rewards(a))
-    // await testkit.inject()
-
-    // await testkit.registerAutomaticInjection({
-    //     validator_rounds: ["valB", "valC", "valD", "valA"],
-    // })
 }
 
 main()
@@ -454,11 +394,11 @@ main()
     .then(async () => {
         console.log("saving state...");
         fs.writeFileSync(
-            "autotxexit_action.json",
+            "liquidationtest_action.json",
             JSON.stringify(getRecord(), null, 2)
         );
         fs.writeFileSync(
-            "autotxexit_state.json",
+            "liquidationtest_state.json",
             JSON.stringify(await mantleState.getState(), null, 2)
         );
     })

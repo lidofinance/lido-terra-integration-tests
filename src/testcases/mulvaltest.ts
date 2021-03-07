@@ -33,14 +33,14 @@ let mantleState: MantleState;
 
 async function main() {
     const testkit = new Testkit("http://localhost:11317");
-    const genesis = require("../testkit/genesis2.json");
+    const genesis = require("../testkit/genesis.json");
 
     const aKey = new MnemonicKey();
     const bKey = new MnemonicKey();
     const cKey = new MnemonicKey();
-    const dKey = new MnemonicKey();
     const owner = new MnemonicKey();
 
+    const valKeys = new Array(26).fill(true).map(() => new MnemonicKey())
     const validatorAKey = new MnemonicKey();
     const validatorBKey = new MnemonicKey();
     const validatorCKey = new MnemonicKey();
@@ -50,41 +50,20 @@ async function main() {
     const response = await testkit.init({
         genesis: genesis,
         accounts: [
+            ...valKeys.map((k, i) => Testkit.walletToAccountRequest(`val${i}`, k)),
+            Testkit.walletToAccountRequest("owner", owner),
+            Testkit.walletToAccountRequest("gasStation", gasStation),
             Testkit.walletToAccountRequest("a", aKey),
             Testkit.walletToAccountRequest("b", bKey),
             Testkit.walletToAccountRequest("c", cKey),
-            Testkit.walletToAccountRequest("d", dKey),
-            Testkit.walletToAccountRequest("valA", validatorAKey),
-            Testkit.walletToAccountRequest("valB", validatorBKey),
-            Testkit.walletToAccountRequest("valC", validatorCKey),
-            Testkit.walletToAccountRequest("valD", validatorDKey),
-            Testkit.walletToAccountRequest("owner", owner),
-            Testkit.walletToAccountRequest("gasStation", gasStation),
         ],
-        validators: [
-            Testkit.validatorInitRequest(
-                "valA",
-                new Coin("uluna", new Int(1000000000000)),
-                new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))
-            ),
-            Testkit.validatorInitRequest(
-                "valB",
-                new Coin("uluna", new Int(1000000000000)),
-                new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))
-            ),
-            Testkit.validatorInitRequest(
-                "valC",
-                new Coin("uluna", new Int(1000000000000)),
-                new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))
-            ),
-            Testkit.validatorInitRequest(
-                "valD",
-                new Coin("uluna", new Int(1000000000000)),
-                new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))
-            ),
-        ],
+        validators: valKeys.map((_, i) => Testkit.validatorInitRequest(
+            `val${i}`,
+            new Coin("uluna", new Int(1000000000000)),
+            new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))
+        )),
         auto_inject: {
-            validator_rounds: ["valB", "valC", "valD", "valA"],
+            validator_rounds: valKeys.map((_, i) => `val${(i + 1) % 26}`)
         },
         auto_tx: [
             // fee generator
@@ -113,7 +92,7 @@ async function main() {
     await testkit.inject();
 
     // register oracle votes
-    const validatorNames = ["valA", "valB", "valC", "valD"];
+    // const validatorNames = ["valA", "valB", "valC", "valD", "valE", "valF", "valG", "valH", "valI", "valJ", "valK", "valL", "valM", "valN", "valO", "valP", "valQ", "valR", "valS", "valT", "valU", "valV", "valW", "valX", "valY", "valZ"];
     // register votes
     const initialVotes = await Promise.all(
         validators.map(async (validator) =>
@@ -146,7 +125,7 @@ async function main() {
     const b = new Wallet(lcd, bKey);
     const c = new Wallet(lcd, cKey);
 
-    const valAWallet = new Wallet(lcd, validatorAKey);
+    const valAWallet = new Wallet(lcd, valKeys[0]);
 
     // store & instantiate contracts
     const ownerWallet = new Wallet(lcd, owner);
@@ -178,31 +157,15 @@ async function main() {
 
     // await testkit.inject(validators[0].validator_address) -> 아무 Tx 없이 지나가는 경우의 테스팅
 
-    await mustPass(
-        anchor.bAsset.register_validator(
-            ownerWallet,
-            validators[0].validator_address
-        )
-    );
-    //erase these
-    await mustPass(
-        anchor.bAsset.register_validator(
-            ownerWallet,
-            validators[1].validator_address
-        )
-    );
-    await mustPass(
-        anchor.bAsset.register_validator(
-            ownerWallet,
-            validators[2].validator_address
-        )
-    );
-    await mustPass(
-        anchor.bAsset.register_validator(
-            ownerWallet,
-            validators[3].validator_address
-        )
-    );
+    for (var i = 0; i < 25; i++) {
+        await mustPass(
+            anchor.bAsset.register_validator(
+                ownerWallet,
+                validators[i].validator_address
+            )
+        );
+    }
+
 
     const basset = anchor.bAsset;
     const moneyMarket = anchor.moneyMarket;
@@ -285,26 +248,6 @@ async function main() {
     //block 68
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
 
-    await mustPass(anc.transfer_cw20_token(a, dKey.accAddress, 100000000000))
-
-    //block 69
-    await mustPass(basset.bond(a, 20000000000000, validators[0].validator_address))
-
-    //block 70
-    await mustPass(basset.bond(a, 333333333333, validators[1].validator_address))
-
-    //block 71
-    await mustPass(basset.bond(a, 333333333333, validators[2].validator_address))
-
-    //block 72
-    await mustPass(basset.bond(a, 333333333333, validators[3].validator_address))
-
-    //block 73
-    await mustPass(basset.deregister_validator(ownerWallet, validators[1].validator_address))
-
-    //block 74 - 80
-    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 7))
-
     //block 81 - 85
     // deregister oracle vote and waste 5 blocks
     const prevotesToClear = initialPrevotes[0]
@@ -343,110 +286,98 @@ async function main() {
     ))
 
     //block 92 - 94
+    //bond
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 3))
+    for (var j = 0; j < 3; j++) {
+        for (var i = 0; i < 25; i++) {
+            await mustPass(basset.bond(a, 2000000, validators[i].validator_address))
+        }
+    }
+
+    for (var j = 0; j < 3; j++) {
+        for (var i = 0; i < 25; i++) {
+            await mustPass(basset.bond(b, 2000000, validators[i].validator_address))
+        }
+    }
+
+    for (var j = 0; j < 3; j++) {
+        for (var i = 0; i < 25; i++) {
+            await mustPass(basset.bond(c, 2000000, validators[i].validator_address))
+        }
+    }
 
     //block 95
-    await mustPass(basset.bond(a, 20000000000000, validators[0].validator_address))
-    await mustPass(basset.bond(b, 20000000000000, validators[0].validator_address))
-    await mustPass(basset.bond(c, 20000000000000, validators[0].validator_address))
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 50))
 
-    //block 97
-    await basset.send_cw20_token(
-        a,
-        333333333333,
-        { unbond: {} },
-        basset.contractInfo["anchor_basset_hub"].contractAddress
-    )
+    await mustPass(basset.update_global_index(a))
 
-    //block 98
-    await mustPass(basset.send_cw20_token(
-        a,
-        333333333333,
-        { unbond: {} },
-        basset.contractInfo["anchor_basset_hub"].contractAddress
-    ))
+    for (var j = 0; j < 3; j++) {
+        for (var i = 0; i < 25; i++) {
+            await basset.send_cw20_token(
+                a,
+                1000000,
+                { unbond: {} },
+                basset.contractInfo["anchor_basset_hub"].contractAddress
+            )
+        }
+    }
+
+    for (var j = 0; j < 3; j++) {
+        for (var i = 0; i < 25; i++) {
+            await basset.send_cw20_token(
+                b,
+                1000000,
+                { unbond: {} },
+                basset.contractInfo["anchor_basset_hub"].contractAddress
+            )
+        }
+    }
+
+    for (var j = 0; j < 3; j++) {
+        for (var i = 0; i < 25; i++) {
+            await basset.send_cw20_token(
+                c,
+                1000000,
+                { unbond: {} },
+                basset.contractInfo["anchor_basset_hub"].contractAddress
+            )
+        }
+    }
 
     //block 99 - 159
-    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 51))
-
-    //block 159
-    await mustPass(basset.send_cw20_token(
-        a,
-        333333333333,
-        { unbond: {} },
-        basset.contractInfo["anchor_basset_hub"].contractAddress
-    ))
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
 
     //block 160
     await mustPass(basset.finish(a))
-
-    //block 161
-    await mustPass(moneyMarket.deposit_stable(b, 10000000000000))
-
-    //block 163
-    const custody = moneyMarket.contractInfo["moneymarket_custody_bluna"].contractAddress;
-    await mustPass(basset.send_cw20_token(
-        a,
-        3000000000000,
-        { deposit_collateral: {} },
-        custody
-    ))
-
-    await mustPass(basset.send_cw20_token(
-        b,
-        3000000000000,
-        { deposit_collateral: {} },
-        custody
-    ))
-
-    await mustPass(basset.send_cw20_token(
-        c,
-        3000000000000,
-        { deposit_collateral: {} },
-        custody
-    ))
-
-
-    //block 166
-    await mustPass(moneyMarket.overseer_lock_collateral(
-        a, [[basset.contractInfo["anchor_basset_token"].contractAddress, "2000000000000"]])
-    )
-    await mustPass(moneyMarket.overseer_lock_collateral(
-        b, [[basset.contractInfo["anchor_basset_token"].contractAddress, "2000000000000"]])
-    )
-    await mustPass(moneyMarket.overseer_lock_collateral(
-        c, [[basset.contractInfo["anchor_basset_token"].contractAddress, "2000000000000"]])
-    )
-
-    //block 169
-    await mustPass(moneyMarket.borrow_stable(a, 100000000000, undefined))
-    await mustPass(moneyMarket.borrow_stable(b, 100000000000, undefined))
-    await mustPass(moneyMarket.borrow_stable(c, 100000000000, undefined))
+    await mustPass(basset.finish(b))
+    await mustPass(basset.finish(c))
 
     //block 170
     await mustPass(basset.update_global_index(a))
 
-    await testkit.clearAllAutomaticTxs()
+    for (var i = 0; i < 5; i++) {
+        await mustPass(basset.deregister_validator(ownerWallet, validators[i].validator_address))
+    }
 
-    // //block 171
-    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 20000))
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 50))
 
-    await mustPass(moneyMarket.repay_stable(a, 10000000000))
-    await mustPass(moneyMarket.repay_stable(b, 10000000000))
-    await mustPass(moneyMarket.repay_stable(c, 10000000000))
+    for (var i = 5; i < 10; i++) {
+        await mustPass(basset.deregister_validator(ownerWallet, validators[i].validator_address))
+    }
 
-    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 20000))
-    // // stop auto injection
-    // await testkit.clearAutomaticInjection()
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 50))
 
-    await mustPass(moneyMarket.market_claim_rewards(c))
-    await mustPass(moneyMarket.market_claim_rewards(b))
-    await mustPass(moneyMarket.market_claim_rewards(a))
-    // await testkit.inject()
+    for (var i = 15; i < 20; i++) {
+        await mustPass(basset.deregister_validator(ownerWallet, validators[i].validator_address))
+    }
 
-    // await testkit.registerAutomaticInjection({
-    //     validator_rounds: ["valB", "valC", "valD", "valA"],
-    // })
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 50))
+
+    for (var i = 20; i < 25; i++) {
+        await mustPass(basset.deregister_validator(ownerWallet, validators[i].validator_address))
+    }
+
+    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
 }
 
 main()
@@ -454,11 +385,11 @@ main()
     .then(async () => {
         console.log("saving state...");
         fs.writeFileSync(
-            "autotxexit_action.json",
+            "mulvaltest_action.json",
             JSON.stringify(getRecord(), null, 2)
         );
         fs.writeFileSync(
-            "autotxexit_state.json",
+            "mulvaltest_state.json",
             JSON.stringify(await mantleState.getState(), null, 2)
         );
     })

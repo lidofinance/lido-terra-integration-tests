@@ -53,7 +53,7 @@ export class MantleState {
             getCoreState(this.client, this.addresses, this.validators, this.contracts),
             getBlunaState(this.client, this.addresses, this.validators, this.contracts),
             getANCState(this.client, this.addresses, this.validators, this.contracts)
-        ]).then(([mm, core,bluna , anc]) => ({
+        ]).then(([mm, core, bluna, anc]) => ({
             ...mm,
             ...core,
             ...bluna,

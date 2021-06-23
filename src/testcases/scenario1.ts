@@ -296,7 +296,8 @@ async function main() {
   await mustPass(basset.bond(a, 333333333333, validators[3].validator_address))
 
   //block 73
-  await mustPass(basset.remove_validator(ownerWallet, validators[0].validator_address))
+  //FIX
+  // await mustPass(basset.remove_validator(ownerWallet, validators[0].validator_address))
 
   //block 74 - 80
   await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 7))
@@ -426,7 +427,8 @@ async function main() {
   await mustPass(moneyMarket.borrow_stable(a, 500000000000, undefined))
 
   //block 170
-  await mustPass(basset.update_global_index(a))
+  //FIX
+  // await mustPass(basset.update_global_index(a))
 
   //block 171
   await mustPass(moneyMarket.market_claim_rewards(a))

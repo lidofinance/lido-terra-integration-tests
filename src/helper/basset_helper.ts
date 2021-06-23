@@ -93,11 +93,6 @@ export default class AnchorbAsset {
       `validators_registry: { codeId: ${this.contractInfo.validators_registry.codeId}, contractAddress: "${this.contractInfo.validators_registry.contractAddress}"},`
     );
   }
-  // pub name: String,
-  // pub symbol: String,
-  // pub decimals: u8,
-  // pub initial_balances: Vec<Cw20CoinHuman>,
-  // pub mint: Option<MinterResponse>,
   public async instantiate_st_luna(
     sender: Wallet,
     params: {
@@ -119,7 +114,7 @@ export default class AnchorbAsset {
         decimals: params.decimals || 2,
         initial_balances: params.initial_balances || [],
         hub_contract: params.hub_contract || this.contractInfo.anchor_basset_hub.contractAddress,
-        // mint: params.mint,
+        mint: params.mint
       },
       undefined
     )
@@ -152,6 +147,7 @@ export default class AnchorbAsset {
         bluna_reward_contract: params.bluna_reward_contract || this.contractInfo["anchor_basset_reward"].contractAddress,
         stluna_reward_denom: "uluna",
         bluna_reward_denom: "uusd",
+        //FIX: change to real fee address?
         lido_fee_address: params.lido_fee_address || this.contractInfo["anchor_basset_token"].contractAddress,
         lido_fee_rate: "0.5",
       },
@@ -168,7 +164,6 @@ export default class AnchorbAsset {
       `anchor_basset_rewards_dispatcher: { codeId: ${this.contractInfo.anchor_basset_rewards_dispatcher.codeId}, contractAddress: "${this.contractInfo.anchor_basset_rewards_dispatcher.contractAddress}"},`
     );
 
-    
   }
 
 
@@ -339,7 +334,7 @@ export default class AnchorbAsset {
       token_address?: string;
       airdrop_registry_contract?: string;
       validators_registry?: string;
-      reward_dispatcher_contract?: string;
+      rewards_dispatcher_contract?: string;
       stluna_token_contract?: string,
     },
     fee?: StdFee
@@ -350,11 +345,8 @@ export default class AnchorbAsset {
       {
         update_config: {
           owner: undefined,
-          reward_contract: params.reward_dispatcher_contract || `${this.contractInfo["anchor_basset_rewards_dispatcher"].contractAddress}`,
+          rewards_dispatcher_contract: params.rewards_dispatcher_contract || `${this.contractInfo["anchor_basset_rewards_dispatcher"].contractAddress}`,
           stluna_token_contract: params.stluna_token_contract || `${this.contractInfo["st_luna"].contractAddress}`,
-          // reward_contract:
-          //   params.reward_address ||
-          //   `${this.contractInfo["anchor_basset_reward"].contractAddress}`,
           bluna_token_contract:
             params.token_address ||
             `${this.contractInfo["anchor_basset_token"].contractAddress}`,
@@ -370,23 +362,6 @@ export default class AnchorbAsset {
     if (isTxError(msg)) {
       throw new Error(`Couldn't run: ${msg.raw_log}`);
     }
-    // console.log({
-    //   owner: undefined,
-    //   reward_dispatcher_contract: params.reward_dispatcher_contract || `${this.contractInfo["anchor_basset_rewards_dispatcher"].contractAddress}`,
-    //   reward_contract:
-    //     params.reward_address ||
-    //     `${this.contractInfo["anchor_basset_reward"].contractAddress}`,
-    //   bluna_token_contract:
-    //     params.token_address ||
-    //     `${this.contractInfo["anchor_basset_token"].contractAddress}`,
-    //   airdrop_registry_contract:
-    //     params.airdrop_registry_contract ||
-    //     `${this.contractInfo["anchor_airdrop_registry"].contractAddress}`,
-    //   validators_registry_contract: params.validators_registry || `${this.contractInfo.validators_registry.contractAddress}`,
-    // })
-    // console.log(msg)
-    // throw new Error("lala");
-    
   }
 
   public async register_validator(

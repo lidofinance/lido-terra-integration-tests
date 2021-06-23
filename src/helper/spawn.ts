@@ -84,7 +84,6 @@ export default class Anchor {
     params?: CustomInstantiationParam,
     validators?: Array<TestkitInit.Validator>
   ): Promise<void> {
-    // validators[0].validator_address
     
     await this.bAsset.instantiate_hub(this.owner, params?.basset, fee);
     await this.bAsset.instantiate_validators_registry(this.owner, {

@@ -31,8 +31,6 @@ export const makeContractStoreQuery = (
   queryMsg: object,
   client: GraphQLClient
 ) => {
-  // console.log(contractAddress)
-  // console.log(queryMsg)
   return makeQuery(
     gql`
       query($contractAddress: String!, $queryMsg: String!) {
@@ -49,6 +47,5 @@ export const makeContractStoreQuery = (
       queryMsg: JSON.stringify(queryMsg),
     },
     client
-  
   ).then((r) => JSON.parse(r.Response.Result));
   }

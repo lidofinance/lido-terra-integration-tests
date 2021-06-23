@@ -284,16 +284,16 @@ async function main() {
   await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
 
   //block 69
-  await mustPass(basset.bond(a, 20000000000000, validators[0].validator_address))
+  await mustPass(basset.bond(a, 20000000000000))
 
   //block 70
-  await mustPass(basset.bond(a, 333333333333, validators[1].validator_address))
+  await mustPass(basset.bond(a, 333333333333))
 
   //block 71
-  await mustPass(basset.bond(a, 333333333333, validators[2].validator_address))
+  await mustPass(basset.bond(a, 333333333333))
 
   //block 72
-  await mustPass(basset.bond(a, 333333333333, validators[3].validator_address))
+  await mustPass(basset.bond(a, 333333333333))
 
   //block 73
   //FIX
@@ -343,7 +343,7 @@ async function main() {
   await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 3))
 
   //block 95
-  await mustPass(basset.bond(a, 20000000000000, validators[0].validator_address))
+  await mustPass(basset.bond(a, 20000000000000))
 
   //block 96
   await mustPass(basset.transfer_cw20_token(a, b, 10000000))

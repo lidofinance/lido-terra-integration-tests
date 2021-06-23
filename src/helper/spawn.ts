@@ -262,7 +262,7 @@ export default class Anchor {
       "uluna"
     );
 
-    await this.bAsset.bond(this.owner, 100000000000, params.basset.validator);
+    await this.bAsset.bond(this.owner, 100000000000);
 
     await this.bAsset.increase_allowance(
       this.owner,

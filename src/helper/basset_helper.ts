@@ -404,7 +404,6 @@ export default class AnchorbAsset {
   public async bond(
     sender: Wallet,
     amount: number,
-    validator: string
   ): Promise<void> {
     const coin = new Coin("uluna", amount);
     const coins = new Coins([coin]);
@@ -417,6 +416,32 @@ export default class AnchorbAsset {
         },
       },
       coins
+    );
+    if (isTxError(bondExecution)) {
+      throw new Error(`Couldn't run: ${bondExecution.raw_log}`);
+    }
+  }
+
+  public async redelegate_proxy(
+    sender: Wallet,
+    src_validator_address: string,
+    dst_validator_address: string,
+    amount: number,
+  ): Promise<void> {
+    const coin = new Coin("uluna", amount);
+    const coins = new Coins([coin]);
+    const contract = this.contractInfo["anchor_basset_hub"].contractAddress;
+    const bondExecution = await execute(
+      sender,
+      contract,
+      {
+        redelegate_proxy: {
+          src_validator: src_validator_address,
+          dst_validator: dst_validator_address,
+          amount: { amount: "100", denom: "uluna" },
+        },
+      },
+      undefined
     );
     if (isTxError(bondExecution)) {
       throw new Error(`Couldn't run: ${bondExecution.raw_log}`);

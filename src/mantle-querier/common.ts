@@ -30,8 +30,10 @@ export const makeContractStoreQuery = (
   contractAddress: string,
   queryMsg: object,
   client: GraphQLClient
-) =>
-  makeQuery(
+) => {
+  // console.log(contractAddress)
+  // console.log(queryMsg)
+  return makeQuery(
     gql`
       query($contractAddress: String!, $queryMsg: String!) {
         Response: WasmContractsContractAddressStore(
@@ -47,4 +49,6 @@ export const makeContractStoreQuery = (
       queryMsg: JSON.stringify(queryMsg),
     },
     client
+  
   ).then((r) => JSON.parse(r.Response.Result));
+  }

@@ -139,7 +139,6 @@ async function main() {
       )
     )
   );
-
   const a = new Wallet(lcd, aKey);
   const b = new Wallet(lcd, bKey);
   const c = new Wallet(lcd, cKey);
@@ -159,7 +158,8 @@ async function main() {
   const fixedFeeForInit = new StdFee(6000000, "2000000uusd");
   await anchor.instantiate(
     fixedFeeForInit,
-    setTestParams(validators[0].validator_address, a.key.accAddress)
+    setTestParams(validators[0].validator_address, a.key.accAddress),
+    validators,
   );
 
   // register oracle price feeder
@@ -176,31 +176,31 @@ async function main() {
 
   // await testkit.inject(validators[0].validator_address) -> 아무 Tx 없이 지나가는 경우의 테스팅
 
-  await mustPass(
-    anchor.bAsset.register_validator(
-      ownerWallet,
-      validators[0].validator_address
-    )
-  );
-  //erase these
-  await mustPass(
-    anchor.bAsset.register_validator(
-      ownerWallet,
-      validators[1].validator_address
-    )
-  );
-  await mustPass(
-    anchor.bAsset.register_validator(
-      ownerWallet,
-      validators[2].validator_address
-    )
-  );
-  await mustPass(
-    anchor.bAsset.register_validator(
-      ownerWallet,
-      validators[3].validator_address
-    )
-  );
+  // await mustPass(
+  //   anchor.bAsset.register_validator(
+  //     ownerWallet,
+  //     validators[0].validator_address
+  //   )
+  // );
+  // //erase these
+  // await mustPass(
+  //   anchor.bAsset.register_validator(
+  //     ownerWallet,
+  //     validators[1].validator_address
+  //   )
+  // );
+  // await mustPass(
+  //   anchor.bAsset.register_validator(
+  //     ownerWallet,
+  //     validators[2].validator_address
+  //   )
+  // );
+  // await mustPass(
+  //   anchor.bAsset.register_validator(
+  //     ownerWallet,
+  //     validators[3].validator_address
+  //   )
+  // );
 
   const basset = anchor.bAsset;
   const moneyMarket = anchor.moneyMarket;
@@ -296,7 +296,7 @@ async function main() {
   await mustPass(basset.bond(a, 333333333333, validators[3].validator_address))
 
   //block 73
-  await mustPass(basset.deregister_validator(ownerWallet, validators[1].validator_address))
+  await mustPass(basset.remove_validator(ownerWallet, validators[0].validator_address))
 
   //block 74 - 80
   await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 7))

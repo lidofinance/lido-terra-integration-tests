@@ -1,9 +1,10 @@
 import basset from "./basset_helper";
 import mMarket, { BAssetInfo } from "./money_market_helper";
 import terraswap from "./terraswap_helper";
-import { StdFee, Wallet } from "@terra-money/terra.js";
+import { StdFee, Validator, Wallet } from "@terra-money/terra.js";
 import { execute } from "./flow/execution";
 import AnchorToken from "./anchor_token_helper";
+import { Testkit, TestkitInit } from "../testkit/testkit";
 
 // https://terra-money.quip.com/lR4sAHcX3yiB/WebApp-Dev-Page-Deployment#UKCACAa6MDK
 export interface CustomInstantiationParam {
@@ -80,12 +81,22 @@ export default class Anchor {
 
   public async instantiate(
     fee?: StdFee,
-    params?: CustomInstantiationParam
+    params?: CustomInstantiationParam,
+    validators?: Array<TestkitInit.Validator>
   ): Promise<void> {
+    // validators[0].validator_address
+    
     await this.bAsset.instantiate_hub(this.owner, params?.basset, fee);
+    await this.bAsset.instantiate_validators_registry(this.owner, {
+      hub_contract: this.bAsset.contractInfo.anchor_basset_hub.contractAddress,
+      registry: validators.map((val) => {return {active:true,total_delegated: "100",address:val.validator_address}})
+    }, fee);
+    await this.bAsset.instantiate_st_luna(this.owner, {}, fee);
     await this.bAsset.instantiate_reward(this.owner, {}, fee);
     await this.bAsset.instantiate_token(this.owner, {}, fee);
     await this.bAsset.instantiate_airdrop(this.owner, {}, fee);
+    await this.bAsset.instantiate_anchor_basset_rewards_dispatcher(this.owner,{},fee)
+
     await this.bAsset.register_contracts(this.owner, {}, fee);
 
     await this.terraswap.instantiate_terraswap(this.owner, fee);

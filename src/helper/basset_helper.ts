@@ -20,6 +20,9 @@ const contracts = [
   "anchor_basset_hub",
   "anchor_basset_reward",
   "anchor_basset_token",
+  "anchor_basset_rewards_dispatcher",
+  "st_luna",
+  "validators_registry",
 ];
 
 type Expire = { at_height: number } | { at_time: number } | { never: {} };
@@ -61,6 +64,113 @@ export default class AnchorbAsset {
       Promise.resolve()
     );
   }
+
+  public async instantiate_validators_registry(
+    sender: Wallet,
+    params: {
+      registry?: Array<{ active: boolean, total_delegated?: string, address: string }>,
+      hub_contract: string,
+    },
+    fee?: StdFee,
+  ): Promise<void> {
+    const init = await instantiate(
+      sender,
+      this.contractInfo.validators_registry.codeId,
+      {
+        registry: params.registry || [],
+        hub_contract: params.hub_contract || this.contractInfo.anchor_basset_hub.contractAddress
+      },
+      undefined
+    )
+    if (isTxError(init)) {
+      throw new Error(`Couldn't instantiate: ${init.raw_log}`);
+    }
+    const contractAddress =
+      init.logs[0].eventsByType.instantiate_contract.contract_address[0];
+    this.contractInfo.validators_registry.contractAddress = contractAddress;
+
+    console.log(
+      `validators_registry: { codeId: ${this.contractInfo.validators_registry.codeId}, contractAddress: "${this.contractInfo.validators_registry.contractAddress}"},`
+    );
+  }
+  // pub name: String,
+  // pub symbol: String,
+  // pub decimals: u8,
+  // pub initial_balances: Vec<Cw20CoinHuman>,
+  // pub mint: Option<MinterResponse>,
+  public async instantiate_st_luna(
+    sender: Wallet,
+    params: {
+      name?: string,
+      symbol?: string,
+      decimals?: number,
+      initial_balances?: [],
+      mint?: null,
+      hub_contract?: string,
+    },
+    fee?: StdFee,
+  ): Promise<void> {
+    const init = await instantiate(
+      sender,
+      this.contractInfo.st_luna.codeId,
+      {
+        name: params.name || "test_name",
+        symbol: params.symbol || "AAA",
+        decimals: params.decimals || 2,
+        initial_balances: params.initial_balances || [],
+        hub_contract: params.hub_contract || this.contractInfo.anchor_basset_hub.contractAddress,
+        // mint: params.mint,
+      },
+      undefined
+    )
+    if (isTxError(init)) {
+      throw new Error(`Couldn't instantiate: ${init.raw_log}`);
+    }
+    const contractAddress =
+      init.logs[0].eventsByType.instantiate_contract.contract_address[0];
+    this.contractInfo.st_luna.contractAddress = contractAddress;
+
+    console.log(
+      `st_luna: { codeId: ${this.contractInfo.st_luna.codeId}, contractAddress: "${this.contractInfo.st_luna.contractAddress}"},`
+    );
+  }
+
+  public async instantiate_anchor_basset_rewards_dispatcher(
+    sender: Wallet,
+    params: {
+      hub_contract?: string,
+      bluna_reward_contract?: string,
+      lido_fee_address?: string,
+    },
+    fee?: StdFee,
+  ): Promise<void> {
+    const init = await instantiate(
+      sender,
+      this.contractInfo.anchor_basset_rewards_dispatcher.codeId,
+      {
+        hub_contract: params.hub_contract || this.contractInfo.anchor_basset_hub.contractAddress,
+        bluna_reward_contract: params.bluna_reward_contract || this.contractInfo["anchor_basset_reward"].contractAddress,
+        stluna_reward_denom: "uluna",
+        bluna_reward_denom: "uusd",
+        lido_fee_address: params.lido_fee_address || this.contractInfo["anchor_basset_token"].contractAddress,
+        lido_fee_rate: "0.5",
+      },
+      undefined
+    )
+    if (isTxError(init)) {
+      throw new Error(`Couldn't instantiate: ${init.raw_log}`);
+    }
+    const contractAddress =
+      init.logs[0].eventsByType.instantiate_contract.contract_address[0];
+    this.contractInfo.anchor_basset_rewards_dispatcher.contractAddress = contractAddress;
+
+    console.log(
+      `anchor_basset_rewards_dispatcher: { codeId: ${this.contractInfo.anchor_basset_rewards_dispatcher.codeId}, contractAddress: "${this.contractInfo.anchor_basset_rewards_dispatcher.contractAddress}"},`
+    );
+
+    
+  }
+
 
   public async instantiate_hub(
     sender: Wallet,
@@ -228,6 +338,9 @@ export default class AnchorbAsset {
       reward_address?: string;
       token_address?: string;
       airdrop_registry_contract?: string;
+      validators_registry?: string;
+      reward_dispatcher_contract?: string;
+      stluna_token_contract?: string,
     },
     fee?: StdFee
   ) {
@@ -237,15 +350,18 @@ export default class AnchorbAsset {
       {
         update_config: {
           owner: undefined,
-          reward_contract:
-            params.reward_address ||
-            `${this.contractInfo["anchor_basset_reward"].contractAddress}`,
-          token_contract:
+          reward_contract: params.reward_dispatcher_contract || `${this.contractInfo["anchor_basset_rewards_dispatcher"].contractAddress}`,
+          stluna_token_contract: params.stluna_token_contract || `${this.contractInfo["st_luna"].contractAddress}`,
+          // reward_contract:
+          //   params.reward_address ||
+          //   `${this.contractInfo["anchor_basset_reward"].contractAddress}`,
+          bluna_token_contract:
             params.token_address ||
             `${this.contractInfo["anchor_basset_token"].contractAddress}`,
           airdrop_registry_contract:
             params.airdrop_registry_contract ||
             `${this.contractInfo["anchor_airdrop_registry"].contractAddress}`,
+          validators_registry_contract: params.validators_registry || `${this.contractInfo.validators_registry.contractAddress}`,
         },
       },
       undefined,
@@ -254,6 +370,23 @@ export default class AnchorbAsset {
     if (isTxError(msg)) {
       throw new Error(`Couldn't run: ${msg.raw_log}`);
     }
+    // console.log({
+    //   owner: undefined,
+    //   reward_dispatcher_contract: params.reward_dispatcher_contract || `${this.contractInfo["anchor_basset_rewards_dispatcher"].contractAddress}`,
+    //   reward_contract:
+    //     params.reward_address ||
+    //     `${this.contractInfo["anchor_basset_reward"].contractAddress}`,
+    //   bluna_token_contract:
+    //     params.token_address ||
+    //     `${this.contractInfo["anchor_basset_token"].contractAddress}`,
+    //   airdrop_registry_contract:
+    //     params.airdrop_registry_contract ||
+    //     `${this.contractInfo["anchor_airdrop_registry"].contractAddress}`,
+    //   validators_registry_contract: params.validators_registry || `${this.contractInfo.validators_registry.contractAddress}`,
+    // })
+    // console.log(msg)
+    // throw new Error("lala");
+    
   }
 
   public async register_validator(
@@ -278,18 +411,18 @@ export default class AnchorbAsset {
     }
   }
 
-  public async deregister_validator(
+  public async remove_validator(
     sender: Wallet,
-    validator: string
+    validatorAddress: string
   ): Promise<void> {
-    const contract = this.contractInfo.anchor_basset_hub.contractAddress;
-    const deregisterValidatorExecution = await execute(sender, contract, {
-      deregister_validator: {
-        validator: `${validator}`,
+    const contract = this.contractInfo.validators_registry.contractAddress;
+    const removeValidatorExecution = await execute(sender, contract, {
+      remove_validator: {
+        address: `${validatorAddress}`,
       },
     });
-    if (isTxError(deregisterValidatorExecution)) {
-      throw new Error(`Couldn't run: ${deregisterValidatorExecution.raw_log}`);
+    if (isTxError(removeValidatorExecution)) {
+      throw new Error(`Couldn't run: ${removeValidatorExecution.raw_log}`);
     }
   }
 
@@ -306,7 +439,6 @@ export default class AnchorbAsset {
       contract,
       {
         bond: {
-          validator: `${validator}`,
         },
       },
       coins
@@ -382,7 +514,9 @@ export default class AnchorbAsset {
   public async update_global_index(sender: Wallet): Promise<void> {
     const contract = this.contractInfo.anchor_basset_hub.contractAddress;
     const finishExe = await execute(sender, contract, {
-      update_global_index: {},
+      update_global_index: {
+        // airdrop_hooks: null,
+      },
     });
     if (isTxError(finishExe)) {
       throw new Error(`Couldn't run: ${finishExe.raw_log}`);

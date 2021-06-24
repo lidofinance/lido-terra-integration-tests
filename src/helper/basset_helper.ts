@@ -109,8 +109,8 @@ export default class AnchorbAsset {
       sender,
       this.contractInfo.st_luna.codeId,
       {
-        name: params.name || "test_name",
-        symbol: params.symbol || "AAA",
+        name: params.name || "stLuna",
+        symbol: params.symbol || "STLUNA",
         decimals: params.decimals || 2,
         initial_balances: params.initial_balances || [],
         hub_contract: params.hub_contract || this.contractInfo.anchor_basset_hub.contractAddress,
@@ -421,6 +421,27 @@ export default class AnchorbAsset {
       throw new Error(`Couldn't run: ${bondExecution.raw_log}`);
     }
   }
+
+    public async bond_for_stluna(
+        sender: Wallet,
+        amount: number,
+    ): Promise<void> {
+        const coin = new Coin("uluna", amount);
+        const coins = new Coins([coin]);
+        const contract = this.contractInfo["anchor_basset_hub"].contractAddress;
+        const bondExecution = await execute(
+            sender,
+            contract,
+            {
+                bond_for_st_luna: {
+                },
+            },
+            coins
+        );
+        if (isTxError(bondExecution)) {
+            throw new Error(`Couldn't run: ${bondExecution.raw_log}`);
+        }
+    }
 
   public async redelegate_proxy(
     sender: Wallet,

@@ -22,6 +22,8 @@ import { MantleState } from "../mantle-querier/MantleState";
 import { Testkit } from "../testkit/testkit";
 import { configureMMOracle } from "../helper/oracle/mm-oracle";
 import { setTestParams } from "../parameters/contract-tests-parameteres";
+import {makeContractStoreQuery} from "../mantle-querier/common";
+import {GraphQLClient} from "graphql-request/dist";
 
 let mantleState: MantleState;
 
@@ -179,23 +181,23 @@ async function main() {
         bAssetToken: basset.contractInfo["anchor_basset_token"].contractAddress,
         bAssetReward: basset.contractInfo["anchor_basset_reward"].contractAddress,
         bAssetAirdrop:
-            basset.contractInfo["anchor_airdrop_registry"].contractAddress,
+        basset.contractInfo["anchor_airdrop_registry"].contractAddress,
         mmInterest:
-            moneyMarket.contractInfo["moneymarket_interest_model"].contractAddress,
+        moneyMarket.contractInfo["moneymarket_interest_model"].contractAddress,
         mmOracle: moneyMarket.contractInfo["moneymarket_oracle"].contractAddress,
         mmMarket: moneyMarket.contractInfo["moneymarket_market"].contractAddress,
         mmOverseer:
-            moneyMarket.contractInfo["moneymarket_overseer"].contractAddress,
+        moneyMarket.contractInfo["moneymarket_overseer"].contractAddress,
         mmCustody:
-            moneyMarket.contractInfo["moneymarket_custody_bluna"].contractAddress,
+        moneyMarket.contractInfo["moneymarket_custody_bluna"].contractAddress,
         mmLiquidation:
-            moneyMarket.contractInfo["moneymarket_liquidation"].contractAddress,
+        moneyMarket.contractInfo["moneymarket_liquidation"].contractAddress,
         mmdistribution:
-            moneyMarket.contractInfo["moneymarket_distribution_model"]
-                .contractAddress,
+        moneyMarket.contractInfo["moneymarket_distribution_model"]
+            .contractAddress,
         anchorToken: moneyMarket.contractInfo["anchorToken"].contractAddress,
         terraswapFactory:
-            terraswap.contractInfo["terraswap_factory"].contractAddress,
+        terraswap.contractInfo["terraswap_factory"].contractAddress,
         terraswapPair: "whateva",
         gov: anc.contractInfo["gov"].contractAddress,
         faucet: anc.contractInfo["faucet"].contractAddress,
@@ -212,23 +214,23 @@ async function main() {
             bAssetToken: basset.contractInfo["anchor_basset_token"].contractAddress,
             bAssetReward: basset.contractInfo["anchor_basset_reward"].contractAddress,
             bAssetAirdrop:
-                basset.contractInfo["anchor_airdrop_registry"].contractAddress,
+            basset.contractInfo["anchor_airdrop_registry"].contractAddress,
             mmInterest:
-                moneyMarket.contractInfo["moneymarket_interest_model"].contractAddress,
+            moneyMarket.contractInfo["moneymarket_interest_model"].contractAddress,
             mmOracle: moneyMarket.contractInfo["moneymarket_oracle"].contractAddress,
             mmMarket: moneyMarket.contractInfo["moneymarket_market"].contractAddress,
             mmOverseer:
-                moneyMarket.contractInfo["moneymarket_overseer"].contractAddress,
+            moneyMarket.contractInfo["moneymarket_overseer"].contractAddress,
             mmCustody:
-                moneyMarket.contractInfo["moneymarket_custody_bluna"].contractAddress,
+            moneyMarket.contractInfo["moneymarket_custody_bluna"].contractAddress,
             mmLiquidation:
-                moneyMarket.contractInfo["moneymarket_liquidation"].contractAddress,
+            moneyMarket.contractInfo["moneymarket_liquidation"].contractAddress,
             mmdistribution:
-                moneyMarket.contractInfo["moneymarket_distribution_model"]
-                    .contractAddress,
+            moneyMarket.contractInfo["moneymarket_distribution_model"]
+                .contractAddress,
             anchorToken: moneyMarket.contractInfo["anchorToken"].contractAddress,
             terraswapFactory:
-                terraswap.contractInfo["terraswap_factory"].contractAddress,
+            terraswap.contractInfo["terraswap_factory"].contractAddress,
             terraswapPair: "whateva",
             gov: anc.contractInfo["gov"].contractAddress,
             faucet: anc.contractInfo["faucet"].contractAddress,
@@ -243,12 +245,19 @@ async function main() {
         testkit.deriveMantle()
     );
 
-    // Auth test, validators_registry is only allowed to send redelegate_proxy message.
-    await mustFail(basset.redelegate_proxy(ownerWallet, validators[0].validator_address, validators[1].validator_address, 100))
+    const addedValidatorKey = new MnemonicKey();
+    await mustPass(basset.add_validator(ownerWallet, addedValidatorKey.accAddress))
 
-    await mustPass(basset.bond(ownerWallet, 20000000000000))
+    const mantleClient = new GraphQLClient(testkit.deriveMantle());
+    const registeredValidators = await makeContractStoreQuery(
+        basset.contractInfo.validators_registry.contractAddress,
+        { get_validators_for_delegation: {} },
+        mantleClient
+    );
 
-    await mustPass(basset.remove_validator(ownerWallet, validators[0].validator_address))
+    if (!registeredValidators.some(e => e.address === addedValidatorKey.accAddress)) {
+        throw new Error("Could not find the registered validator");
+    }
 }
 
 main()

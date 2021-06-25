@@ -386,6 +386,24 @@ export default class AnchorbAsset {
     }
   }
 
+  public async add_validator(
+    sender: Wallet,
+    validatorAddress: string
+  ): Promise<void> {
+    const contract = this.contractInfo.validators_registry.contractAddress;
+    const addValidatorExecution = await execute(sender, contract, {
+      add_validator: {
+        validator: {
+          address: `${validatorAddress}`,
+          active: true,
+        }
+      },
+    });
+    if (isTxError(addValidatorExecution)) {
+      throw new Error(`Couldn't run: ${addValidatorExecution.raw_log}`);
+    }
+  }
+
   public async remove_validator(
     sender: Wallet,
     validatorAddress: string
@@ -626,7 +644,7 @@ export default class AnchorbAsset {
     const sendExecuttion = await execute(sender, contract, {
       mint: {
         recipient: recipient,
-        amount: amount,
+        amount: `${amount}`,
       },
     });
     if (isTxError(sendExecuttion)) {
@@ -764,7 +782,7 @@ export default class AnchorbAsset {
     sender: Wallet,
     spender: string,
     amount: number,
-    height: number
+    expire: Expire
   ): Promise<void> {
     const execution = await execute(
       sender,
@@ -773,9 +791,7 @@ export default class AnchorbAsset {
         decrease_allowance: {
           spender: spender,
           amount: `${amount}`,
-          expires: {
-            at_height: height,
-          },
+          expires: expire,
         },
       }
     );

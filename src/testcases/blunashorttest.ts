@@ -243,12 +243,48 @@ async function main() {
         testkit.deriveMantle()
     );
 
-    //auth test, validators_registry is only allowed to send redelegate_procy message
-    await mustFail(basset.redelegate_proxy(ownerWallet, validators[0].validator_address, validators[1].validator_address, 100))
+    await mustPass(basset.bond(a, 10000000000))
 
-    await mustPass(basset.bond(ownerWallet, 20000000000000))
+    await mustPass(basset.transfer_cw20_token(a, b, 10000000))
 
-    await mustPass(basset.remove_validator(ownerWallet, validators[0].validator_address))
+    await mustFail(basset.burn_cw20_token(b, 11000000))
+    await mustPass(basset.burn_cw20_token(b, 10000000))
+
+
+    await mustPass(basset.send_cw20_token(
+        a,
+        1000000,
+        { unbond: {} },
+        basset.contractInfo["anchor_basset_hub"].contractAddress
+    ))
+
+    // mint message allowed only from anchor_basset_hub contract as sender
+    await mustFail(basset.mint_cw20_token(a, basset.contractInfo["anchor_basset_hub"].contractAddress, 100000))
+
+    //TransferFrom
+    await mustPass(basset.increase_allowance(a, b.key.accAddress, 100000, { never: {} }))
+    await mustPass(basset.transfer_from_cw20_token(b, a, b, 10000))
+    await mustPass(basset.transfer_from_cw20_token(b, a, b, 20000))
+    await mustPass(basset.decrease_allowance(a, b.key.accAddress, 100000, { never: {} }))
+    await mustFail(basset.transfer_from_cw20_token(b, a, b, 20000))
+
+    //BurnFrom
+    await mustPass(basset.increase_allowance(a, b.key.accAddress, 100000, { never: {} }))
+    await mustPass(basset.burn_from_cw20_token(b, a, 10000))
+    await mustPass(basset.decrease_allowance(a, b.key.accAddress, 100000, { never: {} }))
+    await mustFail(basset.burn_from_cw20_token(b, a, 10000))
+
+    //SendFrom
+    await mustPass(basset.increase_allowance(a, b.key.accAddress, 1000000, { never: {} }))
+    await mustPass(basset.send_from_cw20_token(b, a,
+        100000,
+        { unbond: {} },
+        basset.contractInfo["anchor_basset_hub"].contractAddress))
+    await mustPass(basset.decrease_allowance(a, b.key.accAddress, 1000000, { never: {} }))
+    await mustFail(basset.send_from_cw20_token(b, a,
+        100000,
+        { unbond: {} },
+        basset.contractInfo["anchor_basset_hub"].contractAddress))
 
 
 }
@@ -258,11 +294,11 @@ main()
     .then(async () => {
         console.log("saving state...");
         fs.writeFileSync(
-            "remove_validator_action.json",
+            "blunashorttest_action.json",
             JSON.stringify(getRecord(), null, 2)
         );
         fs.writeFileSync(
-            "remove_validator_state.json",
+            "blunashorttest_state.json",
             JSON.stringify(await mantleState.getState(), null, 2)
         );
     })

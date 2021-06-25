@@ -34,13 +34,13 @@ let mantleState: MantleState;
 async function main() {
     const testkit = new Testkit("http://localhost:11317");
     const genesis = require("../testkit/genesis.json");
-
+    const validatorNumber = 9
     const aKey = new MnemonicKey();
     const bKey = new MnemonicKey();
     const cKey = new MnemonicKey();
     const owner = new MnemonicKey();
 
-    const valKeys = new Array(26).fill(true).map(() => new MnemonicKey())
+    const valKeys = new Array(validatorNumber).fill(true).map(() => new MnemonicKey())
     const validatorAKey = new MnemonicKey();
     const validatorBKey = new MnemonicKey();
     const validatorCKey = new MnemonicKey();
@@ -63,7 +63,7 @@ async function main() {
             new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))
         )),
         auto_inject: {
-            validator_rounds: valKeys.map((_, i) => `val${(i + 1) % 26}`)
+            validator_rounds: valKeys.map((_, i) => `val${(i + 1) % validatorNumber}`)
         },
         auto_tx: [
             // fee generator
@@ -140,7 +140,8 @@ async function main() {
     const fixedFeeForInit = new StdFee(6000000, "2000000uusd");
     await anchor.instantiate(
         fixedFeeForInit,
-        setTestParams(validators[0].validator_address, a.key.accAddress)
+        setTestParams(validators[0].validator_address, a.key.accAddress),
+        validators.slice(0, 1),
     );
 
     // register oracle price feeder
@@ -157,9 +158,9 @@ async function main() {
 
     // await testkit.inject(validators[0].validator_address) -> 아무 Tx 없이 지나가는 경우의 테스팅
 
-    for (var i = 0; i < 25; i++) {
+    for (var i = 1; i < validatorNumber - 1; i++) {
         await mustPass(
-            anchor.bAsset.register_validator(
+            anchor.bAsset.add_validator(
                 ownerWallet,
                 validators[i].validator_address
             )
@@ -290,26 +291,27 @@ async function main() {
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 3))
     for (var j = 0; j < 3; j++) {
         for (var i = 0; i < 25; i++) {
-            await mustPass(basset.bond(a, 2000000, validators[i].validator_address))
+            await mustPass(basset.bond(a, 2000000))
         }
     }
 
     for (var j = 0; j < 3; j++) {
         for (var i = 0; i < 25; i++) {
-            await mustPass(basset.bond(b, 2000000, validators[i].validator_address))
+            await mustPass(basset.bond(b, 2000000))
         }
     }
 
     for (var j = 0; j < 3; j++) {
         for (var i = 0; i < 25; i++) {
-            await mustPass(basset.bond(c, 2000000, validators[i].validator_address))
+            await mustPass(basset.bond(c, 2000000))
         }
     }
 
     //block 95
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 50))
 
-    await mustPass(basset.update_global_index(a))
+    //FIXME
+    // await mustPass(basset.update_global_index(a))
 
     for (var j = 0; j < 3; j++) {
         for (var i = 0; i < 25; i++) {
@@ -353,29 +355,34 @@ async function main() {
     await mustPass(basset.finish(c))
 
     //block 170
-    await mustPass(basset.update_global_index(a))
+    //FIXME
+    // await mustPass(basset.update_global_index(a))
 
-    for (var i = 0; i < 5; i++) {
-        await mustPass(basset.deregister_validator(ownerWallet, validators[i].validator_address))
-    }
+    //FIXME
+    // for (var i = 0; i < 5; i++) {
+    //     await mustPass(basset.remove_validator(ownerWallet, validators[i].validator_address))
+    // }
 
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 50))
 
-    for (var i = 5; i < 10; i++) {
-        await mustPass(basset.deregister_validator(ownerWallet, validators[i].validator_address))
-    }
+    //FIXME
+    // for (var i = 5; i < 10; i++) {
+    //     await mustPass(basset.remove_validator(ownerWallet, validators[i].validator_address))
+    // }
 
 
 
     for (var i = 15; i < 20; i++) {
-        await mustPass(basset.deregister_validator(ownerWallet, validators[i].validator_address))
+        //FIXME
+        // await mustPass(basset.remove_validator(ownerWallet, validators[i].validator_address))
         await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 50))
     }
 
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 50))
 
     for (var i = 20; i < 25; i++) {
-        await mustPass(basset.deregister_validator(ownerWallet, validators[i].validator_address))
+        //FIXME
+        // await mustPass(basset.remove_validator(ownerWallet, validators[i].validator_address))
         await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 50))
     }
 

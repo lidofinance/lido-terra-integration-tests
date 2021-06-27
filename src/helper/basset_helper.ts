@@ -644,7 +644,7 @@ export default class AnchorbAsset {
     const sendExecuttion = await execute(sender, contract, {
       mint: {
         recipient: recipient,
-        amount: amount,
+        amount: `${amount}`,
       },
     });
     if (isTxError(sendExecuttion)) {
@@ -783,7 +783,7 @@ export default class AnchorbAsset {
     sender: Wallet,
     spender: string,
     amount: number,
-    height: number
+    expire: Expire
   ): Promise<void> {
     const execution = await execute(
       sender,
@@ -792,9 +792,7 @@ export default class AnchorbAsset {
         decrease_allowance: {
           spender: spender,
           amount: `${amount}`,
-          expires: {
-            at_height: height,
-          },
+          expires: expire,
         },
       }
     );

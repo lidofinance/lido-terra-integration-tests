@@ -256,11 +256,11 @@ main()
     .then(async () => {
         console.log("saving state...");
         fs.writeFileSync(
-            "remove_validator.json",
+            "remove_validator_action.json",
             JSON.stringify(getRecord(), null, 2)
         );
         fs.writeFileSync(
-            "remove_validator.json",
+            "remove_validator_state.json",
             JSON.stringify(await mantleState.getState(), null, 2)
         );
     })

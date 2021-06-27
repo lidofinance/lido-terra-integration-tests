@@ -243,14 +243,12 @@ async function main() {
         testkit.deriveMantle()
     );
 
-    //auth test, validators_registry is only allowed to send redelegate_procy message
+    // Auth test, validators_registry is only allowed to send redelegate_proxy message.
     await mustFail(basset.redelegate_proxy(ownerWallet, validators[0].validator_address, validators[1].validator_address, 100))
 
     await mustPass(basset.bond(ownerWallet, 20000000000000))
 
     await mustPass(basset.remove_validator(ownerWallet, validators[0].validator_address))
-
-
 }
 
 main()
@@ -266,4 +264,4 @@ main()
             JSON.stringify(await mantleState.getState(), null, 2)
         );
     })
-    // .catch(console.log);
+    .catch(console.log);

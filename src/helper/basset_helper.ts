@@ -8,7 +8,7 @@ import {
   Wallet,
 } from "@terra-money/terra.js";
 import * as fs from "fs";
-import {execute, instantiate, send_transaction} from "./flow/execution";
+import { execute, instantiate, send_transaction } from "./flow/execution";
 
 type Mint = {
   minter: string;
@@ -440,6 +440,53 @@ export default class AnchorbAsset {
     }
   }
 
+  public async bond_for_st_luna(
+    sender: Wallet,
+    amount: number,
+  ): Promise<void> {
+    const coin = new Coin("uluna", amount);
+    const coins = new Coins([coin]);
+    const contract = this.contractInfo["anchor_basset_hub"].contractAddress;
+    const bondExecution = await execute(
+      sender,
+      contract,
+      {
+        bond_for_st_luna: {},
+      },
+      coins
+    );
+    if (isTxError(bondExecution)) {
+      throw new Error(`Couldn't run: ${bondExecution.raw_log}`);
+    }
+  }
+
+  public async convert_stluna_to_bluna(
+    sender: Wallet,
+    amount: number,
+  ): Promise<void> {
+    const coin = new Coin("uluna", amount);
+    const coins = new Coins([coin]);
+    const contract = this.contractInfo["st_luna"].contractAddress;
+    const receiveMsg = {
+      msg: { convert: {} },
+      amount: amount,
+      sender: sender.key.accAddress,
+    }
+    const sendExecuttion = await execute(
+      sender,
+      contract,
+      {
+        send: {
+          contract: this.contractInfo["anchor_basset_token"].contractAddress,
+          amount: `${amount}`,
+          msg: Buffer.from(JSON.stringify({ convert: {} })).toString("base64"),
+        },
+      });
+    if (isTxError(sendExecuttion)) {
+      throw new Error(`Couldn't run: ${sendExecuttion.raw_log}`);
+    }
+  }
+
   public async redelegate_proxy(
     sender: Wallet,
     src_validator_address: string,
@@ -456,7 +503,7 @@ export default class AnchorbAsset {
         redelegate_proxy: {
           src_validator: src_validator_address,
           dst_validator: dst_validator_address,
-          amount: {amount: "100", denom: "uluna"},
+          amount: { amount: "100", denom: "uluna" },
         },
       },
       undefined
@@ -487,7 +534,7 @@ export default class AnchorbAsset {
           epoch_period: params?.epoch_period || 30,
           underlying_coin_denom: params?.underlying_coin_denom || "uluna",
           unbonding_period: params?.unbonding_period || 211,
-          peg_recovery_fee: params?.peg_recovery_fee || "0.001",
+          peg_recovery_fee: params?.peg_recovery_fee || "0.0001",
           er_threshold: params?.er_threshold || "1",
           reward_denom: params?.reward_denom || "uusd",
         },
@@ -554,7 +601,7 @@ export default class AnchorbAsset {
   public async reward(sender: Wallet): Promise<void> {
     const contract = this.contractInfo.anchor_basset_reward.contractAddress;
     const rewardExe = await execute(sender, contract, {
-      claim_rewards: {recipient: null},
+      claim_rewards: { recipient: null },
     });
     if (isTxError(rewardExe)) {
       throw new Error(`Couldn't run: ${rewardExe.raw_log}`);
@@ -564,7 +611,7 @@ export default class AnchorbAsset {
   public async reward2(sender: Wallet, address: string): Promise<void> {
     const contract = this.contractInfo.anchor_basset_reward.contractAddress;
     const rewardExe = await execute(sender, contract, {
-      claim_rewards: {recipient: address},
+      claim_rewards: { recipient: address },
     });
     if (isTxError(rewardExe)) {
       throw new Error(`Couldn't run: ${rewardExe.raw_log}`);
@@ -587,7 +634,7 @@ export default class AnchorbAsset {
   ): Promise<void> {
     const contract = this.contractInfo.anchor_basset_reward.contractAddress;
     const updateGlobalExe = await execute(sender, contract, {
-      update_global_index: {prev_balance: prev_balance},
+      update_global_index: { prev_balance: prev_balance },
     });
     if (isTxError(updateGlobalExe)) {
       throw new Error(`Couldn't run: ${updateGlobalExe.raw_log}`);
@@ -600,7 +647,7 @@ export default class AnchorbAsset {
   ): Promise<void> {
     const contract = this.contractInfo.anchor_basset_reward.contractAddress;
     const updateDenomExe = await execute(sender, contract, {
-      update_reward_denom: {reward_denom: reward_denom},
+      update_reward_denom: { reward_denom: reward_denom },
     });
     if (isTxError(updateDenomExe)) {
       throw new Error(`Couldn't run: ${updateDenomExe.raw_log}`);
@@ -614,7 +661,7 @@ export default class AnchorbAsset {
   ): Promise<void> {
     const contract = this.contractInfo.anchor_basset_reward.contractAddress;
     const increaseExe = await execute(sender, contract, {
-      increase_balance: {address: address, amount: amount},
+      increase_balance: { address: address, amount: amount },
     });
     if (isTxError(increaseExe)) {
       throw new Error(`Couldn't run: ${increaseExe.raw_log}`);
@@ -628,7 +675,7 @@ export default class AnchorbAsset {
   ): Promise<void> {
     const contract = this.contractInfo.anchor_basset_reward.contractAddress;
     const decreaseExe = await execute(sender, contract, {
-      decrease_balance: {address: address, amount: amount},
+      decrease_balance: { address: address, amount: amount },
     });
     if (isTxError(decreaseExe)) {
       throw new Error(`Couldn't run: ${decreaseExe.raw_log}`);

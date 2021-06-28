@@ -78,6 +78,20 @@ export class MantleState {
         `, {}).then(r => r.BlockState.Block.Header.Height)
     }
 
+    async getCurrentBlockTime(): Promise<string> {
+        return this.client.request(gql`
+            query {
+                BlockState {
+                    Block {
+                        Header {
+                            Time
+                        }
+                    }
+                }
+            }
+        `, {}).then(r => r.BlockState.Block.Header.Time)
+    }
+
     async query(gql: string, variables: object) {
         return this.client.request(gql, variables)
     }

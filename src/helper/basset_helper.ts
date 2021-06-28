@@ -150,7 +150,7 @@ export default class AnchorbAsset {
         bluna_reward_denom: "uusd",
         //FIX: change to real fee address?
         lido_fee_address: params.lido_fee_address || this.contractInfo["anchor_basset_token"].contractAddress,
-        lido_fee_rate: "0.5",
+        lido_fee_rate: "0.05",
       },
       undefined
     )
@@ -194,7 +194,6 @@ export default class AnchorbAsset {
         peg_recovery_fee: params?.peg_recovery_fee,
         er_threshold: params?.er_threshold,
         reward_denom: params?.reward_denom,
-        validator: params?.validator,
       },
       coins,
       fee
@@ -265,10 +264,11 @@ export default class AnchorbAsset {
         symbol: params.symbol || "BLUNA",
         decimals: params.decimals || 6,
         initial_balances: params.initial_balances || [
-          {
-            address: `${this.contractInfo["anchor_basset_hub"].contractAddress}`,
-            amount: "1000000",
-          },
+            // cause new hub doesn't have initial bond
+          // {
+          //   address: `${this.contractInfo["anchor_basset_hub"].contractAddress}`,
+          //   amount: "1000000",
+          // },
         ],
         mint: {
           minter:
@@ -691,6 +691,25 @@ export default class AnchorbAsset {
       throw new Error(`Couldn't run: ${sendExecuttion.raw_log}`);
     }
   }
+
+    public async send_stluna_token(
+        sender: Wallet,
+        amount: number,
+        inputMsg: object,
+        contracAddr: string
+    ): Promise<void> {
+        const contract = this.contractInfo.st_luna.contractAddress;
+        const sendExecuttion = await execute(sender, contract, {
+            send: {
+                contract: contracAddr,
+                amount: `${amount}`,
+                msg: Buffer.from(JSON.stringify(inputMsg)).toString("base64"),
+            },
+        });
+        if (isTxError(sendExecuttion)) {
+            throw new Error(`Couldn't run: ${sendExecuttion.raw_log}`);
+        }
+    }
 
   public async send_from_cw20_token(
     sender: Wallet,

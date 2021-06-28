@@ -21,8 +21,8 @@ const contracts = [
   "anchor_basset_reward",
   "anchor_basset_token",
   "anchor_basset_rewards_dispatcher",
-  "st_luna",
-  "validators_registry",
+  "anchor_basset_token_stluna",
+  "anchor_basset_validators_registry",
 ];
 
 type Expire = { at_height: number } | { at_time: number } | { never: {} };
@@ -75,7 +75,7 @@ export default class AnchorbAsset {
   ): Promise<void> {
     const init = await instantiate(
       sender,
-      this.contractInfo.validators_registry.codeId,
+      this.contractInfo.anchor_basset_validators_registry.codeId,
       {
         registry: params.registry || [],
         hub_contract: params.hub_contract || this.contractInfo.anchor_basset_hub.contractAddress
@@ -87,10 +87,10 @@ export default class AnchorbAsset {
     }
     const contractAddress =
       init.logs[0].eventsByType.instantiate_contract.contract_address[0];
-    this.contractInfo.validators_registry.contractAddress = contractAddress;
+    this.contractInfo.anchor_basset_validators_registry.contractAddress = contractAddress;
 
     console.log(
-      `validators_registry: { codeId: ${this.contractInfo.validators_registry.codeId}, contractAddress: "${this.contractInfo.validators_registry.contractAddress}"},`
+      `validators_registry: { codeId: ${this.contractInfo.anchor_basset_validators_registry.codeId}, contractAddress: "${this.contractInfo.anchor_basset_validators_registry.contractAddress}"},`
     );
   }
 
@@ -108,7 +108,7 @@ export default class AnchorbAsset {
   ): Promise<void> {
     const init = await instantiate(
       sender,
-      this.contractInfo.st_luna.codeId,
+      this.contractInfo.anchor_basset_token_stluna.codeId,
       {
         name: params.name || "stLuna",
         symbol: params.symbol || "STLUNA",
@@ -124,10 +124,10 @@ export default class AnchorbAsset {
     }
     const contractAddress =
       init.logs[0].eventsByType.instantiate_contract.contract_address[0];
-    this.contractInfo.st_luna.contractAddress = contractAddress;
+    this.contractInfo.anchor_basset_token_stluna.contractAddress = contractAddress;
 
     console.log(
-      `st_luna: { codeId: ${this.contractInfo.st_luna.codeId}, contractAddress: "${this.contractInfo.st_luna.contractAddress}"},`
+      `st_luna: { codeId: ${this.contractInfo.anchor_basset_token_stluna.codeId}, contractAddress: "${this.contractInfo.anchor_basset_token_stluna.contractAddress}"},`
     );
   }
 
@@ -347,14 +347,14 @@ export default class AnchorbAsset {
         update_config: {
           owner: undefined,
           rewards_dispatcher_contract: params.rewards_dispatcher_contract || `${this.contractInfo["anchor_basset_rewards_dispatcher"].contractAddress}`,
-          stluna_token_contract: params.stluna_token_contract || `${this.contractInfo["st_luna"].contractAddress}`,
+          stluna_token_contract: params.stluna_token_contract || `${this.contractInfo["anchor_basset_token_stluna"].contractAddress}`,
           bluna_token_contract:
             params.token_address ||
             `${this.contractInfo["anchor_basset_token"].contractAddress}`,
           airdrop_registry_contract:
             params.airdrop_registry_contract ||
             `${this.contractInfo["anchor_airdrop_registry"].contractAddress}`,
-          validators_registry_contract: params.validators_registry || `${this.contractInfo.validators_registry.contractAddress}`,
+          validators_registry_contract: params.validators_registry || `${this.contractInfo.anchor_basset_validators_registry.contractAddress}`,
         },
       },
       undefined,
@@ -391,7 +391,7 @@ export default class AnchorbAsset {
     sender: Wallet,
     validatorAddress: string
   ): Promise<void> {
-    const contract = this.contractInfo.validators_registry.contractAddress;
+    const contract = this.contractInfo.anchor_basset_validators_registry.contractAddress;
     const addValidatorExecution = await execute(sender, contract, {
       add_validator: {
         validator: {
@@ -409,7 +409,7 @@ export default class AnchorbAsset {
     sender: Wallet,
     validatorAddress: string
   ): Promise<void> {
-    const contract = this.contractInfo.validators_registry.contractAddress;
+    const contract = this.contractInfo.anchor_basset_validators_registry.contractAddress;
     const removeValidatorExecution = await execute(sender, contract, {
       remove_validator: {
         address: `${validatorAddress}`,
@@ -711,7 +711,7 @@ export default class AnchorbAsset {
       inputMsg: object,
       contracAddr: string
   ): Promise<void> {
-      const contract = this.contractInfo.st_luna.contractAddress;
+      const contract = this.contractInfo.anchor_basset_token_stluna.contractAddress;
       const sendExecuttion = await execute(sender, contract, {
           send: {
               contract: contracAddr,

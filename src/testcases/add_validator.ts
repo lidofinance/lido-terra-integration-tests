@@ -20,7 +20,7 @@ async function main() {
 
   const mantleClient = new GraphQLClient(testState.testkit.deriveMantle());
   const registeredValidators = await makeContractStoreQuery(
-    testState.basset.contractInfo.validators_registry.contractAddress,
+    testState.basset.contractInfo.anchor_basset_validators_registry.contractAddress,
     {get_validators_for_delegation: {}},
     mantleClient
   );

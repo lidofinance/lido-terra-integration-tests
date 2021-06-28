@@ -219,7 +219,7 @@ export class TestState {
             {
                 bLunaHub: this.basset.contractInfo["anchor_basset_hub"].contractAddress,
                 bAssetToken: this.basset.contractInfo["anchor_basset_token"].contractAddress,
-                stLunaToken: this.basset.contractInfo["st_luna"].contractAddress,
+                stLunaToken: this.basset.contractInfo["anchor_basset_token_stluna"].contractAddress,
                 bAssetReward: this.basset.contractInfo["anchor_basset_reward"].contractAddress,
                 bAssetAirdrop:
                 this.basset.contractInfo["anchor_airdrop_registry"].contractAddress,

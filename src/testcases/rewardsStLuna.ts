@@ -30,7 +30,7 @@ async function main() {
     ));
 
     const stLunaBalance = await makeContractStoreQuery(
-        testState.basset.contractInfo["st_luna"].contractAddress,
+        testState.basset.contractInfo["anchor_basset_token_stluna"].contractAddress,
         { balance: { address: testState.wallets.a.key.accAddress } },
         mantleClient
     ).then((r) => r.balance);

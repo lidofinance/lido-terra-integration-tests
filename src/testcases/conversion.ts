@@ -42,9 +42,10 @@ async function main() {
     }))
     assert.equal(await querier.balance_stluna(testState.wallets.b.key.accAddress),0)
 
-
+    // console.log(await querier.bluma_reward_state())
     // console.log(await querier.balance_bluna(testState.wallets.a.key.accAddress))
     // console.log(await querier.balance_stluna(testState.wallets.a.key.accAddress))
+    // console.log(await querier.bluma_reward_config())
     // console.log(await querier.holders())
     // console.log("a = ",testState.wallets.a.key.accAddress)
     // console.log("b = ",testState.wallets.b.key.accAddress)

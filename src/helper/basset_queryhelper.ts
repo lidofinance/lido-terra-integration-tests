@@ -13,6 +13,8 @@ import { QueryMsg as ValidatorsQueryMsg } from "./types/validators_registry/quer
 import { HolderResponse, HoldersResponse } from "./types/basset_reward/holders_response";
 
 import { QueryMsg as BlunaQueryMsg } from "./types/basset_reward/query_msg";
+import { StateResponse } from "./types/basset_reward/state_response";
+import { ConfigResponse } from "./types/basset_reward/config_response";
 
 //npx json2ts -i anchor-bAsset-contracts/contracts/anchor_basset_token/schema/ -o src/helper/types/bluna_token/
 
@@ -209,6 +211,18 @@ export default class AnchorbAssetQueryHelper {
         return this.blunarewardquery(
             { holders: {} }
         ).then(r => r as HoldersResponse)
+    }
+
+    public async bluma_reward_state(): Promise<StateResponse> {
+        return this.blunarewardquery(
+            { state: {} }
+        ).then(r => r as StateResponse)
+    }
+
+    public async bluma_reward_config(): Promise<ConfigResponse> {
+        return this.blunarewardquery(
+            { config: {} }
+        ).then(r => r as ConfigResponse)
     }
 
 }

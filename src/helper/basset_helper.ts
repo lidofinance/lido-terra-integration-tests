@@ -467,11 +467,6 @@ export default class AnchorbAsset {
     const coin = new Coin("uluna", amount);
     const coins = new Coins([coin]);
     const contract = this.contractInfo["st_luna"].contractAddress;
-    const receiveMsg = {
-      msg: { convert: {} },
-      amount: amount,
-      sender: sender.key.accAddress,
-    }
     const sendExecuttion = await execute(
       sender,
       contract,

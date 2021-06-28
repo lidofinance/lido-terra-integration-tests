@@ -1,11 +1,11 @@
 import {
-  Coin,
-  Coins,
-  isTxError,
-  MsgSend,
-  MsgStoreCode,
-  StdFee,
-  Wallet,
+    Coin,
+    Coins,
+    isTxError,
+    MsgSend,
+    MsgStoreCode,
+    StdFee, TxBroadcastResult,
+    Wallet,
 } from "@terra-money/terra.js";
 import * as fs from "fs";
 import {execute, instantiate, send_transaction} from "./flow/execution";
@@ -562,6 +562,19 @@ export default class AnchorbAsset {
     }
   }
 
+  public async update_global_index_with_result(sender: Wallet): Promise<ReturnType<typeof send_transaction>> {
+      const contract = this.contractInfo.anchor_basset_hub.contractAddress;
+      const finishExe = await execute(sender, contract, {
+          update_global_index: {
+              // airdrop_hooks: null,
+          },
+      });
+      if (isTxError(finishExe)) {
+          throw new Error(`Couldn't run: ${finishExe.raw_log}`);
+      }
+      return finishExe
+  }
+
   public async slashing(sender: Wallet): Promise<void> {
     const contract = this.contractInfo.anchor_basset_hub.contractAddress;
     const slashingExe = await execute(sender, contract, {
@@ -692,24 +705,24 @@ export default class AnchorbAsset {
     }
   }
 
-    public async send_stluna_token(
-        sender: Wallet,
-        amount: number,
-        inputMsg: object,
-        contracAddr: string
-    ): Promise<void> {
-        const contract = this.contractInfo.st_luna.contractAddress;
-        const sendExecuttion = await execute(sender, contract, {
-            send: {
-                contract: contracAddr,
-                amount: `${amount}`,
-                msg: Buffer.from(JSON.stringify(inputMsg)).toString("base64"),
-            },
-        });
-        if (isTxError(sendExecuttion)) {
-            throw new Error(`Couldn't run: ${sendExecuttion.raw_log}`);
-        }
-    }
+  public async send_stluna_token(
+      sender: Wallet,
+      amount: number,
+      inputMsg: object,
+      contracAddr: string
+  ): Promise<void> {
+      const contract = this.contractInfo.st_luna.contractAddress;
+      const sendExecuttion = await execute(sender, contract, {
+          send: {
+              contract: contracAddr,
+              amount: `${amount}`,
+              msg: Buffer.from(JSON.stringify(inputMsg)).toString("base64"),
+          },
+      });
+      if (isTxError(sendExecuttion)) {
+          throw new Error(`Couldn't run: ${sendExecuttion.raw_log}`);
+      }
+  }
 
   public async send_from_cw20_token(
     sender: Wallet,

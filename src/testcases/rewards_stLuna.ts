@@ -55,11 +55,11 @@ main()
     .then(async () => {
         console.log("saving state...");
         fs.writeFileSync(
-            "rewards.json",
+            "rewards_st_luna.json",
             JSON.stringify(getRecord(), null, 2)
         );
         fs.writeFileSync(
-            "rewards.json",
+            "rewards_st_luna.json",
             JSON.stringify(await mantleState.getState(), null, 2)
         );
     })

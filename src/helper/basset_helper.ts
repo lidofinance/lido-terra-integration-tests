@@ -21,8 +21,8 @@ const contracts = [
   "anchor_basset_reward",
   "anchor_basset_token",
   "anchor_basset_rewards_dispatcher",
+  "anchor_basset_validators_registry",
   "st_luna",
-  "validators_registry",
 ];
 
 type Expire = { at_height: number } | { at_time: number } | { never: {} };
@@ -75,7 +75,7 @@ export default class AnchorbAsset {
   ): Promise<void> {
     const init = await instantiate(
       sender,
-      this.contractInfo.validators_registry.codeId,
+      this.contractInfo.anchor_basset_validators_registry.codeId,
       {
         registry: params.registry || [],
         hub_contract: params.hub_contract || this.contractInfo.anchor_basset_hub.contractAddress
@@ -87,10 +87,10 @@ export default class AnchorbAsset {
     }
     const contractAddress =
       init.logs[0].eventsByType.instantiate_contract.contract_address[0];
-    this.contractInfo.validators_registry.contractAddress = contractAddress;
+    this.contractInfo.anchor_basset_validators_registry.contractAddress = contractAddress;
 
     console.log(
-      `validators_registry: { codeId: ${this.contractInfo.validators_registry.codeId}, contractAddress: "${this.contractInfo.validators_registry.contractAddress}"},`
+      `anchor_basset_validators_registry: { codeId: ${this.contractInfo.anchor_basset_validators_registry.codeId}, contractAddress: "${this.contractInfo.anchor_basset_validators_registry.contractAddress}"},`
     );
   }
 
@@ -166,7 +166,6 @@ export default class AnchorbAsset {
     );
 
   }
-
 
   public async instantiate_hub(
     sender: Wallet,
@@ -354,7 +353,7 @@ export default class AnchorbAsset {
           airdrop_registry_contract:
             params.airdrop_registry_contract ||
             `${this.contractInfo["anchor_airdrop_registry"].contractAddress}`,
-          validators_registry_contract: params.validators_registry || `${this.contractInfo.validators_registry.contractAddress}`,
+          validators_registry_contract: params.validators_registry || `${this.contractInfo.anchor_basset_validators_registry.contractAddress}`,
         },
       },
       undefined,
@@ -391,7 +390,7 @@ export default class AnchorbAsset {
     sender: Wallet,
     validatorAddress: string
   ): Promise<void> {
-    const contract = this.contractInfo.validators_registry.contractAddress;
+    const contract = this.contractInfo.anchor_basset_validators_registry.contractAddress;
     const addValidatorExecution = await execute(sender, contract, {
       add_validator: {
         validator: {
@@ -409,7 +408,7 @@ export default class AnchorbAsset {
     sender: Wallet,
     validatorAddress: string
   ): Promise<void> {
-    const contract = this.contractInfo.validators_registry.contractAddress;
+    const contract = this.contractInfo.anchor_basset_validators_registry.contractAddress;
     const removeValidatorExecution = await execute(sender, contract, {
       remove_validator: {
         address: `${validatorAddress}`,

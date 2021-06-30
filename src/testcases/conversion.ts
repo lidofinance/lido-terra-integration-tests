@@ -48,6 +48,10 @@ async function main() {
     assert.equal(await querier.balance_stluna(testState.wallets.a.key.accAddress),10_000_000_000)
 
 
+    await mustFail(testState.basset.convert_stluna_to_bluna(testState.wallets.a, 1_000_000_000_000))
+    await mustFail(testState.basset.convert_bluna_to_stluna(testState.wallets.a, 1_000_000_000_000))
+
+
 }
 
 main()

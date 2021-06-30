@@ -7,3 +7,5 @@ yarn.lock
 *.iml
 .idea
 .DS_Store
+*_action.json
+*_state.json

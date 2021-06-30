@@ -59,11 +59,11 @@ main()
     .then(async () => {
         console.log("saving state...");
         fs.writeFileSync(
-            "blunashorttest_action.json",
+            "bluna_short_test_action.json",
             JSON.stringify(getRecord(), null, 2)
         );
         fs.writeFileSync(
-            "blunashorttest_state.json",
+            "bluna_short_test_state.json",
             JSON.stringify(await mantleState.getState(), null, 2)
         );
     })

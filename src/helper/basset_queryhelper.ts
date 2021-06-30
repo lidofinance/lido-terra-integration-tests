@@ -13,8 +13,10 @@ import { QueryMsg as ValidatorsQueryMsg } from "./types/validators_registry/quer
 import { HolderResponse, HoldersResponse } from "./types/basset_reward/holders_response";
 
 import { QueryMsg as BlunaQueryMsg } from "./types/basset_reward/query_msg";
+import { QueryMsg as AnchotBassetHubQueryMsg } from "./types/anchor_basset_hub/query_msg";
 import { StateResponse } from "./types/basset_reward/state_response";
 import { ConfigResponse } from "./types/basset_reward/config_response";
+import { State } from "./types/anchor_basset_hub/state";
 
 //npx json2ts -i anchor-bAsset-contracts/contracts/anchor_basset_token/schema/ -o src/helper/types/bluna_token/
 
@@ -103,7 +105,21 @@ export default class AnchorbAssetQueryHelper {
         this.basset = basset;
         this.mantleClient = new GraphQLClient(this.testkit.deriveMantle());
         this.bluna_token_querier = new TokenQuerier(this.basset.contractInfo.anchor_basset_token.contractAddress, this.mantleClient)
-        this.stluna_token_querier = new TokenQuerier(this.basset.contractInfo.st_luna.contractAddress, this.mantleClient)
+        this.stluna_token_querier = new TokenQuerier(this.basset.contractInfo.anchor_basset_token_stluna.contractAddress, this.mantleClient)
+    }
+
+    async bassethubquery(msg: AnchotBassetHubQueryMsg): Promise<any> {
+        return makeContractStoreQuery(
+            this.basset.contractInfo.anchor_basset_hub.contractAddress,
+            msg,
+            this.mantleClient
+        )
+    }
+
+    async get_anchor_basset_hub_state(): Promise<State> {
+        return this.bassethubquery({
+            state: {}
+        }).then(r => r as State)
     }
 
     async blunarewardquery(msg: BlunaQueryMsg): Promise<any> {
@@ -116,7 +132,7 @@ export default class AnchorbAssetQueryHelper {
 
     async validatorsquery(msg: ValidatorsQueryMsg): Promise<any> {
         return makeContractStoreQuery(
-            this.basset.contractInfo.validators_registry.contractAddress,
+            this.basset.contractInfo.anchor_basset_validators_registry.contractAddress,
             msg,
             this.mantleClient
         )
@@ -213,17 +229,36 @@ export default class AnchorbAssetQueryHelper {
         ).then(r => r as HoldersResponse)
     }
 
-    public async bluma_reward_state(): Promise<StateResponse> {
+    public async bluna_reward_state(): Promise<StateResponse> {
         return this.blunarewardquery(
             { state: {} }
         ).then(r => r as StateResponse)
     }
 
-    public async bluma_reward_config(): Promise<ConfigResponse> {
+    public async bluna_reward_config(): Promise<ConfigResponse> {
         return this.blunarewardquery(
             { config: {} }
         ).then(r => r as ConfigResponse)
     }
 
-}
+    public async bluna_exchange_rate(): Promise<number> {
+        return this.get_anchor_basset_hub_state()
+            .then(r => Number(r.bluna_exchange_rate))
+    }
 
+    public async stluna_exchange_rate(): Promise<number> {
+        return this.get_anchor_basset_hub_state()
+            .then(r => Number(r.stluna_exchange_rate))
+    }
+
+    public async total_bond_bluna_amount(): Promise<number> {
+        return this.get_anchor_basset_hub_state()
+            .then(r => Number(r.total_bond_bluna_amount))
+    }
+
+    public async total_bond_stluna_amount(): Promise<number> {
+        return this.get_anchor_basset_hub_state()
+            .then(r => Number(r.total_bond_stluna_amount))
+    }
+
+}

@@ -15,41 +15,36 @@ async function main() {
     mantleState = await testState.getMantleState();
     const querier = new AnchorbAssetQueryHelper(testState.testkit,testState.basset)
 
+    // "first dummy" bonding just to make exchenage rate = 1
+    await mustPass(testState.basset.bond(testState.wallets.c, 100_000_000_000))    
+    assert.equal(await querier.total_bond_bluna_amount(),200_000_000_000)
+    assert.equal(await querier.balance_bluna(testState.wallets.c.key.accAddress),99_999_000_000)
 
-    await mustPass(testState.basset.bond(testState.wallets.a, 10000000000))
-    assert.equal(await querier.balance_bluna(testState.wallets.a.key.accAddress),9999000000)
-    await mustPass(querier.holder(testState.wallets.a.key.accAddress).then(info => {
-        assert.equal(info.balance,9999000000)
-    }))
+
+    await mustPass(testState.basset.bond(testState.wallets.a, 100_000_000_000))
+    assert.equal(await querier.total_bond_bluna_amount(),300_000_000_000)
+    assert.equal(await querier.balance_bluna(testState.wallets.a.key.accAddress),100_000_000_000)
+    assert.equal((await querier.holder(testState.wallets.a.key.accAddress)).balance,100_000_000_000)
+
     
 
-    await mustPass(testState.basset.bond_for_st_luna(testState.wallets.a, 10000000000))  
-    assert.equal(await querier.balance_stluna(testState.wallets.a.key.accAddress),10000000000) 
-    await mustPass(testState.basset.bond_for_st_luna(testState.wallets.b, 10000000000)) 
-    assert.equal(await querier.balance_stluna(testState.wallets.b.key.accAddress),10000000000) 
+    await mustPass(testState.basset.bond_for_st_luna(testState.wallets.a, 10_000_000_000))  
+    assert.equal(await querier.total_bond_stluna_amount(),10_000_000_000)
+    assert.equal(await querier.balance_stluna(testState.wallets.a.key.accAddress),10_000_000_000) 
 
 
-    await mustPass(testState.basset.convert_stluna_to_bluna(testState.wallets.a, 100000000))
-    assert.equal(await querier.balance_bluna(testState.wallets.a.key.accAddress),10099000000)
-    await mustPass(querier.holder(testState.wallets.a.key.accAddress).then(info => {
-        assert.equal(info.balance,10099000000)
-    }))
-    assert.equal(await querier.balance_stluna(testState.wallets.a.key.accAddress),9900000000)
-    await mustPass(testState.basset.convert_stluna_to_bluna(testState.wallets.b, 10000000000))
-    assert.equal(await querier.balance_bluna(testState.wallets.b.key.accAddress),10000000000)
-    await mustPass(querier.holder(testState.wallets.b.key.accAddress).then(info => {
-        assert.equal(info.balance,10000000000)
-    }))
-    assert.equal(await querier.balance_stluna(testState.wallets.b.key.accAddress),0)
+    await mustPass(testState.basset.convert_stluna_to_bluna(testState.wallets.a, 1_000_000_000))
+    assert.equal(await querier.balance_bluna(testState.wallets.a.key.accAddress),101_000_000_000)
+    assert.equal((await querier.holder(testState.wallets.a.key.accAddress)).balance,101_000_000_000)
 
-    // console.log(await querier.bluma_reward_state())
-    // console.log(await querier.balance_bluna(testState.wallets.a.key.accAddress))
-    // console.log(await querier.balance_stluna(testState.wallets.a.key.accAddress))
-    // console.log(await querier.bluma_reward_config())
-    // console.log(await querier.holders())
-    // console.log("a = ",testState.wallets.a.key.accAddress)
-    // console.log("b = ",testState.wallets.b.key.accAddress)
-    // console.log("ownerWallet = ",testState.wallets.ownerWallet.key.accAddress)
+    assert.equal(await querier.total_bond_stluna_amount(),9_000_000_000)
+    assert.equal(await querier.total_bond_bluna_amount(),301_000_000_000)
+
+
+    assert.equal(await querier.balance_stluna(testState.wallets.a.key.accAddress),9_000_000_000)
+
+
+
 
 }
 

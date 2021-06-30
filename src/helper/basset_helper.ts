@@ -20,9 +20,9 @@ const contracts = [
   "anchor_basset_hub",
   "anchor_basset_reward",
   "anchor_basset_token",
+  "anchor_basset_token_stluna",
   "anchor_basset_rewards_dispatcher",
   "anchor_basset_validators_registry",
-  "st_luna",
 ];
 
 type Expire = { at_height: number } | { at_time: number } | { never: {} };
@@ -108,7 +108,7 @@ export default class AnchorbAsset {
   ): Promise<void> {
     const init = await instantiate(
       sender,
-      this.contractInfo.st_luna.codeId,
+      this.contractInfo.anchor_basset_token_stluna.codeId,
       {
         name: params.name || "test_name",
         symbol: params.symbol || "AAA",
@@ -124,10 +124,10 @@ export default class AnchorbAsset {
     }
     const contractAddress =
       init.logs[0].eventsByType.instantiate_contract.contract_address[0];
-    this.contractInfo.st_luna.contractAddress = contractAddress;
+    this.contractInfo.anchor_basset_token_stluna.contractAddress = contractAddress;
 
     console.log(
-      `st_luna: { codeId: ${this.contractInfo.st_luna.codeId}, contractAddress: "${this.contractInfo.st_luna.contractAddress}"},`
+      `anchor_basset_token_stluna: { codeId: ${this.contractInfo.anchor_basset_token_stluna.codeId}, contractAddress: "${this.contractInfo.anchor_basset_token_stluna.contractAddress}"},`
     );
   }
 
@@ -346,7 +346,7 @@ export default class AnchorbAsset {
         update_config: {
           owner: undefined,
           rewards_dispatcher_contract: params.rewards_dispatcher_contract || `${this.contractInfo["anchor_basset_rewards_dispatcher"].contractAddress}`,
-          stluna_token_contract: params.stluna_token_contract || `${this.contractInfo["st_luna"].contractAddress}`,
+          stluna_token_contract: params.stluna_token_contract || `${this.contractInfo["anchor_basset_token_stluna"].contractAddress}`,
           bluna_token_contract:
             params.token_address ||
             `${this.contractInfo["anchor_basset_token"].contractAddress}`,

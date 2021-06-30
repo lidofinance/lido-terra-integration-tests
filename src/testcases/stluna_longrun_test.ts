@@ -14,11 +14,11 @@ import {TestState} from "./common";
 let mantleState: MantleState;
 
 async function main() {
-    let j
+    let j;
     let i
     const testState = new TestState()
     mantleState = await testState.getMantleState()
-    const blunaContractAddress = testState.basset.contractInfo.anchor_basset_token.contractAddress
+    const stlunaContractAddress = testState.basset.contractInfo.anchor_basset_token_stluna.contractAddress
 
     //block 67
     await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation))
@@ -68,19 +68,19 @@ async function main() {
     await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 3))
     for (j = 0; j < 3; j++) {
         for (i = 0; i < 25; i++) {
-            await mustPass(testState.basset.bond(testState.wallets.a, 2000000))
+            await mustPass(testState.basset.bond_for_stluna(testState.wallets.a, 2000000))
         }
     }
 
     for (j = 0; j < 3; j++) {
         for (i = 0; i < 25; i++) {
-            await mustPass(testState.basset.bond(testState.wallets.b, 2000000))
+            await mustPass(testState.basset.bond_for_stluna(testState.wallets.b, 2000000))
         }
     }
 
     for (j = 0; j < 3; j++) {
         for (i = 0; i < 25; i++) {
-            await mustPass(testState.basset.bond(testState.wallets.c, 2000000))
+            await mustPass(testState.basset.bond_for_stluna(testState.wallets.c, 2000000))
         }
     }
 
@@ -93,7 +93,7 @@ async function main() {
     for (j = 0; j < 3; j++) {
         for (i = 0; i < 25; i++) {
             await testState.basset.send_cw20_token(
-                blunaContractAddress,
+                stlunaContractAddress,
                 testState.wallets.a,
                 1000000,
                 {unbond: {}},
@@ -105,7 +105,7 @@ async function main() {
     for (j = 0; j < 3; j++) {
         for (i = 0; i < 25; i++) {
             await testState.basset.send_cw20_token(
-                blunaContractAddress,
+                stlunaContractAddress,
                 testState.wallets.b,
                 1000000,
                 {unbond: {}},
@@ -117,7 +117,7 @@ async function main() {
     for (j = 0; j < 3; j++) {
         for (i = 0; i < 25; i++) {
             await testState.basset.send_cw20_token(
-                blunaContractAddress,
+                stlunaContractAddress,
                 testState.wallets.c,
                 1000000,
                 {unbond: {}},
@@ -164,7 +164,6 @@ async function main() {
         // await mustPass(testState.basset.remove_validator(ownerWallet, validators[i].validator_address))
         await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 50))
     }
-
 }
 
 main()

@@ -36,14 +36,16 @@ async function main() {
     await mustPass(testState.basset.convert_stluna_to_bluna(testState.wallets.a, 1_000_000_000))
     assert.equal(await querier.balance_bluna(testState.wallets.a.key.accAddress),101_000_000_000)
     assert.equal((await querier.holder(testState.wallets.a.key.accAddress)).balance,101_000_000_000)
-
     assert.equal(await querier.total_bond_stluna_amount(),9_000_000_000)
     assert.equal(await querier.total_bond_bluna_amount(),301_000_000_000)
-
-
     assert.equal(await querier.balance_stluna(testState.wallets.a.key.accAddress),9_000_000_000)
 
-
+    await mustPass(testState.basset.convert_bluna_to_stluna(testState.wallets.a, 1_000_000_000))
+    assert.equal(await querier.balance_bluna(testState.wallets.a.key.accAddress),100_000_000_000)
+    assert.equal((await querier.holder(testState.wallets.a.key.accAddress)).balance,100_000_000_000)
+    assert.equal(await querier.total_bond_stluna_amount(),10_000_000_000)
+    assert.equal(await querier.total_bond_bluna_amount(),300_000_000_000)
+    assert.equal(await querier.balance_stluna(testState.wallets.a.key.accAddress),10_000_000_000)
 
 
 }

@@ -359,26 +359,9 @@ async function main() {
     //block 170
     await mustPass(basset.update_global_index(a))
 
-    for (var i = 0; i < 5; i++) {
+    for (var i = 0; i < 24; i++) {
         await mustPass(basset.remove_validator(ownerWallet, validators[i].validator_address))
-    }
-
-    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 50))
-
-    for (var i = 5; i < 10; i++) {
-        await mustPass(basset.remove_validator(ownerWallet, validators[i].validator_address))
-    }
-
-    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 50))
-
-    for (var i = 15; i < 20; i++) {
-        await mustPass(basset.remove_validator(ownerWallet, validators[i].validator_address))
-    }
-
-    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 50))
-
-    for (var i = 20; i < 25; i++) {
-        await mustPass(basset.remove_validator(ownerWallet, validators[i].validator_address))
+        await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 40))
     }
 
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))

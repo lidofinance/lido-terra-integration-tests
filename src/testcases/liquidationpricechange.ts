@@ -1,16 +1,3 @@
-import {
-    Coin,
-    Coins,
-    Dec,
-    Int,
-    MnemonicKey,
-    MsgExecuteContract,
-    MsgSend,
-    StdFee,
-    Validator,
-    Wallet,
-} from "@terra-money/terra.js";
-import * as path from "path";
 import * as fs from "fs";
 import { mustFail, mustPass } from "../helper/flow/must";
 import { getRecord } from "../helper/flow/record";
@@ -18,502 +5,258 @@ import {
     registerChainOracleVote,
     registerChainOraclePrevote,
 } from "../helper/oracle/chain-oracle";
-import Anchor, { Asset } from "../helper/spawn";
 import { MantleState } from "../mantle-querier/MantleState";
-import { Testkit } from "../testkit/testkit";
-import { execute, send_transaction } from "../helper/flow/execution";
 import { emptyBlockWithFixedGas } from "../helper/flow/gas-station";
 import { repeat } from "../helper/flow/repeat";
 import { unjail } from "../helper/validator-operation/unjail";
-import { gql } from "graphql-request";
 import { configureMMOracle } from "../helper/oracle/mm-oracle";
-import { setTestParams } from "../parameters/contract-tests-parameteres";
+import {TestState} from "./common";
 
 let mantleState: MantleState;
 
 async function main() {
-    const testkit = new Testkit("http://localhost:11317");
-    const genesis = require("../testkit/genesis.json");
-
-    const aKey = new MnemonicKey();
-    const bKey = new MnemonicKey();
-    const cKey = new MnemonicKey();
-    const owner = new MnemonicKey();
-
-    const validatorAKey = new MnemonicKey();
-    const validatorBKey = new MnemonicKey();
-    const validatorCKey = new MnemonicKey();
-    const validatorDKey = new MnemonicKey();
-    const gasStation = new MnemonicKey();
-
-    const response = await testkit.init({
-        genesis: genesis,
-        accounts: [
-            Testkit.walletToAccountRequest("a", aKey),
-            Testkit.walletToAccountRequest("b", bKey),
-            Testkit.walletToAccountRequest("c", cKey),
-            Testkit.walletToAccountRequest("valA", validatorAKey),
-            Testkit.walletToAccountRequest("valB", validatorBKey),
-            Testkit.walletToAccountRequest("valC", validatorCKey),
-            Testkit.walletToAccountRequest("valD", validatorDKey),
-            Testkit.walletToAccountRequest("owner", owner),
-            Testkit.walletToAccountRequest("gasStation", gasStation),
-        ],
-        validators: [
-            Testkit.validatorInitRequest(
-                "valA",
-                new Coin("uluna", new Int(1000000000000)),
-                new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))
-            ),
-            Testkit.validatorInitRequest(
-                "valB",
-                new Coin("uluna", new Int(1000000000000)),
-                new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))
-            ),
-            Testkit.validatorInitRequest(
-                "valC",
-                new Coin("uluna", new Int(1000000000000)),
-                new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))
-            ),
-            Testkit.validatorInitRequest(
-                "valD",
-                new Coin("uluna", new Int(1000000000000)),
-                new Validator.CommissionRates(new Dec(0), new Dec(1), new Dec(0))
-            ),
-        ],
-        auto_inject: {
-            validator_rounds: ["valB", "valC", "valD", "valA"],
-        },
-        auto_tx: [
-            // fee generator
-            Testkit.automaticTxRequest({
-                accountName: "gasStation",
-                period: 1,
-                startAt: 2,
-                msgs: [
-                    new MsgSend(
-                        gasStation.accAddress,
-                        gasStation.accAddress,
-                        new Coins([new Coin("uusd", 1)])
-                    ),
-                ],
-                fee: new StdFee(10000000, "1000000uusd"),
-            }),
-        ],
-    });
-
-    console.log(testkit.deriveMantle())
-
-    const validators = response.validators;
-    const lcd = testkit.deriveLCD();
-
-    // initialize genesis block
-    await testkit.inject();
-
-    // register oracle votes
-    const validatorNames = ["valA", "valB", "valC", "valD"];
-    // register votes
-    const initialVotes = await Promise.all(
-        validators.map(async (validator) =>
-            testkit.registerAutomaticTx(
-                registerChainOracleVote(
-                    validator.account_name,
-                    validator.Msg.delegator_address,
-                    validator.Msg.validator_address,
-                    3
-                )
-            )
-        )
-    );
-
-    // register prevotes
-    const initialPrevotes = await Promise.all(
-        validators.map(async (validator) =>
-            testkit.registerAutomaticTx(
-                registerChainOraclePrevote(
-                    validator.account_name,
-                    validator.Msg.delegator_address,
-                    validator.Msg.validator_address,
-                    2
-                )
-            )
-        )
-    );
-
-    const a = new Wallet(lcd, aKey);
-    const b = new Wallet(lcd, bKey);
-    const c = new Wallet(lcd, cKey);
-
-    const valAWallet = new Wallet(lcd, validatorAKey);
-
-    // store & instantiate contracts
-    const ownerWallet = new Wallet(lcd, owner);
-    const anchor = new Anchor(ownerWallet);
-    await anchor.store_contracts(
-        path.resolve(__dirname, "../../anchor-bAsset-contracts/artifacts"),
-        path.resolve(__dirname, "../../money-market-contracts/artifacts"),
-        path.resolve(__dirname, "../../terraswap/artifacts"),
-        path.resolve(__dirname, "../../anchor-token-contracts/artifacts")
-    );
-
-    const fixedFeeForInit = new StdFee(6000000, "2000000uusd");
-    await anchor.instantiate(
-        fixedFeeForInit,
-        setTestParams(validators[0].validator_address, a.key.accAddress)
-    );
-
-    // register oracle price feeder
-    const previousOracleFeed = await testkit.registerAutomaticTx(
-        configureMMOracle(
-            owner,
-            anchor.moneyMarket.contractInfo["moneymarket_oracle"].contractAddress,
-            anchor.bAsset.contractInfo["anchor_basset_token"].contractAddress,
-            1.0
-        )
-    );
-
-    ///////////////// scenario 시작 ////////////////////
-
-    // await testkit.inject(validators[0].validator_address) -> 아무 Tx 없이 지나가는 경우의 테스팅
-
-    await mustPass(
-        anchor.bAsset.register_validator(
-            ownerWallet,
-            validators[0].validator_address
-        )
-    );
-    //erase these
-    await mustPass(
-        anchor.bAsset.register_validator(
-            ownerWallet,
-            validators[1].validator_address
-        )
-    );
-    await mustPass(
-        anchor.bAsset.register_validator(
-            ownerWallet,
-            validators[2].validator_address
-        )
-    );
-    await mustPass(
-        anchor.bAsset.register_validator(
-            ownerWallet,
-            validators[3].validator_address
-        )
-    );
-
-    const basset = anchor.bAsset;
-    const moneyMarket = anchor.moneyMarket;
-    const terraswap = anchor.terraswap;
-    const anc = anchor.ANC;
-    ////////////////////////
-
-    // create mantle state
-    console.log({
-        bLunaHub: basset.contractInfo["anchor_basset_hub"].contractAddress,
-        bAssetToken: basset.contractInfo["anchor_basset_token"].contractAddress,
-        bAssetReward: basset.contractInfo["anchor_basset_reward"].contractAddress,
-        bAssetAirdrop:
-            basset.contractInfo["anchor_airdrop_registry"].contractAddress,
-        mmInterest:
-            moneyMarket.contractInfo["moneymarket_interest_model"].contractAddress,
-        mmOracle: moneyMarket.contractInfo["moneymarket_oracle"].contractAddress,
-        mmMarket: moneyMarket.contractInfo["moneymarket_market"].contractAddress,
-        mmOverseer:
-            moneyMarket.contractInfo["moneymarket_overseer"].contractAddress,
-        mmCustody:
-            moneyMarket.contractInfo["moneymarket_custody_bluna"].contractAddress,
-        mmLiquidation:
-            moneyMarket.contractInfo["moneymarket_liquidation"].contractAddress,
-        mmdistribution:
-            moneyMarket.contractInfo["moneymarket_distribution_model"]
-                .contractAddress,
-        anchorToken: moneyMarket.contractInfo["anchorToken"].contractAddress,
-        terraswapFactory:
-            terraswap.contractInfo["terraswap_factory"].contractAddress,
-        terraswapPair: "whateva",
-        gov: anc.contractInfo["gov"].contractAddress,
-        faucet: anc.contractInfo["faucet"].contractAddress,
-        collector: anc.contractInfo["collector"].contractAddress,
-        community: anc.contractInfo["community"].contractAddress,
-        staking: anc.contractInfo["staking"].contractAddress,
-        token: anc.contractInfo["token"].contractAddress,
-        airdrop: anc.contractInfo["airdrop"].contractAddress,
-    });
-
-    mantleState = new MantleState(
-        {
-            bLunaHub: basset.contractInfo["anchor_basset_hub"].contractAddress,
-            bAssetToken: basset.contractInfo["anchor_basset_token"].contractAddress,
-            bAssetReward: basset.contractInfo["anchor_basset_reward"].contractAddress,
-            bAssetAirdrop:
-                basset.contractInfo["anchor_airdrop_registry"].contractAddress,
-            mmInterest:
-                moneyMarket.contractInfo["moneymarket_interest_model"].contractAddress,
-            mmOracle: moneyMarket.contractInfo["moneymarket_oracle"].contractAddress,
-            mmMarket: moneyMarket.contractInfo["moneymarket_market"].contractAddress,
-            mmOverseer:
-                moneyMarket.contractInfo["moneymarket_overseer"].contractAddress,
-            mmCustody:
-                moneyMarket.contractInfo["moneymarket_custody_bluna"].contractAddress,
-            mmLiquidation:
-                moneyMarket.contractInfo["moneymarket_liquidation"].contractAddress,
-            mmdistribution:
-                moneyMarket.contractInfo["moneymarket_distribution_model"]
-                    .contractAddress,
-            anchorToken: moneyMarket.contractInfo["anchorToken"].contractAddress,
-            terraswapFactory:
-                terraswap.contractInfo["terraswap_factory"].contractAddress,
-            terraswapPair: "whateva",
-            gov: anc.contractInfo["gov"].contractAddress,
-            faucet: anc.contractInfo["faucet"].contractAddress,
-            collector: anc.contractInfo["collector"].contractAddress,
-            community: anc.contractInfo["community"].contractAddress,
-            staking: anc.contractInfo["staking"].contractAddress,
-            token: anc.contractInfo["token"].contractAddress,
-            airdrop: anc.contractInfo["airdrop"].contractAddress,
-        },
-        [aKey.accAddress, bKey.accAddress, cKey.accAddress],
-        response.validators.map((val) => val.validator_address),
-        testkit.deriveMantle()
-    );
+    const testState = new TestState()
+    mantleState = await testState.getMantleState()
     //block 29
-    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation))
 
     //block 30
-    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation))
 
     //block 31
-    await mustPass(basset.bond(a, 20000000000000, validators[0].validator_address))
+    await mustPass(testState.basset.bond(testState.wallets.a, 20000000000000))
 
     //block 32 - 40
-    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 9))
+    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 9))
 
     //block 41~45
     // deregister oracle vote and waste 5 blocks
-    const prevotesToClear = initialPrevotes[0]
-    const votesToClear = initialVotes[0]
+    const prevotesToClear = testState.initialPrevotes[0]
+    const votesToClear = testState.initialVotes[0]
 
-    await testkit.clearAutomaticTx(prevotesToClear.id)
-    await testkit.clearAutomaticTx(votesToClear.id)
+    await testState.testkit.clearAutomaticTx(prevotesToClear.id)
+    await testState.testkit.clearAutomaticTx(votesToClear.id)
     await repeat(10, async () => {
-        await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+        await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 1))
     })
 
     //block 46 - 50
     // Oracle slashing happen at the block 49
-    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 5))
+    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 5))
 
     //block 51 unjail & revive oracle
     // unjail & re-register oracle votes
-    await mustPass(unjail(valAWallet))
+    await mustPass(unjail(testState.wallets.valAWallet))
     console.log("saving state...")
     fs.writeFileSync("4_block51_state.json", JSON.stringify(await mantleState.getState(), null, 2))
 
     const currentBlockHeight = await mantleState.getCurrentBlockHeight()
 
     // // register vote for valA
-    const previousVote = await testkit.registerAutomaticTx(registerChainOracleVote(
-        validators[0].account_name,
-        validators[0].Msg.delegator_address,
-        validators[0].Msg.validator_address,
+    const previousVote = await testState.testkit.registerAutomaticTx(registerChainOracleVote(
+        testState.validators[0].account_name,
+        testState.validators[0].Msg.delegator_address,
+        testState.validators[0].Msg.validator_address,
         currentBlockHeight + 2,
     ))
 
     // register votes
-    const previousPrevote = await testkit.registerAutomaticTx(registerChainOraclePrevote(
-        validators[0].account_name,
-        validators[0].Msg.delegator_address,
-        validators[0].Msg.validator_address,
+    const previousPrevote = await testState.testkit.registerAutomaticTx(registerChainOraclePrevote(
+        testState.validators[0].account_name,
+        testState.validators[0].Msg.delegator_address,
+        testState.validators[0].Msg.validator_address,
         currentBlockHeight + 1
     ))
 
     //block 52 - 54
-    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 3))
+    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 3))
 
     //block 55
-    await mustPass(basset.bond(a, 20000000000000, validators[0].validator_address))
+    await mustPass(testState.basset.bond(testState.wallets.a, 20000000000000))
 
     //block 56
-    await mustPass(basset.transfer_cw20_token(a, b, 10000000))
+    await mustPass(testState.basset.transfer_cw20_token(testState.basset.contractInfo["anchor_basset_token"].contractAddress, testState.wallets.a, testState.wallets.b, 10000000))
 
     //block 57
-    await basset.send_cw20_token(
-        a,
+    await testState.basset.send_cw20_token(
+        testState.basset.contractInfo["anchor_basset_token"].contractAddress,
+        testState.wallets.a,
         20000000000000,
         { unbond: {} },
-        basset.contractInfo["anchor_basset_hub"].contractAddress
+        testState.basset.contractInfo["anchor_basset_hub"].contractAddress
     )
 
     //block 58
-    await mustPass(basset.send_cw20_token(
-        a,
+    await mustPass(testState.basset.send_cw20_token(
+        testState.basset.contractInfo["anchor_basset_token"].contractAddress,
+        testState.wallets.a,
         1000000,
         { unbond: {} },
-        basset.contractInfo["anchor_basset_hub"].contractAddress
+        testState.basset.contractInfo["anchor_basset_hub"].contractAddress
     ))
 
     //block 59 - 66
-    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 8))
+    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 8))
 
     //block 67
-    await mustPass(emptyBlockWithFixedGas(lcd, gasStation))
+    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation))
     //unbond 1
 
     //block 68 - 89
     //oracle slashing happen at the block 79
-    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 22))
+    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 22))
 
     // unjail & re-register oracle votes
     //block 90
-    await mustPass(unjail(valAWallet))
+    await mustPass(unjail(testState.wallets.valAWallet))
     console.log("saving state...")
     fs.writeFileSync("4_block90_state.json", JSON.stringify(await mantleState.getState(), null, 2))
 
     const currentBlockHeight2 = await mantleState.getCurrentBlockHeight()
 
     // // register vote for valA
-    const previousVote2 = await testkit.registerAutomaticTx(registerChainOracleVote(
-        validators[0].account_name,
-        validators[0].Msg.delegator_address,
-        validators[0].Msg.validator_address,
+    const previousVote2 = await testState.testkit.registerAutomaticTx(registerChainOracleVote(
+        testState.validators[0].account_name,
+        testState.validators[0].Msg.delegator_address,
+        testState.validators[0].Msg.validator_address,
         currentBlockHeight2 + 2,
     ))
 
     // register votes
-    const previousPrevote2 = await testkit.registerAutomaticTx(registerChainOraclePrevote(
-        validators[0].account_name,
-        validators[0].Msg.delegator_address,
-        validators[0].Msg.validator_address,
+    const previousPrevote2 = await testState.testkit.registerAutomaticTx(registerChainOraclePrevote(
+        testState.validators[0].account_name,
+        testState.validators[0].Msg.delegator_address,
+        testState.validators[0].Msg.validator_address,
         currentBlockHeight2 + 1
     ))
 
     //block 91 - 119
-    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 29))
+    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 29))
 
     //block 120
-    await mustPass(basset.finish(a))
+    await mustPass(testState.basset.finish(testState.wallets.a))
 
     //block 121
-    await mustPass(moneyMarket.deposit_stable(b, 1000000000000))
+    await mustPass(testState.moneyMarket.deposit_stable(testState.wallets.b, 1000000000000))
 
     //block 122
-    const marketAddr = moneyMarket.contractInfo["moneymarket_market"].contractAddress;
-    await mustPass(moneyMarket.send_cw20_token(
-        b,
+    const marketAddr = testState.moneyMarket.contractInfo["moneymarket_market"].contractAddress;
+    await mustPass(testState.moneyMarket.send_cw20_token(
+        testState.wallets.b,
         300000000000,
         { redeem_stable: {} },
         marketAddr
     ))
 
     //block 123
-    const custody = moneyMarket.contractInfo["moneymarket_custody"].contractAddress;
-    await mustPass(basset.send_cw20_token(
-        a,
+    const custody = testState.moneyMarket.contractInfo["moneymarket_custody_bluna"].contractAddress;
+    await mustPass(testState.basset.send_cw20_token(
+        testState.basset.contractInfo["anchor_basset_token"].contractAddress,
+        testState.wallets.a,
         3000000000000,
         { deposit_collateral: {} },
         custody
     ))
 
     //block 124
-    await mustPass(moneyMarket.overseer_lock_collateral(a, [[basset.contractInfo["anchor_basset_token"].contractAddress, "2000000000000"]]))
+    await mustPass(testState.moneyMarket.overseer_lock_collateral(testState.wallets.a, [[testState.basset.contractInfo["anchor_basset_token"].contractAddress, "2000000000000"]]))
 
     //block 125
-    await mustFail(moneyMarket.overseer_lock_collateral(a, [[basset.contractInfo["anchor_basset_token"].contractAddress, "1500000000000"]]))
+    await mustFail(testState.moneyMarket.overseer_lock_collateral(testState.wallets.a, [[testState.basset.contractInfo["anchor_basset_token"].contractAddress, "1500000000000"]]))
 
     //block 126
-    await mustFail(moneyMarket.borrow_stable(a, 1500000000000, undefined))
+    await mustFail(testState.moneyMarket.borrow_stable(testState.wallets.a, 1500000000000, undefined))
 
     //block 127
-    await mustPass(moneyMarket.borrow_stable(a, 300000000000, undefined))
+    await mustPass(testState.moneyMarket.borrow_stable(testState.wallets.a, 300000000000, undefined))
 
     //block 128
-    await mustPass(basset.update_global_index(a))
+    await mustPass(testState.basset.update_global_index(testState.wallets.a))
 
     //block 129
-    await mustPass(moneyMarket.execute_epoch_operations(a))
+    await mustPass(testState.moneyMarket.execute_epoch_operations(testState.wallets.a))
 
     // block 130
-    await mustFail(moneyMarket.send_cw20_token(
-        b,
+    await mustFail(testState.moneyMarket.send_cw20_token(
+        testState.wallets.b,
         50000000000000,
         { redeem_stable: {} },
-        moneyMarket.contractInfo["moneymarket_market"].contractAddress
+        testState.moneyMarket.contractInfo["moneymarket_market"].contractAddress
     ))
 
     //block 131
-    await mustPass(moneyMarket.deposit_stable(b, 1000000))
+    await mustPass(testState.moneyMarket.deposit_stable(testState.wallets.b, 1000000))
 
     //block 132
-    await mustPass(moneyMarket.overseer_unlock_collateral(a, [[basset.contractInfo["anchor_basset_token"].contractAddress, "100000000000"]]))
+    await mustPass(testState.moneyMarket.overseer_unlock_collateral(testState.wallets.a, [[testState.basset.contractInfo["anchor_basset_token"].contractAddress, "100000000000"]]))
 
     //block 133
-    await mustFail(moneyMarket.overseer_unlock_collateral(a, [[basset.contractInfo["anchor_basset_token"].contractAddress, "10000000000000"]]))
+    await mustFail(testState.moneyMarket.overseer_unlock_collateral(testState.wallets.a, [[testState.basset.contractInfo["anchor_basset_token"].contractAddress, "10000000000000"]]))
 
     //block 134
-    await mustPass(moneyMarket.withdraw_collateral(a, 150000000000))
+    await mustPass(testState.moneyMarket.withdraw_collateral(testState.wallets.a, 150000000000))
 
     //block 135
-    await mustFail(moneyMarket.withdraw_collateral(a, 990000000000))
+    await mustFail(testState.moneyMarket.withdraw_collateral(testState.wallets.a, 990000000000))
 
     //block 136-149
-    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 14))
+    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 14))
 
     console.log("saving state...")
     fs.writeFileSync("4_block149_state.json", JSON.stringify(await mantleState.getState(), null, 2))
 
     //block 150
-    await mustPass(basset.update_global_index(a))
+    await mustPass(testState.basset.update_global_index(testState.wallets.a))
 
     //block 151
-    await mustPass(moneyMarket.execute_epoch_operations(a))
+    await mustPass(testState.moneyMarket.execute_epoch_operations(testState.wallets.a))
 
     //block 152
-    await mustPass(moneyMarket.borrow_stable(a, 300000000000, undefined))
+    await mustPass(testState.moneyMarket.borrow_stable(testState.wallets.a, 300000000000, undefined))
 
     //block 153 - 165
-    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 13))
+    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 13))
 
     //block 166
-    await mustPass(basset.update_global_index(a))
+    await mustPass(testState.basset.update_global_index(testState.wallets.a))
 
     //block 167
-    await mustPass(moneyMarket.execute_epoch_operations(a))
+    await mustPass(testState.moneyMarket.execute_epoch_operations(testState.wallets.a))
 
     //block 168
-    await mustFail(moneyMarket.overseer_unlock_collateral(a, [[basset.contractInfo["anchor_basset_token"].contractAddress, "30000000000"]]))
+    await mustFail(testState.moneyMarket.overseer_unlock_collateral(testState.wallets.a, [[testState.basset.contractInfo["anchor_basset_token"].contractAddress, "30000000000"]]))
 
     // block 169
-    await mustPass(moneyMarket.liquidation_submit_bid(c, basset.contractInfo["anchor_basset_token"].contractAddress, "0.2", "100000000000uusd"))
+    await mustPass(testState.moneyMarket.liquidation_submit_bid(testState.wallets.c, testState.basset.contractInfo["anchor_basset_token"].contractAddress, "0.2", "100000000000uusd"))
 
     // block 170 
-    await mustFail(moneyMarket.liquidate_collateral(c, aKey.accAddress))
-    await testkit.clearAutomaticTx(previousOracleFeed.id)
+    await mustFail(testState.moneyMarket.liquidate_collateral(testState.wallets.c, testState.keys.aKey.accAddress))
+    await testState.testkit.clearAutomaticTx(testState.previousOracleFeed.id)
 
     //block 172
-    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))
+    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 10))
 
-    await mustFail(moneyMarket.borrow_stable(a, 100, undefined))
-    await mustFail(moneyMarket.repay_stable(a, 100))
-    await mustFail(moneyMarket.overseer_lock_collateral(a,
-        [[basset.contractInfo["anchor_basset_token"].contractAddress, "100"]]))
-    await mustFail(moneyMarket.overseer_unlock_collateral(a,
-        [[basset.contractInfo["anchor_basset_token"].contractAddress, "100"]]))
+    await mustFail(testState.moneyMarket.borrow_stable(testState.wallets.a, 100, undefined))
+    await mustFail(testState.moneyMarket.repay_stable(testState.wallets.a, 100))
+    await mustFail(testState.moneyMarket.overseer_lock_collateral(testState.wallets.a,
+        [[testState.basset.contractInfo["anchor_basset_token"].contractAddress, "100"]]))
+    await mustFail(testState.moneyMarket.overseer_unlock_collateral(testState.wallets.a,
+        [[testState.basset.contractInfo["anchor_basset_token"].contractAddress, "100"]]))
 
-    const previousOracleFeed2 = await testkit.registerAutomaticTx(configureMMOracle(
-        owner,
-        anchor.moneyMarket.contractInfo["moneymarket_oracle"].contractAddress,
-        anchor.bAsset.contractInfo["anchor_basset_token"].contractAddress,
+    const previousOracleFeed2 = await testState.testkit.registerAutomaticTx(configureMMOracle(
+        testState.keys.owner,
+        testState.anchor.moneyMarket.contractInfo["moneymarket_oracle"].contractAddress,
+        testState.anchor.bAsset.contractInfo["anchor_basset_token"].contractAddress,
         0.18867924528301886792452830188679245
     ))
     // // change MM oracle price to 0.75
 
     // block 173
-    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 1))
+    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 1))
     //한블록 더 써야 하는 이유는 ,오라클 바뀌는 것 보다 autotx관련 오퍼레이션이 뒤에 들어가기 때문
 
     // block 174
-    await mustFail(moneyMarket.liquidate_collateral(c, aKey.accAddress))
+    await mustFail(testState.moneyMarket.liquidate_collateral(testState.wallets.c, testState.keys.aKey.accAddress))
 }
 
 main()

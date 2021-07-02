@@ -14,9 +14,11 @@ import {TestState} from "./common";
 let mantleState: MantleState;
 
 async function main() {
-    let i;
-    const testState = new TestState();
-    mantleState = await testState.getMantleState();
+    let j
+    let i
+    const testState = new TestState()
+    mantleState = await testState.getMantleState()
+    const blunaContractAddress = testState.basset.contractInfo.anchor_basset_token.contractAddress
 
     //block 67
     await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation))
@@ -64,19 +66,19 @@ async function main() {
     //block 92 - 94
     //bond
     await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 3))
-    for (var j = 0; j < 3; j++) {
+    for (j = 0; j < 3; j++) {
         for (i = 0; i < 25; i++) {
             await mustPass(testState.basset.bond(testState.wallets.a, 2000000))
         }
     }
 
-    for (var j = 0; j < 3; j++) {
+    for (j = 0; j < 3; j++) {
         for (i = 0; i < 25; i++) {
             await mustPass(testState.basset.bond(testState.wallets.b, 2000000))
         }
     }
 
-    for (var j = 0; j < 3; j++) {
+    for (j = 0; j < 3; j++) {
         for (i = 0; i < 25; i++) {
             await mustPass(testState.basset.bond(testState.wallets.c, 2000000))
         }
@@ -88,9 +90,10 @@ async function main() {
     //FIXME
     // await mustPass(testState.basset.update_global_index(a))
 
-    for (var j = 0; j < 3; j++) {
+    for (j = 0; j < 3; j++) {
         for (i = 0; i < 25; i++) {
             await testState.basset.send_cw20_token(
+                blunaContractAddress,
                 testState.wallets.a,
                 1000000,
                 {unbond: {}},
@@ -99,9 +102,10 @@ async function main() {
         }
     }
 
-    for (var j = 0; j < 3; j++) {
+    for (j = 0; j < 3; j++) {
         for (i = 0; i < 25; i++) {
             await testState.basset.send_cw20_token(
+                blunaContractAddress,
                 testState.wallets.b,
                 1000000,
                 {unbond: {}},
@@ -110,9 +114,10 @@ async function main() {
         }
     }
 
-    for (var j = 0; j < 3; j++) {
+    for (j = 0; j < 3; j++) {
         for (i = 0; i < 25; i++) {
             await testState.basset.send_cw20_token(
+                blunaContractAddress,
                 testState.wallets.c,
                 1000000,
                 {unbond: {}},

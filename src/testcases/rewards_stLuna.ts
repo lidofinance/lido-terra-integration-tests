@@ -22,7 +22,8 @@ async function main() {
 
     await mustPass(testState.basset.update_global_index(testState.wallets.a))
 
-    await mustPass(testState.basset.send_stluna_token(
+    await mustPass(testState.basset.send_cw20_token(
+        testState.basset.contractInfo["anchor_basset_token_stluna"].contractAddress,
         testState.wallets.a,
         bondAmount,
         {unbond: {}},

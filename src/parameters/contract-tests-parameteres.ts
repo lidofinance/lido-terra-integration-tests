@@ -3,7 +3,8 @@ import { ValAddress } from "@terra-money/terra.js";
 
 export const setTestParams = (
   validator: ValAddress,
-  testAccount: string
+  testAccount: string,
+  lido_fee_address?: string,
 ): CustomInstantiationParam => {
   let testParams: CustomInstantiationParam = {
     testAccount: testAccount,
@@ -15,6 +16,7 @@ export const setTestParams = (
       er_threshold: "1.0",
       reward_denom: "uusd",
       validator: validator, // for tequila
+      lido_fee_address: lido_fee_address,
     },
     overseer: {
       stable_denom: "uusd",

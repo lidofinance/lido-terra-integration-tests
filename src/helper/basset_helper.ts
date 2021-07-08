@@ -150,7 +150,7 @@ export default class AnchorbAsset {
                 bluna_reward_denom: "uusd",
                 //FIX: change to real fee address?
                 lido_fee_address: params.lido_fee_address || this.contractInfo["anchor_basset_token"].contractAddress,
-                lido_fee_rate: "0.5",
+                lido_fee_rate: "0.005",
             },
             undefined
         )

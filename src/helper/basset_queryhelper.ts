@@ -17,6 +17,7 @@ import { QueryMsg as AnchotBassetHubQueryMsg } from "./types/anchor_basset_hub/q
 import { StateResponse } from "./types/basset_reward/state_response";
 import { ConfigResponse } from "./types/basset_reward/config_response";
 import { State } from "./types/anchor_basset_hub/state";
+import { AccruedRewardsResponse } from "./types/basset_reward/accrued_rewards_response";
 
 //npx json2ts -i anchor-bAsset-contracts/contracts/anchor_basset_token/schema/ -o src/helper/types/bluna_token/
 
@@ -239,6 +240,16 @@ export default class AnchorbAssetQueryHelper {
         return this.blunarewardquery(
             { config: {} }
         ).then(r => r as ConfigResponse)
+    }
+
+    public async bluna_accrued_reward(address: string): Promise<AccruedRewardsResponse> {
+        return this.blunarewardquery(
+            {
+                accrued_rewards: {
+                    address: address
+                }
+            }
+        ).then(r => r as AccruedRewardsResponse)
     }
 
     public async bluna_exchange_rate(): Promise<number> {

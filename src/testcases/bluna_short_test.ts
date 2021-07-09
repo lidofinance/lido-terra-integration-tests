@@ -89,7 +89,7 @@ async function main() {
     assert.equal(uluna_balance_b, initial_uluna_balance_b + unbond_amount * withdrawal_rate)
 
 
-    await mustPass(testState.basset.decrease_allowance(blunaContractAddress, testState.wallets.a, testState.wallets.b.key.accAddress, 1000000, { never: {} }))
+    await mustPass(testState.basset.decrease_allowance(blunaContractAddress, testState.wallets.a, testState.wallets.b.key.accAddress, unbond_amount, { never: {} }))
     await mustFail(testState.basset.send_from_cw20_token(blunaContractAddress, testState.wallets.b, testState.wallets.a,
         100000,
         { unbond: {} },

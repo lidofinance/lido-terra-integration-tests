@@ -1,14 +1,14 @@
-import {AutomaticTxRequest, AutomaticTxResponse, Testkit, TestkitInit} from "../testkit/testkit";
-import {Coin, Coins, Dec, Int, LCDClient, MnemonicKey, MsgSend, StdFee, Validator, Wallet} from "@terra-money/terra.js";
+import { AutomaticTxRequest, AutomaticTxResponse, Testkit, TestkitInit } from "../testkit/testkit";
+import { Coin, Coins, Dec, Int, LCDClient, MnemonicKey, MsgSend, StdFee, Validator, Wallet } from "@terra-money/terra.js";
 import Anchor from "../helper/spawn";
 import AnchorbAsset from "../helper/basset_helper";
 import MoneyMarket from "../helper/money_market_helper";
 import TerraSwap from "../helper/terraswap_helper";
 import AnchorToken from "../helper/anchor_token_helper";
-import {registerChainOraclePrevote, registerChainOracleVote} from "../helper/oracle/chain-oracle";
-import {setTestParams} from "../parameters/contract-tests-parameteres";
-import {configureMMOracle} from "../helper/oracle/mm-oracle";
-import {MantleState} from "../mantle-querier/MantleState";
+import { registerChainOraclePrevote, registerChainOracleVote } from "../helper/oracle/chain-oracle";
+import { setTestParams } from "../parameters/contract-tests-parameteres";
+import { configureMMOracle } from "../helper/oracle/mm-oracle";
+import { MantleState } from "../mantle-querier/MantleState";
 import * as path from "path";
 
 export class TestState {
@@ -44,6 +44,7 @@ export class TestState {
         this.keys.bKey = new MnemonicKey();
         this.keys.cKey = new MnemonicKey();
         this.keys.dKey = new MnemonicKey();
+        this.keys.lidoKey = new MnemonicKey();
         this.keys.owner = new MnemonicKey();
 
         this.validatorKeys.validatorAKey = new MnemonicKey();
@@ -59,6 +60,7 @@ export class TestState {
                 Testkit.walletToAccountRequest("b", this.keys.bKey),
                 Testkit.walletToAccountRequest("c", this.keys.cKey),
                 Testkit.walletToAccountRequest("d", this.keys.dKey),
+                Testkit.walletToAccountRequest("lido_fee", this.keys.lidoKey),
                 Testkit.walletToAccountRequest("valA", this.validatorKeys.validatorAKey),
                 Testkit.walletToAccountRequest("valB", this.validatorKeys.validatorBKey),
                 Testkit.walletToAccountRequest("valC", this.validatorKeys.validatorCKey),
@@ -152,6 +154,8 @@ export class TestState {
 
         this.wallets.valAWallet = new Wallet(this.lcdClient, this.validatorKeys.validatorAKey);
 
+        this.wallets.lido_fee = new Wallet(this.lcdClient, this.keys.lidoKey);
+
         // store & instantiate contracts
         this.wallets.ownerWallet = new Wallet(this.lcdClient, this.keys.owner);
         this.anchor = new Anchor(this.wallets.ownerWallet);
@@ -165,8 +169,12 @@ export class TestState {
         const fixedFeeForInit = new StdFee(6000000, "2000000uusd");
         await this.anchor.instantiate(
             fixedFeeForInit,
-            setTestParams(this.validators[0].validator_address, this.wallets.a.key.accAddress),
-            this.validators,
+            setTestParams(
+                this.validators[0].validator_address,
+                this.wallets.a.key.accAddress,
+                this.wallets.lido_fee.key.accAddress,
+            ),
+            this.validators
         );
 
         // register oracle price feeder
@@ -192,23 +200,23 @@ export class TestState {
             bAssetToken: this.basset.contractInfo["anchor_basset_token"].contractAddress,
             bAssetReward: this.basset.contractInfo["anchor_basset_reward"].contractAddress,
             bAssetAirdrop:
-            this.basset.contractInfo["anchor_airdrop_registry"].contractAddress,
+                this.basset.contractInfo["anchor_airdrop_registry"].contractAddress,
             mmInterest:
-            this.moneyMarket.contractInfo["moneymarket_interest_model"].contractAddress,
+                this.moneyMarket.contractInfo["moneymarket_interest_model"].contractAddress,
             mmOracle: this.moneyMarket.contractInfo["moneymarket_oracle"].contractAddress,
             mmMarket: this.moneyMarket.contractInfo["moneymarket_market"].contractAddress,
             mmOverseer:
-            this.moneyMarket.contractInfo["moneymarket_overseer"].contractAddress,
+                this.moneyMarket.contractInfo["moneymarket_overseer"].contractAddress,
             mmCustody:
-            this.moneyMarket.contractInfo["moneymarket_custody_bluna"].contractAddress,
+                this.moneyMarket.contractInfo["moneymarket_custody_bluna"].contractAddress,
             mmLiquidation:
-            this.moneyMarket.contractInfo["moneymarket_liquidation"].contractAddress,
+                this.moneyMarket.contractInfo["moneymarket_liquidation"].contractAddress,
             mmdistribution:
-            this.moneyMarket.contractInfo["moneymarket_distribution_model"]
-                .contractAddress,
+                this.moneyMarket.contractInfo["moneymarket_distribution_model"]
+                    .contractAddress,
             anchorToken: this.moneyMarket.contractInfo["anchorToken"].contractAddress,
             terraswapFactory:
-            this.terraswap.contractInfo["terraswap_factory"].contractAddress,
+                this.terraswap.contractInfo["terraswap_factory"].contractAddress,
             terraswapPair: "whateva",
             gov: this.anc.contractInfo["gov"].contractAddress,
             faucet: this.anc.contractInfo["faucet"].contractAddress,
@@ -225,23 +233,23 @@ export class TestState {
                 bAssetToken: this.basset.contractInfo["anchor_basset_token"].contractAddress,
                 bAssetReward: this.basset.contractInfo["anchor_basset_reward"].contractAddress,
                 bAssetAirdrop:
-                this.basset.contractInfo["anchor_airdrop_registry"].contractAddress,
+                    this.basset.contractInfo["anchor_airdrop_registry"].contractAddress,
                 mmInterest:
-                this.moneyMarket.contractInfo["moneymarket_interest_model"].contractAddress,
+                    this.moneyMarket.contractInfo["moneymarket_interest_model"].contractAddress,
                 mmOracle: this.moneyMarket.contractInfo["moneymarket_oracle"].contractAddress,
                 mmMarket: this.moneyMarket.contractInfo["moneymarket_market"].contractAddress,
                 mmOverseer:
-                this.moneyMarket.contractInfo["moneymarket_overseer"].contractAddress,
+                    this.moneyMarket.contractInfo["moneymarket_overseer"].contractAddress,
                 mmCustody:
-                this.moneyMarket.contractInfo["moneymarket_custody_bluna"].contractAddress,
+                    this.moneyMarket.contractInfo["moneymarket_custody_bluna"].contractAddress,
                 mmLiquidation:
-                this.moneyMarket.contractInfo["moneymarket_liquidation"].contractAddress,
+                    this.moneyMarket.contractInfo["moneymarket_liquidation"].contractAddress,
                 mmdistribution:
-                this.moneyMarket.contractInfo["moneymarket_distribution_model"]
-                    .contractAddress,
+                    this.moneyMarket.contractInfo["moneymarket_distribution_model"]
+                        .contractAddress,
                 anchorToken: this.moneyMarket.contractInfo["anchorToken"].contractAddress,
                 terraswapFactory:
-                this.terraswap.contractInfo["terraswap_factory"].contractAddress,
+                    this.terraswap.contractInfo["terraswap_factory"].contractAddress,
                 terraswapPair: "whateva",
                 gov: this.anc.contractInfo["gov"].contractAddress,
                 faucet: this.anc.contractInfo["faucet"].contractAddress,

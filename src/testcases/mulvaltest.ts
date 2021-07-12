@@ -140,7 +140,8 @@ async function main() {
     const fixedFeeForInit = new StdFee(6000000, "2000000uusd");
     await anchor.instantiate(
         fixedFeeForInit,
-        setTestParams(validators[0].validator_address, a.key.accAddress)
+        setTestParams(validators[0].validator_address, a.key.accAddress),
+        [validators[0]]
     );
 
     // register oracle price feeder
@@ -157,9 +158,9 @@ async function main() {
 
     // await testkit.inject(validators[0].validator_address) -> 아무 Tx 없이 지나가는 경우의 테스팅
 
-    for (var i = 0; i < 25; i++) {
+    for (var i = 1; i < 25; i++) {
         await mustPass(
-            anchor.bAsset.register_validator(
+            anchor.bAsset.add_validator(
                 ownerWallet,
                 validators[i].validator_address
             )
@@ -290,19 +291,19 @@ async function main() {
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 3))
     for (var j = 0; j < 3; j++) {
         for (var i = 0; i < 25; i++) {
-            await mustPass(basset.bond(a, 2000000, validators[i].validator_address))
+            await mustPass(basset.bond(a, 2000000))
         }
     }
 
     for (var j = 0; j < 3; j++) {
         for (var i = 0; i < 25; i++) {
-            await mustPass(basset.bond(b, 2000000, validators[i].validator_address))
+            await mustPass(basset.bond(b, 2000000))
         }
     }
 
     for (var j = 0; j < 3; j++) {
         for (var i = 0; i < 25; i++) {
-            await mustPass(basset.bond(c, 2000000, validators[i].validator_address))
+            await mustPass(basset.bond(c, 2000000))
         }
     }
 
@@ -314,6 +315,7 @@ async function main() {
     for (var j = 0; j < 3; j++) {
         for (var i = 0; i < 25; i++) {
             await basset.send_cw20_token(
+                basset.contractInfo["anchor_basset_token"].contractAddress,
                 a,
                 1000000,
                 { unbond: {} },
@@ -325,6 +327,7 @@ async function main() {
     for (var j = 0; j < 3; j++) {
         for (var i = 0; i < 25; i++) {
             await basset.send_cw20_token(
+                basset.contractInfo["anchor_basset_token"].contractAddress,
                 b,
                 1000000,
                 { unbond: {} },
@@ -336,6 +339,7 @@ async function main() {
     for (var j = 0; j < 3; j++) {
         for (var i = 0; i < 25; i++) {
             await basset.send_cw20_token(
+                basset.contractInfo["anchor_basset_token"].contractAddress,
                 c,
                 1000000,
                 { unbond: {} },
@@ -355,26 +359,9 @@ async function main() {
     //block 170
     await mustPass(basset.update_global_index(a))
 
-    for (var i = 0; i < 5; i++) {
-        await mustPass(basset.deregister_validator(ownerWallet, validators[i].validator_address))
-    }
-
-    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 50))
-
-    for (var i = 5; i < 10; i++) {
-        await mustPass(basset.deregister_validator(ownerWallet, validators[i].validator_address))
-    }
-
-    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 50))
-
-    for (var i = 15; i < 20; i++) {
-        await mustPass(basset.deregister_validator(ownerWallet, validators[i].validator_address))
-    }
-
-    await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 50))
-
-    for (var i = 20; i < 25; i++) {
-        await mustPass(basset.deregister_validator(ownerWallet, validators[i].validator_address))
+    for (var i = 0; i < 24; i++) {
+        await mustPass(basset.remove_validator(ownerWallet, validators[i].validator_address))
+        await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 40))
     }
 
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 10))

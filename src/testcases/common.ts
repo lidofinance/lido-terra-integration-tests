@@ -1,4 +1,4 @@
-import { AutomaticTxResponse, Testkit, TestkitInit } from "../testkit/testkit";
+import { AutomaticTxRequest, AutomaticTxResponse, Testkit, TestkitInit } from "../testkit/testkit";
 import { Coin, Coins, Dec, Int, LCDClient, MnemonicKey, MsgSend, StdFee, Validator, Wallet } from "@terra-money/terra.js";
 import Anchor from "../helper/spawn";
 import AnchorbAsset from "../helper/basset_helper";
@@ -26,6 +26,8 @@ export class TestState {
     anc: AnchorToken
     initialPrevotes: AutomaticTxResponse[]
     initialVotes: AutomaticTxResponse[]
+    previousOracleFeed: AutomaticTxResponse
+
 
     constructor() {
         this.keys = {};
@@ -41,6 +43,7 @@ export class TestState {
         this.keys.aKey = new MnemonicKey();
         this.keys.bKey = new MnemonicKey();
         this.keys.cKey = new MnemonicKey();
+        this.keys.dKey = new MnemonicKey();
         this.keys.lidoKey = new MnemonicKey();
         this.keys.owner = new MnemonicKey();
 
@@ -56,6 +59,7 @@ export class TestState {
                 Testkit.walletToAccountRequest("a", this.keys.aKey),
                 Testkit.walletToAccountRequest("b", this.keys.bKey),
                 Testkit.walletToAccountRequest("c", this.keys.cKey),
+                Testkit.walletToAccountRequest("d", this.keys.dKey),
                 Testkit.walletToAccountRequest("lido_fee", this.keys.lidoKey),
                 Testkit.walletToAccountRequest("valA", this.validatorKeys.validatorAKey),
                 Testkit.walletToAccountRequest("valB", this.validatorKeys.validatorBKey),
@@ -174,7 +178,7 @@ export class TestState {
         );
 
         // register oracle price feeder
-        const previousOracleFeed = await this.testkit.registerAutomaticTx(
+        this.previousOracleFeed = await this.testkit.registerAutomaticTx(
             configureMMOracle(
                 this.keys.owner,
                 this.anchor.moneyMarket.contractInfo["moneymarket_oracle"].contractAddress,

@@ -161,7 +161,8 @@ async function main() {
     const fixedFeeForInit = new StdFee(6000000, "2000000uusd");
     await anchor.instantiate(
         fixedFeeForInit,
-        setTestParams(validators[0].validator_address, a.key.accAddress)
+        setTestParams(validators[0].validator_address, a.key.accAddress),
+        validators
     );
 
     // register oracle price feeder
@@ -177,32 +178,6 @@ async function main() {
     ///////////////// scenario 시작 ////////////////////
 
     // await testkit.inject(validators[0].validator_address) -> 아무 Tx 없이 지나가는 경우의 테스팅
-
-    await mustPass(
-        anchor.bAsset.register_validator(
-            ownerWallet,
-            validators[0].validator_address
-        )
-    );
-    //erase these
-    await mustPass(
-        anchor.bAsset.register_validator(
-            ownerWallet,
-            validators[1].validator_address
-        )
-    );
-    await mustPass(
-        anchor.bAsset.register_validator(
-            ownerWallet,
-            validators[2].validator_address
-        )
-    );
-    await mustPass(
-        anchor.bAsset.register_validator(
-            ownerWallet,
-            validators[3].validator_address
-        )
-    );
 
     const basset = anchor.bAsset;
     const moneyMarket = anchor.moneyMarket;
@@ -288,19 +263,19 @@ async function main() {
     await mustPass(anc.transfer_cw20_token(a, dKey.accAddress, 100000000000))
 
     //block 69
-    await mustPass(basset.bond(a, 20000000000000, validators[0].validator_address))
+    await mustPass(basset.bond(a, 20000000000000))
 
     //block 70
-    await mustPass(basset.bond(a, 333333333333, validators[1].validator_address))
+    await mustPass(basset.bond(a, 333333333333))
 
     //block 71
-    await mustPass(basset.bond(a, 333333333333, validators[2].validator_address))
+    await mustPass(basset.bond(a, 333333333333))
 
     //block 72
-    await mustPass(basset.bond(a, 333333333333, validators[3].validator_address))
+    await mustPass(basset.bond(a, 333333333333))
 
     //block 73
-    await mustPass(basset.deregister_validator(ownerWallet, validators[1].validator_address))
+    await mustPass(basset.remove_validator(ownerWallet, validators[1].validator_address))
 
     //block 74 - 80
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 7))
@@ -346,12 +321,13 @@ async function main() {
     await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 3))
 
     //block 95
-    await mustPass(basset.bond(a, 20000000000000, validators[0].validator_address))
-    await mustPass(basset.bond(b, 20000000000000, validators[0].validator_address))
-    await mustPass(basset.bond(c, 20000000000000, validators[0].validator_address))
+    await mustPass(basset.bond(a, 20000000000000))
+    await mustPass(basset.bond(b, 20000000000000))
+    await mustPass(basset.bond(c, 20000000000000))
 
     //block 97
     await basset.send_cw20_token(
+        basset.contractInfo["anchor_basset_token"].contractAddress,
         a,
         333333333333,
         { unbond: {} },
@@ -360,6 +336,7 @@ async function main() {
 
     //block 98
     await mustPass(basset.send_cw20_token(
+        basset.contractInfo["anchor_basset_token"].contractAddress,
         a,
         333333333333,
         { unbond: {} },
@@ -371,6 +348,7 @@ async function main() {
 
     //block 159
     await mustPass(basset.send_cw20_token(
+        basset.contractInfo["anchor_basset_token"].contractAddress,
         a,
         333333333333,
         { unbond: {} },
@@ -386,6 +364,7 @@ async function main() {
     //block 163
     const custody = moneyMarket.contractInfo["moneymarket_custody_bluna"].contractAddress;
     await mustPass(basset.send_cw20_token(
+        basset.contractInfo["anchor_basset_token"].contractAddress,
         a,
         3000000000000,
         { deposit_collateral: {} },
@@ -393,6 +372,7 @@ async function main() {
     ))
 
     await mustPass(basset.send_cw20_token(
+        basset.contractInfo["anchor_basset_token"].contractAddress,
         b,
         3000000000000,
         { deposit_collateral: {} },
@@ -400,6 +380,7 @@ async function main() {
     ))
 
     await mustPass(basset.send_cw20_token(
+        basset.contractInfo["anchor_basset_token"].contractAddress,
         c,
         3000000000000,
         { deposit_collateral: {} },

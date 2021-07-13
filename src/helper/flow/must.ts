@@ -18,3 +18,7 @@ export const mustFail = <T>(action: Promise<T>): Promise<Error> => {
 
   return Promise.race([pathA, pathB]);
 };
+
+export function floateq(a: number, b: number, e: number): boolean {
+  return Math.abs((a - b) / (a + b)) < e;
+}

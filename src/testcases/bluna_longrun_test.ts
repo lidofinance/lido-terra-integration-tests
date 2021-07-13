@@ -1,5 +1,5 @@
 import * as fs from "fs";
-import { mustPass } from "../helper/flow/must";
+import { floateq as floateq, mustPass } from "../helper/flow/must";
 import { getRecord } from "../helper/flow/record";
 import {
     registerChainOracleVote,
@@ -9,7 +9,7 @@ import { MantleState } from "../mantle-querier/MantleState";
 import { emptyBlockWithFixedGas } from "../helper/flow/gas-station";
 import { repeat } from "../helper/flow/repeat";
 import { unjail } from "../helper/validator-operation/unjail";
-import { TestState } from "./common";
+import { get_expected_sum_from_requests, TestState } from "./common";
 import AnchorbAssetQueryHelper from "../helper/basset_queryhelper";
 var assert = require('assert');
 
@@ -75,50 +75,20 @@ async function main() {
     //block 92 - 94
     //bond
     await testState.basset.slashing(testState.wallets.a)
-    // const in_bluna_bonded = await querier.total_bond_bluna_amount()
-    // const in_bluna_issued = await querier.token_info_bluna()
-    // await mustPass(testState.basset.bond(testState.wallets.a, 2_000_000_000))
-    // assert.equal(await querier.balance_bluna(testState.wallets.a.key.accAddress), 2_000_000)
-    // let rates: Array<number> = [];
-    // let diffs: Array<{
-    //     total_issued: number;
-    //     total_bonded: number;
-    //     diff: number;
-    //     rate:number;
-    // }> = [{
-    //     total_issued: Number((await querier.token_info_bluna()).total_supply),
-    //     total_bonded: await querier.total_bond_bluna_amount(),
-    //     diff: Number((await querier.token_info_bluna()).total_supply) - await querier.total_bond_bluna_amount(),
-    //     rate:await querier.bluna_exchange_rate(),
-    // }
-    //     ]
 
     await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 3))
     // set really low xhg_rate for first iteration
     let bluna_exchange_rate = 0.5;
     for (j = 0; j < 3; j++) {
         for (i = 0; i < 25; i++) {
-            // rates.push(await querier.bluna_exchange_rate())
             assert.ok(await querier.bluna_exchange_rate() <= 1)
             // check exchange_rate is growing on each iteration
             assert.ok(await querier.bluna_exchange_rate() > bluna_exchange_rate)
             bluna_exchange_rate = await querier.bluna_exchange_rate()
             await mustPass(testState.basset.bond(testState.wallets.a, 2_000_000))
-            // diffs.push({
-            //     total_issued: Number((await querier.token_info_bluna()).total_supply),
-            //     total_bonded: await querier.total_bond_bluna_amount(),
-            //     diff: Number((await querier.token_info_bluna()).total_supply) - await querier.total_bond_bluna_amount(),
-            //     rate:await querier.bluna_exchange_rate(),
-            // })
         }
     }
-    // console.log(rates)
-    // console.log(diffs)
-    // console.log(in_bluna_bonded, in_bluna_issued)
-    // throw new Error("lala");
 
-
-    // assert.equal(await querier.balance_bluna(testState.wallets.a.key.accAddress), 150_000_000)
 
     // set really low xhg_rate for first iteration
     bluna_exchange_rate = 0.5;
@@ -195,7 +165,11 @@ async function main() {
 
 
     //block 99 - 159
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 10))
+    const unbond_requests_a = await querier.unbond_requests(testState.wallets.a.key.accAddress)
+    const unbond_requests_b = await querier.unbond_requests(testState.wallets.b.key.accAddress)
+    const unbond_requests_c = await querier.unbond_requests(testState.wallets.c.key.accAddress)
+
+    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 30))
     const inital_uluna_balance_a = Number((await testState.wallets.a.lcd.bank.balance(testState.wallets.a.key.accAddress)).get("uluna").amount)
     const inital_uluna_balance_b = Number((await testState.wallets.b.lcd.bank.balance(testState.wallets.b.key.accAddress)).get("uluna").amount)
     const inital_uluna_balance_c = Number((await testState.wallets.c.lcd.bank.balance(testState.wallets.c.key.accAddress)).get("uluna").amount)
@@ -204,11 +178,28 @@ async function main() {
     await mustPass(testState.basset.finish(testState.wallets.b))
     await mustPass(testState.basset.finish(testState.wallets.c))
 
+
     //block 170
     await mustPass(testState.basset.update_global_index(testState.wallets.a))
 
+
+
     const uluna_balance_a = Number((await testState.wallets.a.lcd.bank.balance(testState.wallets.a.key.accAddress)).get("uluna").amount)
-    // console.log(await querier.)
+    const uluna_balance_b = Number((await testState.wallets.b.lcd.bank.balance(testState.wallets.b.key.accAddress)).get("uluna").amount)
+    const uluna_balance_c = Number((await testState.wallets.c.lcd.bank.balance(testState.wallets.c.key.accAddress)).get("uluna").amount)
+
+    const actual_withdrawal_sum_a = (Number(uluna_balance_a) - inital_uluna_balance_a)
+    const actual_withdrawal_sum_b = (Number(uluna_balance_b) - inital_uluna_balance_b)
+    const actual_withdrawal_sum_c = (Number(uluna_balance_c) - inital_uluna_balance_c)
+
+    const expected_withdrawal_sum_a = await get_expected_sum_from_requests(querier, unbond_requests_a)
+    const expected_withdrawal_sum_b = await get_expected_sum_from_requests(querier, unbond_requests_b)
+    const expected_withdrawal_sum_c = await get_expected_sum_from_requests(querier, unbond_requests_c)
+
+
+    assert.ok(floateq(expected_withdrawal_sum_a, actual_withdrawal_sum_a, 1e-5))
+    assert.ok(floateq(expected_withdrawal_sum_b, actual_withdrawal_sum_b, 1e-5))
+    assert.ok(floateq(expected_withdrawal_sum_c, actual_withdrawal_sum_c, 1e-5))
 
 }
 

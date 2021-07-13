@@ -10,6 +10,8 @@ import { setTestParams } from "../parameters/contract-tests-parameteres";
 import { configureMMOracle } from "../helper/oracle/mm-oracle";
 import { MantleState } from "../mantle-querier/MantleState";
 import * as path from "path";
+import { UnbondRequestsResponse } from "../helper/types/anchor_basset_hub/unbond_requests_response";
+import AnchorbAssetQueryHelper from "../helper/basset_queryhelper";
 
 export class TestState {
     testkit: Testkit
@@ -266,4 +268,23 @@ export class TestState {
 
         return mantleState
     }
+}
+
+
+
+export const get_expected_sum_from_requests = async (querier: AnchorbAssetQueryHelper, reqs: UnbondRequestsResponse): Promise<number> => {
+    return reqs.requests.reduce(async (acc, [batchid, amount]) => {
+        const acc_sum = await acc;
+        const h = await querier.all_history(1, batchid - 1);
+        if (h.history.length == 0) {
+            // probably this request is not in UnboundHistory yet
+            return acc_sum
+        } else if (!h.history[0].released) {
+            // unbond batch is not released yet
+            return acc_sum
+        }
+        else {
+            return Number(h.history[0].withdraw_rate) * Number(amount) + acc_sum;
+        }
+    }, Promise.resolve(0))
 }

@@ -222,6 +222,7 @@ async function main() {
         {
             bLunaHub: basset.contractInfo["anchor_basset_hub"].contractAddress,
             bAssetToken: basset.contractInfo["anchor_basset_token"].contractAddress,
+            stLunaToken: basset.contractInfo["anchor_basset_token_stluna"].contractAddress,
             bAssetReward: basset.contractInfo["anchor_basset_reward"].contractAddress,
             bAssetAirdrop:
                 basset.contractInfo["anchor_airdrop_registry"].contractAddress,

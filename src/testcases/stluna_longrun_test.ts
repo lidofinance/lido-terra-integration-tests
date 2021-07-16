@@ -1,15 +1,15 @@
 import * as fs from "fs";
-import { floateq, mustPass } from "../helper/flow/must";
-import { getRecord } from "../helper/flow/record";
+import {floateq, mustPass} from "../helper/flow/must";
+import {getRecord} from "../helper/flow/record";
 import {
     registerChainOracleVote,
     registerChainOraclePrevote,
 } from "../helper/oracle/chain-oracle";
-import { MantleState } from "../mantle-querier/MantleState";
-import { emptyBlockWithFixedGas } from "../helper/flow/gas-station";
-import { repeat } from "../helper/flow/repeat";
-import { unjail } from "../helper/validator-operation/unjail";
-import { TestState } from "./common";
+import {MantleState} from "../mantle-querier/MantleState";
+import {emptyBlockWithFixedGas} from "../helper/flow/gas-station";
+import {repeat} from "../helper/flow/repeat";
+import {unjail} from "../helper/validator-operation/unjail";
+import {get_expected_sum_from_requests, TestState} from "./common";
 import AnchorbAssetQueryHelper from "../helper/basset_queryhelper";
 var assert = require('assert');
 
@@ -83,6 +83,8 @@ async function main() {
             await mustPass(testState.basset.bond_for_stluna(testState.wallets.a, 2_000_000))
         }
     }
+    // we are bonding 3 * 25 = 75 iterations by 2_000_000 uluna each, 150_000_000 in total
+    // we are expecting to have (150_000_000 / stluna_exchange_rate) stluna tokens
     assert.ok(floateq(
         150_000_000 / stluna_exchange_rate,
         await querier.balance_stluna(testState.wallets.a.key.accAddress),
@@ -99,6 +101,8 @@ async function main() {
             await mustPass(testState.basset.bond_for_stluna(testState.wallets.b, 2_000_000))
         }
     }
+    // we are bonding 3 * 25 = 75 iterations by 2_000_000 uluna each, 150_000_000 in total
+    // we are expecting to have (150_000_000 / stluna_exchange_rate) stluna tokens
     assert.ok(floateq(
         150_000_000 / stluna_exchange_rate,
         await querier.balance_stluna(testState.wallets.b.key.accAddress),
@@ -115,6 +119,8 @@ async function main() {
             await mustPass(testState.basset.bond_for_stluna(testState.wallets.c, 2_000_000))
         }
     }
+    // we are bonding 3 * 25 = 75 iterations by 2_000_000 uluna each, 150_000_000 in total
+    // we are expecting to have (150_000_000 / stluna_exchange_rate) stluna tokens
     assert.ok(floateq(
         150_000_000 / stluna_exchange_rate,
         await querier.balance_stluna(testState.wallets.c.key.accAddress),
@@ -135,7 +141,7 @@ async function main() {
                 stlunaContractAddress,
                 testState.wallets.a,
                 1_000_000,
-                { unbond: {} },
+                {unbond: {}},
                 testState.basset.contractInfo["anchor_basset_hub"].contractAddress
             )
         }
@@ -144,7 +150,7 @@ async function main() {
         stlunaContractAddress,
         testState.wallets.a,
         await querier.balance_stluna(testState.wallets.a.key.accAddress),
-        { unbond: {} },
+        {unbond: {}},
         testState.basset.contractInfo["anchor_basset_hub"].contractAddress
     )
 
@@ -155,7 +161,7 @@ async function main() {
                 stlunaContractAddress,
                 testState.wallets.b,
                 1_000_000,
-                { unbond: {} },
+                {unbond: {}},
                 testState.basset.contractInfo["anchor_basset_hub"].contractAddress
             )
         }
@@ -164,7 +170,7 @@ async function main() {
         stlunaContractAddress,
         testState.wallets.b,
         await querier.balance_stluna(testState.wallets.b.key.accAddress),
-        { unbond: {} },
+        {unbond: {}},
         testState.basset.contractInfo["anchor_basset_hub"].contractAddress
     )
 
@@ -175,7 +181,7 @@ async function main() {
                 stlunaContractAddress,
                 testState.wallets.c,
                 1_000_000,
-                { unbond: {} },
+                {unbond: {}},
                 testState.basset.contractInfo["anchor_basset_hub"].contractAddress
             )
         }
@@ -185,7 +191,7 @@ async function main() {
         stlunaContractAddress,
         testState.wallets.c,
         await querier.balance_stluna(testState.wallets.c.key.accAddress),
-        { unbond: {} },
+        {unbond: {}},
         testState.basset.contractInfo["anchor_basset_hub"].contractAddress
     )
     await mustPass(testState.basset.update_global_index(testState.wallets.c))
@@ -193,6 +199,9 @@ async function main() {
 
     //block 99 - 159
     await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 50))
+    const unbond_requests_a = await querier.unbond_requests(testState.wallets.a.key.accAddress)
+    const unbond_requests_b = await querier.unbond_requests(testState.wallets.b.key.accAddress)
+    const unbond_requests_c = await querier.unbond_requests(testState.wallets.c.key.accAddress)
     //block 160
     await mustPass(testState.basset.finish(testState.wallets.a))
     await mustPass(testState.basset.finish(testState.wallets.b))
@@ -204,10 +213,23 @@ async function main() {
     const uluna_balance_c = Number((await testState.wallets.c.lcd.bank.balance(testState.wallets.c.key.accAddress)).get("uluna").amount)
     const uluna_balance_lido_fee = Number((await testState.wallets.lido_fee.lcd.bank.balance(testState.wallets.lido_fee.key.accAddress)).get("uluna").amount)
 
-
+    const actual_profit_sum_a = (Number(uluna_balance_a) - initial_uluna_balance_a)
+    const actual_profit_sum_b = (Number(uluna_balance_b) - initial_uluna_balance_b)
+    const actual_profit_sum_c = (Number(uluna_balance_c) - initial_uluna_balance_c)
+    // we have unbonded all our stluna tokens, we have withdrawed(testState.basset.finish) all uluna
+    // our profit is "withdrawal amount" - "bonded amount"
+    const expected_profit_sum_a = await get_expected_sum_from_requests(querier, unbond_requests_a) - 150_000_000
+    const expected_profit_sum_b = await get_expected_sum_from_requests(querier, unbond_requests_b) - 150_000_000
+    const expected_profit_sum_c = await get_expected_sum_from_requests(querier, unbond_requests_c) - 150_000_000
+    // due to js float64 math precision we have to set the precision value = 1e-4, i.e. 0.01%
+    assert.ok(floateq(expected_profit_sum_a, actual_profit_sum_a, 1e-4))
+    assert.ok(floateq(expected_profit_sum_b, actual_profit_sum_b, 1e-4))
+    assert.ok(floateq(expected_profit_sum_c, actual_profit_sum_c, 1e-4))
     assert.ok(uluna_balance_a > initial_uluna_balance_a)
     assert.ok(uluna_balance_b > initial_uluna_balance_b)
     assert.ok(uluna_balance_c > initial_uluna_balance_c)
+
+
     assert.ok(uluna_balance_lido_fee > initial_uluna_balance_lido_fee)
 
 }

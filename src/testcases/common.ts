@@ -1,15 +1,17 @@
-import { AutomaticTxRequest, AutomaticTxResponse, Testkit, TestkitInit } from "../testkit/testkit";
-import { Coin, Coins, Dec, Int, LCDClient, MnemonicKey, MsgSend, StdFee, Validator, Wallet } from "@terra-money/terra.js";
+import {AutomaticTxRequest, AutomaticTxResponse, Testkit, TestkitInit} from "../testkit/testkit";
+import {Coin, Coins, Dec, Int, LCDClient, MnemonicKey, MsgSend, StdFee, Validator, Wallet} from "@terra-money/terra.js";
 import Anchor from "../helper/spawn";
 import AnchorbAsset from "../helper/basset_helper";
 import MoneyMarket from "../helper/money_market_helper";
 import TerraSwap from "../helper/terraswap_helper";
 import AnchorToken from "../helper/anchor_token_helper";
-import { registerChainOraclePrevote, registerChainOracleVote } from "../helper/oracle/chain-oracle";
-import { setTestParams } from "../parameters/contract-tests-parameteres";
-import { configureMMOracle } from "../helper/oracle/mm-oracle";
-import { MantleState } from "../mantle-querier/MantleState";
+import {registerChainOraclePrevote, registerChainOracleVote} from "../helper/oracle/chain-oracle";
+import {setTestParams} from "../parameters/contract-tests-parameteres";
+import {configureMMOracle} from "../helper/oracle/mm-oracle";
+import {MantleState} from "../mantle-querier/MantleState";
 import * as path from "path";
+import AnchorbAssetQueryHelper from "../helper/basset_queryhelper";
+import {UnbondRequestsResponse} from "../helper/types/anchor_basset_hub/unbond_requests_response";
 
 export class TestState {
     testkit: Testkit
@@ -266,4 +268,23 @@ export class TestState {
 
         return mantleState
     }
+}
+
+
+
+export const get_expected_sum_from_requests = async (querier: AnchorbAssetQueryHelper, reqs: UnbondRequestsResponse): Promise<number> => {
+    return reqs.requests.reduce(async (acc, [batchid, amount]) => {
+        const acc_sum = await acc;
+        const h = await querier.all_history(1, batchid - 1);
+        if (h.history.length == 0) {
+            // probably this request is not in UnboundHistory yet
+            return acc_sum
+        } else if (!h.history[0].released) {
+            // unbond batch is not released yet
+            return acc_sum
+        }
+        else {
+            return Number(h.history[0].withdraw_rate) * Number(amount) + acc_sum;
+        }
+    }, Promise.resolve(0))
 }

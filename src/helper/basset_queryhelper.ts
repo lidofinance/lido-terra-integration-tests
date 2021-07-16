@@ -18,6 +18,8 @@ import { StateResponse } from "./types/basset_reward/state_response";
 import { ConfigResponse } from "./types/basset_reward/config_response";
 import { State } from "./types/anchor_basset_hub/state";
 import { AccruedRewardsResponse } from "./types/basset_reward/accrued_rewards_response";
+import {AllHistoryResponse} from "./types/anchor_basset_hub/all_history_response";
+import {UnbondRequestsResponse} from "./types/anchor_basset_hub/unbond_requests_response";
 
 //npx json2ts -i anchor-bAsset-contracts/contracts/anchor_basset_token/schema/ -o src/helper/types/bluna_token/
 
@@ -270,6 +272,27 @@ export default class AnchorbAssetQueryHelper {
     public async total_bond_stluna_amount(): Promise<number> {
         return this.get_anchor_basset_hub_state()
             .then(r => Number(r.total_bond_stluna_amount))
+    }
+
+    public async all_history(limit?: number, start_from?: number): Promise<AllHistoryResponse> {
+        return this.bassethubquery(
+            {
+                all_history: {
+                    limit: limit,
+                    start_from: start_from,
+                }
+            }
+        ).then(r => r as AllHistoryResponse)
+    }
+
+    public async unbond_requests(address: string): Promise<UnbondRequestsResponse> {
+        return this.bassethubquery(
+            {
+                unbond_requests: {
+                    address: address,
+                }
+            }
+        ).then(r => r as UnbondRequestsResponse)
     }
 
 }

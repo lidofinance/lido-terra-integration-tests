@@ -3,11 +3,8 @@ import { mustPass } from "../helper/flow/must";
 import { getRecord } from "../helper/flow/record";
 import { MantleState } from "../mantle-querier/MantleState";
 import {TestState} from "./common";
-import {makeBalanceQuery, makeContractStoreQuery} from "../mantle-querier/common";
+import {makeContractStoreQuery} from "../mantle-querier/common";
 import {GraphQLClient} from "graphql-request";
-import {emptyBlockWithFixedGas} from "../helper/flow/gas-station";
-import {send_transaction} from "../helper/flow/execution";
-import {MsgSend} from "@terra-money/terra.js";
 
 let mantleState: MantleState;
 
@@ -16,7 +13,7 @@ async function main() {
     mantleState = await testState.getMantleState();
     const mantleClient = new GraphQLClient(testState.testkit.deriveMantle());
 
-    let bondAmount = 20000000000000;
+    let bondAmount = 20_000_000_000_000;
 
     await mustPass(testState.basset.bond_for_stluna(testState.wallets.a, bondAmount))
 
@@ -64,4 +61,4 @@ main()
             JSON.stringify(await mantleState.getState(), null, 2)
         );
     })
-// .catch(console.log);
+.catch(console.log);

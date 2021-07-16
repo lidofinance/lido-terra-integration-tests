@@ -19,14 +19,14 @@ async function main() {
     mantleState = await testState.getMantleState();
     const mantleClient = new GraphQLClient(testState.testkit.deriveMantle());
 
-    let stLunaBondAmount = 10000000000000;
-    let bLunaBondAmount = 20000000000000;
+    let stLunaBondAmount = 10_000_000_000_000;
+    let bLunaBondAmount = 20_000_000_000_000;
 
     await mustPass(testState.basset.bond_for_stluna(testState.wallets.a, stLunaBondAmount))
     await mustPass(testState.basset.bond(testState.wallets.b, bLunaBondAmount))
 
     await mustPass(send_transaction(testState.wallets.ownerWallet, [
-        new MsgSend(testState.wallets.ownerWallet.key.accAddress, testState.basset.contractInfo["anchor_basset_rewards_dispatcher"].contractAddress, "1000000uluna"),
+        new MsgSend(testState.wallets.ownerWallet.key.accAddress, testState.basset.contractInfo["anchor_basset_rewards_dispatcher"].contractAddress, "1000000uluna,1000000ukrw,1000000usdr,1000000umnt"),
     ]));
 
     let result = await testState.basset.update_global_index_with_result(testState.wallets.ownerWallet);
@@ -53,10 +53,13 @@ async function main() {
     ).then((r) => r.OracleDenomsExchangeRates.Result);
     let uusdExhangeRate = parseFloat(oraclePrices.find(currency => currency.Denom == "uusd").Amount);
 
-    // check that bLuna/stLuna rewards (in uusd) ratio is the same as bLuna/stLuna bond ration with some accuracy due to fees
+    // check that bLuna/stLuna rewards (in uusd) ratio is the same as bLuna/stLuna bond ratio with some accuracy due to fees
     // stLuna rewards is rebonded to validators and bLunaRewards is available as rewards for bLuna holders
     if (!approxeq(bLunaRewards / (stLunaRewards * uusdExhangeRate), bLunaBondAmount / stLunaBondAmount, 0.05)) {
-        throw new Error(`invalid rewards distribution: stLunaRewards=${stLunaRewards}, bLunaRewards=${bLunaRewards}, stLunaBonded=${stLunaBondAmount}, bLunaBonded=${bLunaBondAmount}`);
+        throw new Error(`invalid rewards distribution: stLunaRewards=${stLunaRewards}, 
+                                                       bLunaRewards=${bLunaRewards}, 
+                                                       stLunaBonded=${stLunaBondAmount}, 
+                                                       bLunaBonded=${bLunaBondAmount}`);
     }
 
     const accruedRewards = await makeContractStoreQuery(
@@ -82,4 +85,4 @@ main()
             JSON.stringify(await mantleState.getState(), null, 2)
         );
     })
-// .catch(console.log);
+.catch(console.log);

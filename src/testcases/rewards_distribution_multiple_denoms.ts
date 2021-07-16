@@ -15,7 +15,8 @@ function approxeq(a, b, e) {
 }
 
 async function main() {
-    const testState = new TestState();
+    const oraclePrice = "1200.000000000000000000ukrw,15.000000000000000000uusd,0.750000000000000000usdr,2400.000000000000000000umnt";
+    const testState = new TestState(oraclePrice);
     mantleState = await testState.getMantleState();
     const mantleClient = new GraphQLClient(testState.testkit.deriveMantle());
 

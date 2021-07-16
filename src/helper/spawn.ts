@@ -1,10 +1,10 @@
 import basset from "./basset_helper";
-import mMarket, {BAssetInfo} from "./money_market_helper";
+import mMarket, { BAssetInfo } from "./money_market_helper";
 import terraswap from "./terraswap_helper";
-import {StdFee, Validator, Wallet} from "@terra-money/terra.js";
-import {execute} from "./flow/execution";
+import { StdFee, Validator, Wallet } from "@terra-money/terra.js";
+import { execute } from "./flow/execution";
 import AnchorToken from "./anchor_token_helper";
-import {Testkit, TestkitInit} from "../testkit/testkit";
+import { Testkit, TestkitInit } from "../testkit/testkit";
 
 // https://terra-money.quip.com/lR4sAHcX3yiB/WebApp-Dev-Page-Deployment#UKCACAa6MDK
 export interface CustomInstantiationParam {
@@ -17,6 +17,7 @@ export interface CustomInstantiationParam {
         er_threshold?: string;
         reward_denom?: string;
         validator?: string;
+        lido_fee_address?: string;
     };
     overseer?: {
         stable_denom?: string;
@@ -82,21 +83,23 @@ export default class Anchor {
     public async instantiate(
         fee?: StdFee,
         params?: CustomInstantiationParam,
-        validators?: Array<TestkitInit.Validator>
+        validators?: Array<TestkitInit.Validator>,
     ): Promise<void> {
 
         await this.bAsset.instantiate_hub(this.owner, params?.basset, fee);
         await this.bAsset.instantiate_validators_registry(this.owner, {
             hub_contract: this.bAsset.contractInfo.anchor_basset_hub.contractAddress,
             registry: validators.map((val) => {
-                return {active: true, total_delegated: "100", address: val.validator_address}
+                return { active: true, total_delegated: "100", address: val.validator_address }
             })
         }, fee);
         await this.bAsset.instantiate_st_luna(this.owner, {}, fee);
         await this.bAsset.instantiate_reward(this.owner, {}, fee);
         await this.bAsset.instantiate_token(this.owner, {}, fee);
         await this.bAsset.instantiate_airdrop(this.owner, {}, fee);
-        await this.bAsset.instantiate_anchor_basset_rewards_dispatcher(this.owner, {}, fee)
+        await this.bAsset.instantiate_anchor_basset_rewards_dispatcher(this.owner, {
+            lido_fee_address: params.basset.lido_fee_address,
+        }, fee)
 
         await this.bAsset.register_contracts(this.owner, {}, fee);
 
@@ -128,19 +131,19 @@ export default class Anchor {
 
         await this.moneyMarket.instantiate_liquidation(
             this.owner,
-            {owner: this.ANC.contractInfo["gov"].contractAddress},
+            { owner: this.ANC.contractInfo["gov"].contractAddress },
             fee
         );
 
         await this.moneyMarket.instantiate_interest(
             this.owner,
-            {owner: this.ANC.contractInfo["gov"].contractAddress},
+            { owner: this.ANC.contractInfo["gov"].contractAddress },
             fee
         );
 
         await this.moneyMarket.instantiate_distribution(
             this.owner,
-            {owner: this.ANC.contractInfo["gov"].contractAddress},
+            { owner: this.ANC.contractInfo["gov"].contractAddress },
             fee
         );
 
@@ -231,7 +234,7 @@ export default class Anchor {
             owner_addr: gov,
         });
         await this.moneyMarket.oracle_update_config(this.owner, gov);
-        await this.ANC.gov_update_config(this.owner, {owner: gov});
+        await this.ANC.gov_update_config(this.owner, { owner: gov });
 
         await this.ANC.transfer_cw20_token(
             this.owner,
@@ -271,7 +274,7 @@ export default class Anchor {
             this.owner,
             this.terraswap.contractInfo["terraswap_pair"].contractAddress,
             100000000000,
-            {never: {}}
+            { never: {} }
         );
 
         await this.terraswap.provide_liquidity(

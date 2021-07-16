@@ -298,7 +298,7 @@ async function main() {
 
   //block 73
   //FIX
-  // await mustPass(basset.remove_validator(ownerWallet, validators[0].validator_address))
+  await mustPass(basset.remove_validator(ownerWallet, validators[0].validator_address))
 
   //block 74 - 80
   await mustPass(emptyBlockWithFixedGas(lcd, gasStation, 7))
@@ -347,10 +347,11 @@ async function main() {
   await mustPass(basset.bond(a, 20000000000000))
 
   //block 96
-  await mustPass(basset.transfer_cw20_token(a, b, 10000000))
+  await mustPass(basset.transfer_cw20_token(basset.contractInfo["anchor_basset_token"].contractAddress, a, b, 10000000))
 
   //block 97
   await basset.send_cw20_token(
+    basset.contractInfo["anchor_basset_token"].contractAddress,
     a,
     333333333333,
     { unbond: {} },
@@ -359,6 +360,7 @@ async function main() {
 
   //block 98
   await mustPass(basset.send_cw20_token(
+    basset.contractInfo["anchor_basset_token"].contractAddress,
     a,
     333333333333,
     { unbond: {} },
@@ -370,6 +372,7 @@ async function main() {
 
   //block 159
   await mustPass(basset.send_cw20_token(
+    basset.contractInfo["anchor_basset_token"].contractAddress,
     a,
     333333333333,
     { unbond: {} },
@@ -394,6 +397,7 @@ async function main() {
   //block 163
   const custody = moneyMarket.contractInfo["moneymarket_custody_bluna"].contractAddress;
   await mustPass(basset.send_cw20_token(
+    basset.contractInfo["anchor_basset_token"].contractAddress,
     a,
     3000000000000,
     { deposit_collateral: {} },
@@ -402,6 +406,7 @@ async function main() {
 
   //block 164
   await mustFail(basset.send_cw20_token(
+    basset.contractInfo["anchor_basset_token"].contractAddress,
     a,
     300000000000000,
     { deposit_collateral: {} },
@@ -429,7 +434,7 @@ async function main() {
 
   //block 170
   //FIX
-  // await mustPass(basset.update_global_index(a))
+  await mustPass(basset.update_global_index(a))
 
   //block 171
   await mustPass(moneyMarket.market_claim_rewards(a))

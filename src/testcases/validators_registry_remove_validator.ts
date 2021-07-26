@@ -3,6 +3,7 @@ import {mustFail, mustPass} from "../helper/flow/must";
 import {getRecord} from "../helper/flow/record";
 import {MantleState} from "../mantle-querier/MantleState";
 import {TestState} from "./common";
+import {emptyBlockWithFixedGas} from "../helper/flow/gas-station";
 
 let mantleState: MantleState;
 
@@ -16,6 +17,16 @@ async function main() {
     await mustPass(testState.basset.bond(testState.wallets.ownerWallet, 20000000000000))
 
     await mustPass(testState.basset.remove_validator(testState.wallets.ownerWallet, testState.validators[0].validator_address))
+    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 50))
+
+    await mustPass(testState.basset.remove_validator(testState.wallets.ownerWallet, testState.validators[1].validator_address))
+    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 50))
+
+    await mustPass(testState.basset.remove_validator(testState.wallets.ownerWallet, testState.validators[2].validator_address))
+    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 50))
+
+    // we cannot remove the last validator in registry
+    await mustFail(testState.basset.remove_validator(testState.wallets.ownerWallet, testState.validators[3].validator_address))
 }
 
 main()

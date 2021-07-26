@@ -20,6 +20,7 @@ import { State } from "./types/anchor_basset_hub/state";
 import { AccruedRewardsResponse } from "./types/basset_reward/accrued_rewards_response";
 import { AllHistoryResponse } from "./types/anchor_basset_hub/all_history_response";
 import { UnbondRequestsResponse } from "./types/anchor_basset_hub/unbond_requests_response";
+import { WithdrawableUnbondedResponse } from "./types/anchor_basset_hub/withdrawable_unbonded_response";
 
 //npx json2ts -i anchor-bAsset-contracts/contracts/anchor_basset_token/schema/ -o src/helper/types/bluna_token/
 

@@ -1,16 +1,16 @@
-import { AutomaticTxRequest, AutomaticTxResponse, Testkit, TestkitInit } from "../testkit/testkit";
-import { Coin, Coins, Dec, Int, LCDClient, MnemonicKey, MsgSend, StdFee, Validator, Wallet } from "@terra-money/terra.js";
+import {AutomaticTxRequest, AutomaticTxResponse, Testkit, TestkitInit} from "../testkit/testkit";
+import {Coin, Coins, Dec, Int, LCDClient, MnemonicKey, MsgSend, StdFee, Validator, Wallet} from "@terra-money/terra.js";
 import Anchor from "../helper/spawn";
 import AnchorbAsset from "../helper/basset_helper";
 import MoneyMarket from "../helper/money_market_helper";
 import TerraSwap from "../helper/terraswap_helper";
 import AnchorToken from "../helper/anchor_token_helper";
-import { registerChainOraclePrevote, registerChainOracleVote } from "../helper/oracle/chain-oracle";
-import { setTestParams } from "../parameters/contract-tests-parameteres";
-import { configureMMOracle } from "../helper/oracle/mm-oracle";
-import { MantleState } from "../mantle-querier/MantleState";
+import {registerChainOraclePrevote, registerChainOracleVote} from "../helper/oracle/chain-oracle";
+import {setTestParams} from "../parameters/contract-tests-parameteres";
+import {configureMMOracle} from "../helper/oracle/mm-oracle";
+import {MantleState} from "../mantle-querier/MantleState";
 import * as path from "path";
-import { UnbondRequestsResponse } from "../helper/types/anchor_basset_hub/unbond_requests_response";
+import {UnbondRequestsResponse} from "../helper/types/anchor_basset_hub/unbond_requests_response";
 import AnchorbAssetQueryHelper from "../helper/basset_queryhelper";
 
 export class TestState {

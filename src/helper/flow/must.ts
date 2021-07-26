@@ -6,7 +6,6 @@ export const mustPass = <T>(action: Promise<T>): Promise<T> => {
     });
 };
 
-
 export function floateq(a: number, b: number, e: number): boolean {
   return Math.abs((a - b) / (a + b)) < e;
 }

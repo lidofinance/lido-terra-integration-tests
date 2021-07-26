@@ -1,12 +1,10 @@
-import { MsgWithdrawValidatorCommission } from "@terra-money/terra.js";
 import * as fs from "fs";
-import { assertAbstractType } from "graphql";
 import AnchorbAssetQueryHelper from "../helper/basset_queryhelper";
-import { emptyBlockWithFixedGas } from "../helper/flow/gas-station";
-import { mustFail, mustPass } from "../helper/flow/must";
-import { getRecord } from "../helper/flow/record";
-import { MantleState } from "../mantle-querier/MantleState";
-import { TestState } from "./common";
+import {emptyBlockWithFixedGas} from "../helper/flow/gas-station";
+import {mustFail, mustPass} from "../helper/flow/must";
+import {getRecord} from "../helper/flow/record";
+import {MantleState} from "../mantle-querier/MantleState";
+import {TestState} from "./common";
 var assert = require('assert');
 
 let mantleState: MantleState;

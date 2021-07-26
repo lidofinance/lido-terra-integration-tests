@@ -274,8 +274,6 @@ export default class AnchorbAssetQueryHelper {
             .then(r => Number(r.total_bond_stluna_amount))
     }
 
-
-
     public async all_history(limit?: number, start_from?: number): Promise<AllHistoryResponse> {
         return this.bassethubquery(
             {

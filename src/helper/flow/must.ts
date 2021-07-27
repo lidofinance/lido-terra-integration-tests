@@ -6,15 +6,18 @@ export const mustPass = <T>(action: Promise<T>): Promise<T> => {
     });
 };
 
-export const mustFail = <T>(action: Promise<T>): Promise<Error> => {
-  const pathB = action.catch((r) => {
-    // noop
-    return null;
-  });
 
-  const pathA = action.then((r) => {
-    throw new Error(`Action should have failed but succeeded ${r}`);
-  });
 
-  return Promise.race([pathA, pathB]);
-};
+
+export function floateq(a: number, b: number, e: number): boolean {
+  return Math.abs((a - b) / (a + b)) < e;
+}
+
+export const mustFail = <T>(p: Promise<T>): Promise<Error> => {
+  return p
+    .then(r => {
+      throw new Error(`Action should have failed but succeeded ${r}`);
+    }, () => {
+      return null
+    })
+}

@@ -23,7 +23,6 @@ async function getStLunaBalance(testState, mantleClient, address) {
 
 async function getLunaBalance(testState, mantleClient, address) {
     let balance = await makeBalanceQuery(address, mantleClient);
-    console.log(JSON.stringify(balance));
     for (let i = 0; i < balance.Response.Result.length; i++) {
         if (balance.Response.Result[i].Denom == "uluna") {
             return balance.Response.Result[i].Amount
@@ -71,8 +70,6 @@ async function main() {
     // check that bLuna/stLuna rewards (in uusd) ratio is the same as bLuna/stLuna bond ratio with some accuracy due to fees
     // stLuna rewards is rebonded to validators and bLunaRewards is available as rewards for bLuna holders
     if (!approxeq(bLunaRewards / (stLunaRewards * uusdExhangeRate), bLunaBondAmount / stLunaBondAmount, 0.05)) {
-        console.log(bLunaRewards / (stLunaRewards * uusdExhangeRate));
-        console.log(bLunaBondAmount / stLunaBondAmount);
         throw new Error(`invalid rewards distribution: stLunaRewards=${stLunaRewards}, 
                                                         bLunaRewards=${bLunaRewards}, 
                                                         stLunaBonded=${stLunaBondAmount}, 

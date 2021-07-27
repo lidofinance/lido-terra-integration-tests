@@ -1,12 +1,10 @@
-import { MsgWithdrawValidatorCommission } from "@terra-money/terra.js";
 import * as fs from "fs";
-import { assertAbstractType } from "graphql";
 import AnchorbAssetQueryHelper from "../helper/basset_queryhelper";
-import { emptyBlockWithFixedGas } from "../helper/flow/gas-station";
-import { mustFail, mustPass } from "../helper/flow/must";
-import { getRecord } from "../helper/flow/record";
-import { MantleState } from "../mantle-querier/MantleState";
-import { TestState } from "./common";
+import {emptyBlockWithFixedGas} from "../helper/flow/gas-station";
+import {mustFail, mustPass} from "../helper/flow/must";
+import {getRecord} from "../helper/flow/record";
+import {MantleState} from "../mantle-querier/MantleState";
+import {TestState} from "./common";
 var assert = require('assert');
 
 let mantleState: MantleState;
@@ -53,7 +51,7 @@ export default async function main() {
     assert.equal(await querier.total_bond_bluna_amount(), 300_000_000_000)
     assert.equal(await querier.balance_stluna(testState.wallets.a.key.accAddress), 10_000_000_000)
 
-
+    // insufficient balance
     await mustFail(testState.basset.convert_stluna_to_bluna(testState.wallets.a, 1_000_000_000_000))
     await mustFail(testState.basset.convert_bluna_to_stluna(testState.wallets.a, 1_000_000_000_000))
 
@@ -67,7 +65,7 @@ export default async function main() {
     await mustPass(testState.basset.update_global_index(testState.wallets.c))
     const accrued_reward = Number((await querier.bluna_accrued_reward(testState.wallets.c.key.accAddress)).rewards)
     // tx - 3 - conversion
-    await mustFail(testState.basset.convert_bluna_to_stluna(testState.wallets.c, 100_000_000_000))
+    await mustPass(testState.basset.convert_bluna_to_stluna(testState.wallets.c, 100_000_000_000))
     // tx - 4 - claiming
     await mustPass(testState.basset.reward2(testState.wallets.c, testState.wallets.c.key.accAddress))
     const uusd_balance = Number((await testState.wallets.c.lcd.bank.balance(testState.wallets.c.key.accAddress)).get("uusd").amount)

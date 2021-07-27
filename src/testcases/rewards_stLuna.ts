@@ -23,7 +23,6 @@ async function getStLunaBalance(testState, mantleClient, address) {
 
 async function getLunaBalance(testState, mantleClient, address) {
     let balance = await makeBalanceQuery(address, mantleClient);
-    console.log(JSON.stringify(balance));
     for (let i = 0; i < balance.Response.Result.length; i++) {
         if (balance.Response.Result[i].Denom == "uluna") {
             return balance.Response.Result[i].Amount

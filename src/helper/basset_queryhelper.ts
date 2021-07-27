@@ -1,23 +1,25 @@
-import { Validator as QueryValidator } from "./types/validators_registry/validator";
-import { LoneSchemaDefinitionRule } from "graphql";
-import { GraphQLClient } from "graphql-request";
-import { makeContractStoreQuery } from "../mantle-querier/common";
-import { Testkit } from "../testkit/testkit";
+import {Validator as QueryValidator} from "./types/validators_registry/validator";
+import {LoneSchemaDefinitionRule} from "graphql";
+import {GraphQLClient} from "graphql-request";
+import {makeContractStoreQuery} from "../mantle-querier/common";
+import {Testkit} from "../testkit/testkit";
 import AnchorbAsset from "./basset_helper";
-import { AllowanceResponse } from "./types/cw20_token/allowance_response";
-import { AllAccountsResponse } from "./types/cw20_token/all_accounts_response";
-import { AllAllowancesResponse } from "./types/cw20_token/all_allowances_response";
-import { TokenInfoResponse } from "./types/cw20_token/token_info_response";
-import { MinterResponse } from "./types/cw20_token/token_init_msg";
-import { QueryMsg as ValidatorsQueryMsg } from "./types/validators_registry/query_msg";
-import { HolderResponse, HoldersResponse } from "./types/basset_reward/holders_response";
+import {AllowanceResponse} from "./types/cw20_token/allowance_response";
+import {AllAccountsResponse} from "./types/cw20_token/all_accounts_response";
+import {AllAllowancesResponse} from "./types/cw20_token/all_allowances_response";
+import {TokenInfoResponse} from "./types/cw20_token/token_info_response";
+import {MinterResponse} from "./types/cw20_token/token_init_msg";
+import {QueryMsg as ValidatorsQueryMsg} from "./types/validators_registry/query_msg";
+import {HolderResponse, HoldersResponse} from "./types/basset_reward/holders_response";
 
-import { QueryMsg as BlunaQueryMsg } from "./types/basset_reward/query_msg";
-import { QueryMsg as AnchotBassetHubQueryMsg } from "./types/anchor_basset_hub/query_msg";
-import { StateResponse } from "./types/basset_reward/state_response";
-import { ConfigResponse } from "./types/basset_reward/config_response";
-import { State } from "./types/anchor_basset_hub/state";
-import { AccruedRewardsResponse } from "./types/basset_reward/accrued_rewards_response";
+import {QueryMsg as BlunaQueryMsg} from "./types/basset_reward/query_msg";
+import {QueryMsg as AnchotBassetHubQueryMsg} from "./types/anchor_basset_hub/query_msg";
+import {StateResponse} from "./types/basset_reward/state_response";
+import {ConfigResponse} from "./types/basset_reward/config_response";
+import {State} from "./types/anchor_basset_hub/state";
+import {AccruedRewardsResponse} from "./types/basset_reward/accrued_rewards_response";
+import {AllHistoryResponse} from "./types/anchor_basset_hub/all_history_response";
+import {UnbondRequestsResponse} from "./types/anchor_basset_hub/unbond_requests_response";
 
 //npx json2ts -i anchor-bAsset-contracts/contracts/anchor_basset_token/schema/ -o src/helper/types/bluna_token/
 
@@ -226,19 +228,19 @@ export default class AnchorbAssetQueryHelper {
 
     public async holders(): Promise<HoldersResponse> {
         return this.blunarewardquery(
-            { holders: {} }
+            {holders: {}}
         ).then(r => r as HoldersResponse)
     }
 
     public async bluna_reward_state(): Promise<StateResponse> {
         return this.blunarewardquery(
-            { state: {} }
+            {state: {}}
         ).then(r => r as StateResponse)
     }
 
     public async bluna_reward_config(): Promise<ConfigResponse> {
         return this.blunarewardquery(
-            { config: {} }
+            {config: {}}
         ).then(r => r as ConfigResponse)
     }
 
@@ -270,6 +272,27 @@ export default class AnchorbAssetQueryHelper {
     public async total_bond_stluna_amount(): Promise<number> {
         return this.get_anchor_basset_hub_state()
             .then(r => Number(r.total_bond_stluna_amount))
+    }
+
+    public async all_history(limit?: number, start_from?: number): Promise<AllHistoryResponse> {
+        return this.bassethubquery(
+            {
+                all_history: {
+                    limit: limit,
+                    start_from: start_from,
+                }
+            }
+        ).then(r => r as AllHistoryResponse)
+    }
+
+    public async unbond_requests(address: string): Promise<UnbondRequestsResponse> {
+        return this.bassethubquery(
+            {
+                unbond_requests: {
+                    address: address,
+                }
+            }
+        ).then(r => r as UnbondRequestsResponse)
     }
 
 }

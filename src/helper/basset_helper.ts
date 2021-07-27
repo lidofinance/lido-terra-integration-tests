@@ -180,8 +180,7 @@ export default class AnchorbAsset {
         },
         fee?: StdFee
     ): Promise<void> {
-        const coin = new Coin("uluna", 1000000);
-        const coins = new Coins([coin]);
+        const coins = new Coins([]);
         const init = await instantiate(
             sender,
             this.contractInfo.anchor_basset_hub.codeId,

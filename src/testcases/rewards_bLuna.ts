@@ -3,10 +3,27 @@ import { mustPass } from "../helper/flow/must";
 import { getRecord } from "../helper/flow/record";
 import { MantleState } from "../mantle-querier/MantleState";
 import {TestState} from "./common";
-import {makeContractStoreQuery} from "../mantle-querier/common";
+import {makeBalanceQuery, makeContractStoreQuery} from "../mantle-querier/common";
 import {GraphQLClient} from "graphql-request";
+import {emptyBlockWithFixedGas} from "../helper/flow/gas-station";
 
 let mantleState: MantleState;
+
+function approxeq(a, b, e) {
+    console.log(a, b, e);
+    return Math.abs(a - b) <= e;
+}
+
+async function getLunaBalance(testState, mantleClient, address) {
+    let balance = await makeBalanceQuery(address, mantleClient);
+    console.log(JSON.stringify(balance));
+    for (let i = 0; i < balance.Response.Result.length; i++) {
+        if (balance.Response.Result[i].Denom == "uluna") {
+            return balance.Response.Result[i].Amount
+        }
+    }
+    return null
+}
 
 async function main() {
     const testState = new TestState();
@@ -16,6 +33,7 @@ async function main() {
     let bondAmount = 20_000_000_000_000;
 
     await mustPass(testState.basset.bond(testState.wallets.a, bondAmount))
+    await mustPass(testState.basset.bond(testState.wallets.b, bondAmount))
 
     await mustPass(testState.basset.update_global_index(testState.wallets.a))
 
@@ -37,7 +55,7 @@ async function main() {
         throw new Error("bLuna balance must be zero")
     }
 
-    const accruedRewards = await makeContractStoreQuery(
+    let accruedRewards = await makeContractStoreQuery(
         testState.basset.contractInfo["anchor_basset_reward"].contractAddress,
         { accrued_rewards: { address: testState.wallets.a.key.accAddress } },
         mantleClient
@@ -46,8 +64,10 @@ async function main() {
         throw new Error("accruedRewards must be more than zero");
     }
 
-    const currentBlockTime = new Date(await mantleState.getCurrentBlockTime());
-    const withdrawableUnbonded = await makeContractStoreQuery(
+    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 50));
+
+    let currentBlockTime = new Date(await mantleState.getCurrentBlockTime());
+    let withdrawableUnbonded = await makeContractStoreQuery(
         testState.basset.contractInfo["anchor_basset_hub"].contractAddress,
         { withdrawable_unbonded: { address: testState.wallets.a.key.accAddress, block_time: currentBlockTime.getTime()} },
         mantleClient
@@ -55,6 +75,58 @@ async function main() {
     if (withdrawableUnbonded != bondAmount) {
         throw new Error("withdrawableUnbonded is not equal to bonded amount")
     }
+
+    let lunaBalanceBeforeWithdraw = await getLunaBalance(testState, mantleClient, testState.wallets.a.key.accAddress);
+    await mustPass(testState.basset.finish(testState.wallets.a));
+    let lunaBalanceAfterWithdraw = await getLunaBalance(testState, mantleClient, testState.wallets.a.key.accAddress);
+    // we lose 1-2 uluna because of Decimal logic
+    if (!approxeq(Number(BigInt(lunaBalanceAfterWithdraw) - BigInt(lunaBalanceBeforeWithdraw)), withdrawableUnbonded, 2)) {
+        throw new Error(`withdraw amount is not equal to withdrawableUnboned: 
+                                    ${BigInt(lunaBalanceAfterWithdraw) - BigInt(lunaBalanceBeforeWithdraw)} != ${withdrawableUnbonded}`)
+    }
+
+    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 50));
+
+    await mustPass(testState.basset.update_global_index(testState.wallets.a))
+
+    await mustPass(testState.basset.send_cw20_token(
+        testState.basset.contractInfo["anchor_basset_token"].contractAddress,
+        testState.wallets.b,
+        bondAmount,
+        {unbond: {}},
+        testState.basset.contractInfo["anchor_basset_hub"].contractAddress
+    ));
+
+    accruedRewards = await makeContractStoreQuery(
+        testState.basset.contractInfo["anchor_basset_reward"].contractAddress,
+        { accrued_rewards: { address: testState.wallets.b.key.accAddress } },
+        mantleClient
+    ).then((r) => r.rewards);
+    if (accruedRewards <= 0) {
+        throw new Error("accruedRewards must be more than zero");
+    }
+
+    currentBlockTime = new Date(await mantleState.getCurrentBlockTime());
+    withdrawableUnbonded = await makeContractStoreQuery(
+        testState.basset.contractInfo["anchor_basset_hub"].contractAddress,
+        { withdrawable_unbonded: { address: testState.wallets.b.key.accAddress, block_time: currentBlockTime.getTime()} },
+        mantleClient
+    ).then((r) => r.withdrawable);
+    if (withdrawableUnbonded != bondAmount) {
+        throw new Error(`withdrawableUnbonded is not equal to bonded amount: ${withdrawableUnbonded} != ${bondAmount}`)
+    }
+
+    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 50));
+
+    lunaBalanceBeforeWithdraw = await getLunaBalance(testState, mantleClient, testState.wallets.b.key.accAddress);
+    await mustPass(testState.basset.finish(testState.wallets.b));
+    lunaBalanceAfterWithdraw = await getLunaBalance(testState, mantleClient, testState.wallets.b.key.accAddress);
+    // we lose 1-2 uluna because of Decimal logic
+    if (!approxeq(Number(BigInt(lunaBalanceAfterWithdraw) - BigInt(lunaBalanceBeforeWithdraw)), withdrawableUnbonded, 2)) {
+        throw new Error(`withdraw amount is not equal to withdrawableUnboned: 
+                                    ${BigInt(lunaBalanceAfterWithdraw) - BigInt(lunaBalanceBeforeWithdraw)} != ${withdrawableUnbonded}`)
+    }
+
 }
 
 main()

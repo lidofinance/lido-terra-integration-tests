@@ -138,7 +138,7 @@ async function main() {
     await mustPass(testState.basset.finish(testState.wallets.b));
     let lunaBalanceAfterWithdrawB = await getLunaBalance(testState, mantleClient, testState.wallets.b.key.accAddress);
     // we lose 1-2 uluna because of Decimal logic
-    if (!approxeq(Number(BigInt(lunaBalanceAfterWithdrawB) - BigInt(lunaBalanceBeforeWithdrawB)), withdrawableUnbondedBLuna, 2)) {
+    if (BigInt(lunaBalanceAfterWithdrawB) - BigInt(lunaBalanceBeforeWithdrawB) != BigInt(withdrawableUnbondedBLuna)) {
         throw new Error(`withdraw amount is not equal to withdrawableUnboned: 
                                     ${BigInt(lunaBalanceAfterWithdrawB) - BigInt(lunaBalanceBeforeWithdrawB)} != ${withdrawableUnbondedBLuna}`)
     }

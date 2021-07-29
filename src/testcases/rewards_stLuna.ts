@@ -31,22 +31,6 @@ async function getLunaBalance(testState, mantleClient, address) {
     return null
 }
 
-async function getHubState(testState, mantleClient) {
-    return await makeContractStoreQuery(
-        testState.basset.contractInfo["anchor_basset_hub"].contractAddress,
-        { state: {}},
-        mantleClient
-    ).then((r) => r);
-}
-
-async function getHistory(testState, mantleClient) {
-    return await makeContractStoreQuery(
-        testState.basset.contractInfo["anchor_basset_hub"].contractAddress,
-        { all_history: {}},
-        mantleClient
-    ).then((r) => r);
-}
-
 async function main() {
     const testState = new TestState();
     mantleState = await testState.getMantleState();

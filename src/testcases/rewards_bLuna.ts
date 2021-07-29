@@ -9,10 +9,6 @@ import {emptyBlockWithFixedGas} from "../helper/flow/gas-station";
 
 let mantleState: MantleState;
 
-function approxeq(a, b, e) {
-    return Math.abs(a - b) <= e;
-}
-
 async function getLunaBalance(testState, mantleClient, address) {
     let balance = await makeBalanceQuery(address, mantleClient);
     for (let i = 0; i < balance.Response.Result.length; i++) {
@@ -78,7 +74,7 @@ async function main() {
     await mustPass(testState.basset.finish(testState.wallets.a));
     let lunaBalanceAfterWithdraw = await getLunaBalance(testState, mantleClient, testState.wallets.a.key.accAddress);
     // we lose 1-2 uluna because of Decimal logic
-    if (!approxeq(Number(BigInt(lunaBalanceAfterWithdraw) - BigInt(lunaBalanceBeforeWithdraw)), withdrawableUnbonded, 2)) {
+    if (BigInt(lunaBalanceAfterWithdraw) - BigInt(lunaBalanceBeforeWithdraw) != BigInt(withdrawableUnbonded)) {
         throw new Error(`withdraw amount is not equal to withdrawableUnboned: 
                                     ${BigInt(lunaBalanceAfterWithdraw) - BigInt(lunaBalanceBeforeWithdraw)} != ${withdrawableUnbonded}`)
     }
@@ -120,7 +116,7 @@ async function main() {
     await mustPass(testState.basset.finish(testState.wallets.b));
     lunaBalanceAfterWithdraw = await getLunaBalance(testState, mantleClient, testState.wallets.b.key.accAddress);
     // we lose 1-2 uluna because of Decimal logic
-    if (!approxeq(Number(BigInt(lunaBalanceAfterWithdraw) - BigInt(lunaBalanceBeforeWithdraw)), withdrawableUnbonded, 2)) {
+    if (BigInt(lunaBalanceAfterWithdraw) - BigInt(lunaBalanceBeforeWithdraw) != BigInt(withdrawableUnbonded)) {
         throw new Error(`withdraw amount is not equal to withdrawableUnboned: 
                                     ${BigInt(lunaBalanceAfterWithdraw) - BigInt(lunaBalanceBeforeWithdraw)} != ${withdrawableUnbonded}`)
     }

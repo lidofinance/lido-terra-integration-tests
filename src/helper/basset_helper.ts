@@ -180,7 +180,8 @@ export default class AnchorbAsset {
         },
         fee?: StdFee
     ): Promise<void> {
-        const coins = new Coins([]);
+        const coin = new Coin("uluna", 1000000)
+        const coins = new Coins([coin]);
         const init = await instantiate(
             sender,
             this.contractInfo.anchor_basset_hub.codeId,
@@ -263,11 +264,10 @@ export default class AnchorbAsset {
                 symbol: params.symbol || "BLUNA",
                 decimals: params.decimals || 6,
                 initial_balances: params.initial_balances || [
-                    // cause new hub doesn't have initial bond
-                    // {
-                    //     address: `${this.contractInfo["anchor_basset_hub"].contractAddress}`,
-                    //     amount: "1000000",
-                    // },
+                    {
+                        address: `${this.contractInfo["anchor_basset_hub"].contractAddress}`,
+                        amount: "1000000",
+                    },
                 ],
                 mint: {
                     minter:

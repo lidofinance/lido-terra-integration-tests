@@ -10,8 +10,8 @@ import {setTestParams} from "../parameters/contract-tests-parameteres";
 import {configureMMOracle} from "../helper/oracle/mm-oracle";
 import {MantleState} from "../mantle-querier/MantleState";
 import * as path from "path";
-import AnchorbAssetQueryHelper from "../helper/basset_queryhelper";
 import {UnbondRequestsResponse} from "../helper/types/anchor_basset_hub/unbond_requests_response";
+import AnchorbAssetQueryHelper from "../helper/basset_queryhelper";
 
 export class TestState {
     testkit: Testkit

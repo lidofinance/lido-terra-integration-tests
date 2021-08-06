@@ -1,15 +1,15 @@
 import * as fs from "fs";
-import { floateq as floateq, mustPass } from "../helper/flow/must";
-import { getRecord } from "../helper/flow/record";
+import {floateq as floateq, mustPass} from "../helper/flow/must";
+import {getRecord} from "../helper/flow/record";
 import {
     registerChainOracleVote,
     registerChainOraclePrevote,
 } from "../helper/oracle/chain-oracle";
-import { MantleState } from "../mantle-querier/MantleState";
-import { emptyBlockWithFixedGas } from "../helper/flow/gas-station";
-import { repeat } from "../helper/flow/repeat";
-import { unjail } from "../helper/validator-operation/unjail";
-import { get_expected_sum_from_requests, TestState } from "./common";
+import {MantleState} from "../mantle-querier/MantleState";
+import {emptyBlockWithFixedGas} from "../helper/flow/gas-station";
+import {repeat} from "../helper/flow/repeat";
+import {unjail} from "../helper/validator-operation/unjail";
+import {get_expected_sum_from_requests, TestState} from "./common";
 import AnchorbAssetQueryHelper from "../helper/basset_queryhelper";
 var assert = require('assert');
 
@@ -126,7 +126,7 @@ async function main() {
                 blunaContractAddress,
                 testState.wallets.a,
                 1_000_000,
-                { unbond: {} },
+                {unbond: {}},
                 testState.basset.contractInfo["anchor_basset_hub"].contractAddress
             )
         }
@@ -141,7 +141,7 @@ async function main() {
                 blunaContractAddress,
                 testState.wallets.b,
                 1_000_000,
-                { unbond: {} },
+                {unbond: {}},
                 testState.basset.contractInfo["anchor_basset_hub"].contractAddress
             )
         }
@@ -156,7 +156,7 @@ async function main() {
                 blunaContractAddress,
                 testState.wallets.c,
                 1_000_000,
-                { unbond: {} },
+                {unbond: {}},
                 testState.basset.contractInfo["anchor_basset_hub"].contractAddress
             )
         }
@@ -192,10 +192,9 @@ async function main() {
     const actual_withdrawal_sum_b = (Number(uluna_balance_b) - inital_uluna_balance_b)
     const actual_withdrawal_sum_c = (Number(uluna_balance_c) - inital_uluna_balance_c)
 
-    const expected_withdrawal_sum_a = await get_expected_sum_from_requests(querier, unbond_requests_a)
-    const expected_withdrawal_sum_b = await get_expected_sum_from_requests(querier, unbond_requests_b)
-    const expected_withdrawal_sum_c = await get_expected_sum_from_requests(querier, unbond_requests_c)
-
+    const expected_withdrawal_sum_a = await get_expected_sum_from_requests(querier, unbond_requests_a, "bluna")
+    const expected_withdrawal_sum_b = await get_expected_sum_from_requests(querier, unbond_requests_b, "bluna")
+    const expected_withdrawal_sum_c = await get_expected_sum_from_requests(querier, unbond_requests_c, "bluna")
 
     assert.ok(floateq(expected_withdrawal_sum_a, actual_withdrawal_sum_a, 1e-5))
     assert.ok(floateq(expected_withdrawal_sum_b, actual_withdrawal_sum_b, 1e-5))

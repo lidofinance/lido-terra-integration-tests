@@ -10,6 +10,6 @@ export type Uint128 = string;
 
 export interface UnbondRequestsResponse {
   address: HumanAddr;
-  requests: [number, Uint128][];
+  requests: [number, Uint128, Uint128][];
   [k: string]: unknown;
 }

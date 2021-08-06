@@ -218,9 +218,9 @@ async function main() {
     const actual_profit_sum_c = (Number(uluna_balance_c) - initial_uluna_balance_c)
     // we have unbonded all our stluna tokens, we have withdrawed(testState.basset.finish) all uluna
     // our profit is "withdrawal amount" - "bonded amount"
-    const expected_profit_sum_a = await get_expected_sum_from_requests(querier, unbond_requests_a) - 150_000_000
-    const expected_profit_sum_b = await get_expected_sum_from_requests(querier, unbond_requests_b) - 150_000_000
-    const expected_profit_sum_c = await get_expected_sum_from_requests(querier, unbond_requests_c) - 150_000_000
+    const expected_profit_sum_a = await get_expected_sum_from_requests(querier, unbond_requests_a, "stluna") - 150_000_000
+    const expected_profit_sum_b = await get_expected_sum_from_requests(querier, unbond_requests_b, "stluna") - 150_000_000
+    const expected_profit_sum_c = await get_expected_sum_from_requests(querier, unbond_requests_c, "stluna") - 150_000_000
     // due to js float64 math precision we have to set the precision value = 1e-4, i.e. 0.01%
     assert.ok(floateq(expected_profit_sum_a, actual_profit_sum_a, 1e-4))
     assert.ok(floateq(expected_profit_sum_b, actual_profit_sum_b, 1e-4))

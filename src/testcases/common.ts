@@ -272,8 +272,8 @@ export class TestState {
 
 
 
-export const get_expected_sum_from_requests = async (querier: AnchorbAssetQueryHelper, reqs: UnbondRequestsResponse): Promise<number> => {
-    return reqs.requests.reduce(async (acc, [batchid, amount]) => {
+export const get_expected_sum_from_requests = async (querier: AnchorbAssetQueryHelper, reqs: UnbondRequestsResponse, token: "bluna" | "stluna"): Promise<number> => {
+    return reqs.requests.reduce(async (acc, [batchid, amount_bluna_tokens, amount_stluna_tokens]) => {
         const acc_sum = await acc;
         const h = await querier.all_history(1, batchid - 1);
         if (h.history.length == 0) {
@@ -284,7 +284,11 @@ export const get_expected_sum_from_requests = async (querier: AnchorbAssetQueryH
             return acc_sum
         }
         else {
-            return Number(h.history[0].withdraw_rate) * Number(amount) + acc_sum;
+            if (token == "bluna") {
+                return Number(h.history[0].bluna_withdraw_rate) * Number(amount_bluna_tokens) + acc_sum;
+            } else {
+                return Number(h.history[0].stluna_withdraw_rate) * Number(amount_stluna_tokens) + acc_sum;
+            }
         }
     }, Promise.resolve(0))
 }

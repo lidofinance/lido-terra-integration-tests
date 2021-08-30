@@ -5,13 +5,13 @@ import AnchorbAsset from "../helper/basset_helper";
 import MoneyMarket from "../helper/money_market_helper";
 import TerraSwap from "../helper/terraswap_helper";
 import AnchorToken from "../helper/anchor_token_helper";
-import {registerChainOraclePrevote, registerChainOracleVote} from "../helper/oracle/chain-oracle";
-import {setTestParams} from "../parameters/contract-tests-parameteres";
-import {configureMMOracle} from "../helper/oracle/mm-oracle";
-import {MantleState} from "../mantle-querier/MantleState";
+import { registerChainOraclePrevote, registerChainOracleVote, defaultOraclePrice } from "../helper/oracle/chain-oracle";
+import { setTestParams } from "../parameters/contract-tests-parameteres";
+import { configureMMOracle } from "../helper/oracle/mm-oracle";
+import { MantleState } from "../mantle-querier/MantleState";
 import * as path from "path";
-import AnchorbAssetQueryHelper from "../helper/basset_queryhelper";
 import {UnbondRequestsResponse} from "../helper/types/anchor_basset_hub/unbond_requests_response";
+import AnchorbAssetQueryHelper from "../helper/basset_queryhelper";
 
 export class TestState {
     testkit: Testkit
@@ -29,13 +29,15 @@ export class TestState {
     initialPrevotes: AutomaticTxResponse[]
     initialVotes: AutomaticTxResponse[]
     previousOracleFeed: AutomaticTxResponse
+    oraclePrice: string
 
 
-    constructor() {
+    constructor(oraclePrice: string = defaultOraclePrice) {
         this.keys = {};
         this.validatorKeys = {};
         this.validators = [];
         this.wallets = {};
+        this.oraclePrice = oraclePrice;
     }
 
     async getMantleState(): Promise<MantleState> {
@@ -131,7 +133,8 @@ export class TestState {
                         validator.account_name,
                         validator.Msg.delegator_address,
                         validator.Msg.validator_address,
-                        3
+                        3,
+                        this.oraclePrice
                     )
                 )
             )
@@ -145,7 +148,8 @@ export class TestState {
                         validator.account_name,
                         validator.Msg.delegator_address,
                         validator.Msg.validator_address,
-                        2
+                        2,
+                        this.oraclePrice
                     )
                 )
             )
@@ -153,6 +157,7 @@ export class TestState {
         this.wallets.a = new Wallet(this.lcdClient, this.keys.aKey);
         this.wallets.b = new Wallet(this.lcdClient, this.keys.bKey);
         this.wallets.c = new Wallet(this.lcdClient, this.keys.cKey);
+        this.wallets.d = new Wallet(this.lcdClient, this.keys.dKey);
 
         this.wallets.valAWallet = new Wallet(this.lcdClient, this.validatorKeys.validatorAKey);
 
@@ -233,6 +238,7 @@ export class TestState {
             {
                 bLunaHub: this.basset.contractInfo["anchor_basset_hub"].contractAddress,
                 bAssetToken: this.basset.contractInfo["anchor_basset_token"].contractAddress,
+                stLunaToken: this.basset.contractInfo["anchor_basset_token_stluna"].contractAddress,
                 bAssetReward: this.basset.contractInfo["anchor_basset_reward"].contractAddress,
                 bAssetAirdrop:
                     this.basset.contractInfo["anchor_airdrop_registry"].contractAddress,

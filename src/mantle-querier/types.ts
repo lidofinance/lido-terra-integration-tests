@@ -1,6 +1,7 @@
 export interface Contracts {
   bLunaHub: string,
   bAssetToken: string,
+  stLunaToken: string,
   bAssetReward: string,
   bAssetAirdrop: string,
   mmInterest: string,

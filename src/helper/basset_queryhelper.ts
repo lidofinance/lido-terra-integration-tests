@@ -20,6 +20,8 @@ import {State} from "./types/anchor_basset_hub/state";
 import {AccruedRewardsResponse} from "./types/basset_reward/accrued_rewards_response";
 import {AllHistoryResponse} from "./types/anchor_basset_hub/all_history_response";
 import {UnbondRequestsResponse} from "./types/anchor_basset_hub/unbond_requests_response";
+import {WithdrawableUnbondedResponse} from "./types/anchor_basset_hub/withdrawable_unbonded_response";
+import {LCDClient} from "@terra-money/terra.js";
 
 //npx json2ts -i anchor-bAsset-contracts/contracts/anchor_basset_token/schema/ -o src/helper/types/bluna_token/
 
@@ -102,9 +104,11 @@ export default class AnchorbAssetQueryHelper {
     basset: AnchorbAsset
     bluna_token_querier: TokenQuerier
     stluna_token_querier: TokenQuerier
+    lcd
 
-    constructor(/* testkit: Testkit, */ basset: AnchorbAsset) {
+    constructor(/* testkit: Testkit, */ lcd: LCDClient, basset: AnchorbAsset) {
         // this.testkit = testkit;
+        this.lcd = lcd;
         this.basset = basset;
         this.mantleClient = new GraphQLClient("http://localhost:1337/");
         this.bluna_token_querier = new TokenQuerier(this.basset.contractInfo.anchor_basset_token.contractAddress, this.mantleClient)
@@ -293,6 +297,16 @@ export default class AnchorbAssetQueryHelper {
                 }
             }
         ).then(r => r as UnbondRequestsResponse)
+    }
+
+    public async get_withdraweble_unbonded(address: string): Promise<WithdrawableUnbondedResponse> {
+        const latestBlock = await this.lcd.tendermint.blockInfo()
+        return this.bassethubquery({
+            withdrawable_unbonded: {
+                address: address,
+                block_time: Math.trunc(new Date(latestBlock.block.header.time).getTime() / 1000),
+            }
+        }).then(r => r as WithdrawableUnbondedResponse)
     }
 
 }

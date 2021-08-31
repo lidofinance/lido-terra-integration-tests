@@ -33,7 +33,7 @@ async function main() {
     await testState.init()
 
     const blunaContractAddress = testState.basset.contractInfo.anchor_basset_token.contractAddress
-    const querier = new AnchorbAssetQueryHelper(/* testState.testkit, */ testState.basset)
+    const querier = new AnchorbAssetQueryHelper(/* testState.testkit, */testState.lcdClient, testState.basset)
 
     await mustPass(testState.basset.bond(testState.wallets.a, 9_999_000_000))
     await sleep(1000)
@@ -65,6 +65,11 @@ async function main() {
     await sleep(1000)
     assert.equal(await querier.balance_bluna(testState.wallets.a.key.accAddress), 7_999_000_000)
     await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 50))
+    console.log(await querier.all_history())
+    console.log(await querier.token_info_bluna())
+    console.log(await querier.balance_bluna(testState.wallets.a.key.accAddress))
+    console.log(await testState.wallets.a.lcd.bank.balance(testState.basset.contractInfo["anchor_basset_hub"].contractAddress))
+    console.log(await querier.get_withdraweble_unbonded(testState.wallets.a.key.accAddress))
     await mustPass(testState.basset.finish(testState.wallets.a))
     await sleep(1000)
     const uluna_balance = Number((await testState.wallets.a.lcd.bank.balance(testState.wallets.a.key.accAddress)).get("uluna").amount)

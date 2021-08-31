@@ -15,14 +15,15 @@ export type Decimal = string;
 
 export interface AllHistoryResponse {
   history: UnbondHistory[];
-  [k: string]: unknown;
 }
 export interface UnbondHistory {
-  amount: Uint128;
-  applied_exchange_rate: Decimal;
   batch_id: number;
+  bluna_amount: Uint128;
+  bluna_applied_exchange_rate: Decimal;
+  bluna_withdraw_rate: Decimal;
   released: boolean;
+  stluna_amount: Uint128;
+  stluna_applied_exchange_rate: Decimal;
+  stluna_withdraw_rate: Decimal;
   time: number;
-  withdraw_rate: Decimal;
-  [k: string]: unknown;
 }

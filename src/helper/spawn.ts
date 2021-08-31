@@ -67,6 +67,13 @@ export default class Anchor {
         this.ANC = new AnchorToken();
     }
 
+    public async store_contracts_localterra(
+        bassetLocation: string,
+        fee?: StdFee
+    ): Promise<void> {
+        await this.bAsset.storeCodes(this.owner, bassetLocation, fee);
+    }
+
     public async store_contracts(
         bassetLocation: string,
         mmLocation: string,
@@ -78,6 +85,29 @@ export default class Anchor {
         await this.moneyMarket.storeCodes(this.owner, mmLocation, fee);
         await this.terraswap.storeCodes(this.owner, terraswapLocation, fee);
         await this.ANC.storeCodes(this.owner, ancLocation, fee);
+    }
+
+    public async instantiate_localterra(
+        fee?: StdFee,
+        params?: CustomInstantiationParam,
+        validators_addresses?: Array<string>,
+    ): Promise<void> {
+        await this.bAsset.instantiate_hub(this.owner, params?.basset, fee);
+        await this.bAsset.instantiate_validators_registry(this.owner, {
+            hub_contract: this.bAsset.contractInfo.anchor_basset_hub.contractAddress,
+            registry: validators_addresses.map((val) => {
+                return {active: true, total_delegated: "100", address: val}
+            })
+        }, fee);
+        await this.bAsset.instantiate_st_luna(this.owner, {}, fee);
+        await this.bAsset.instantiate_reward(this.owner, {}, fee);
+        await this.bAsset.instantiate_token(this.owner, {}, fee);
+        await this.bAsset.instantiate_airdrop(this.owner, {}, fee);
+        await this.bAsset.instantiate_anchor_basset_rewards_dispatcher(this.owner, {
+            lido_fee_address: params.basset.lido_fee_address,
+        }, fee)
+
+        await this.bAsset.register_contracts(this.owner, {}, fee);
     }
 
     public async instantiate(

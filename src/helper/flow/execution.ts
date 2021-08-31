@@ -65,7 +65,7 @@ export async function execute(
 export async function send_transaction(
   sender: Wallet,
   msgs: Msg[],
-  fee: StdFee = new StdFee(10000000, "1000000uusd")
+  fee: StdFee = new StdFee(10000000, "10000000uusd")
 ): Promise<BlockTxBroadcastResult> {
   return Promise.resolve()
     .then(() =>

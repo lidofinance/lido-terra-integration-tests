@@ -41,7 +41,7 @@ export class TestState {
     }
 
     async getMantleState(): Promise<MantleState> {
-        this.testkit = new Testkit("http://localhost:11317");
+        this.testkit = new Testkit("http://localhost:1317");
         const genesis = require("../testkit/genesis.json");
 
         this.keys.aKey = new MnemonicKey();

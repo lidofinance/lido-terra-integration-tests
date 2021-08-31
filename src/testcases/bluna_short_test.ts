@@ -33,7 +33,10 @@ async function main() {
     await testState.init()
 
     const blunaContractAddress = testState.basset.contractInfo.anchor_basset_token.contractAddress
-    const querier = new AnchorbAssetQueryHelper(/* testState.testkit, */testState.lcdClient, testState.basset)
+    const querier = new AnchorbAssetQueryHelper(
+        testState.lcdClient,
+        new GraphQLClient("http://localhost:1337/"),
+        testState.basset)
 
     await mustPass(testState.basset.bond(testState.wallets.a, 9_999_000_000))
     await sleep(1000)

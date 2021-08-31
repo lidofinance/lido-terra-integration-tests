@@ -40,8 +40,11 @@ export class TestState {
         this.oraclePrice = oraclePrice;
     }
 
-    async getMantleState(): Promise<MantleState> {
-        this.testkit = new Testkit("http://localhost:1317");
+    async getMantleState(testkit_host?:string): Promise<MantleState> {
+        if (testkit_host==undefined) {
+            testkit_host="http://localhost:11317"
+        }
+        this.testkit = new Testkit(testkit_host);
         const genesis = require("../testkit/genesis.json");
 
         this.keys.aKey = new MnemonicKey();

@@ -106,11 +106,11 @@ export default class AnchorbAssetQueryHelper {
     stluna_token_querier: TokenQuerier
     lcd
 
-    constructor(/* testkit: Testkit, */ lcd: LCDClient, basset: AnchorbAsset) {
+    constructor(/* testkit: Testkit, */ lcd: LCDClient,graphQL: GraphQLClient, basset: AnchorbAsset) {
         // this.testkit = testkit;
         this.lcd = lcd;
         this.basset = basset;
-        this.mantleClient = new GraphQLClient("http://localhost:1337/");
+        this.mantleClient = graphQL ;
         this.bluna_token_querier = new TokenQuerier(this.basset.contractInfo.anchor_basset_token.contractAddress, this.mantleClient)
         this.stluna_token_querier = new TokenQuerier(this.basset.contractInfo.anchor_basset_token_stluna.contractAddress, this.mantleClient)
     }

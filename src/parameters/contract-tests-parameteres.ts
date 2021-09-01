@@ -9,9 +9,9 @@ export const setTestParams = (
   let testParams: CustomInstantiationParam = {
     testAccount: testAccount,
     basset: {
-      epoch_period: 30,
+      epoch_period: 10,
       underlying_coin_denom: "uluna",
-      unbonding_period: 211,
+      unbonding_period: 21,
       peg_recovery_fee: "0.001",
       er_threshold: "1.0",
       reward_denom: "uusd",

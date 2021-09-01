@@ -1,7 +1,5 @@
 import {Validator as QueryValidator} from "./types/validators_registry/validator";
-import {LoneSchemaDefinitionRule} from "graphql";
 import {GraphQLClient} from "graphql-request";
-import {makeContractStoreQuery} from "../mantle-querier/common";
 import {Testkit} from "../testkit/testkit";
 import AnchorbAsset from "./basset_helper";
 import {AllowanceResponse} from "./types/cw20_token/allowance_response";
@@ -11,7 +9,6 @@ import {TokenInfoResponse} from "./types/cw20_token/token_info_response";
 import {MinterResponse} from "./types/cw20_token/token_init_msg";
 import {QueryMsg as ValidatorsQueryMsg} from "./types/validators_registry/query_msg";
 import {HolderResponse, HoldersResponse} from "./types/basset_reward/holders_response";
-
 import {QueryMsg as BlunaQueryMsg} from "./types/basset_reward/query_msg";
 import {QueryMsg as AnchotBassetHubQueryMsg} from "./types/anchor_basset_hub/query_msg";
 import {StateResponse} from "./types/basset_reward/state_response";
@@ -22,24 +19,31 @@ import {AllHistoryResponse} from "./types/anchor_basset_hub/all_history_response
 import {UnbondRequestsResponse} from "./types/anchor_basset_hub/unbond_requests_response";
 import {WithdrawableUnbondedResponse} from "./types/anchor_basset_hub/withdrawable_unbonded_response";
 import {LCDClient} from "@terra-money/terra.js";
+import axios from "axios";
 
 //npx json2ts -i anchor-bAsset-contracts/contracts/anchor_basset_token/schema/ -o src/helper/types/bluna_token/
 
 
+const makeRestStoreQuery = async (contract_address: string,msg:any,endpoint:string): Promise<any> => {
+    const r = await axios.get(`${endpoint}/wasm/contracts/${contract_address}/store`,{ params: { query_msg: msg } })
+    return r.data['result']
+}
+
 class TokenQuerier {
     token_address: string;
-    mantleClient: GraphQLClient
+    lcd: LCDClient;
 
-    constructor(token_address: string, mantleClient: GraphQLClient) {
+    constructor(token_address: string, lcd: LCDClient) {
         this.token_address = token_address;
-        this.mantleClient = mantleClient;
+        this.lcd = lcd;
+        // lcd.wasm.contractQuery
     }
 
     async query(msg: object): Promise<any> {
-        return makeContractStoreQuery(
+        return makeRestStoreQuery(
             this.token_address,
             msg,
-            this.mantleClient
+            this.lcd.config.URL
         )
     }
 
@@ -104,22 +108,20 @@ export default class AnchorbAssetQueryHelper {
     basset: AnchorbAsset
     bluna_token_querier: TokenQuerier
     stluna_token_querier: TokenQuerier
-    lcd
+    lcd: LCDClient
 
-    constructor(/* testkit: Testkit, */ lcd: LCDClient,graphQL: GraphQLClient, basset: AnchorbAsset) {
-        // this.testkit = testkit;
+    constructor(lcd: LCDClient, basset: AnchorbAsset) {
         this.lcd = lcd;
         this.basset = basset;
-        this.mantleClient = graphQL ;
-        this.bluna_token_querier = new TokenQuerier(this.basset.contractInfo.anchor_basset_token.contractAddress, this.mantleClient)
-        this.stluna_token_querier = new TokenQuerier(this.basset.contractInfo.anchor_basset_token_stluna.contractAddress, this.mantleClient)
+        this.bluna_token_querier = new TokenQuerier(this.basset.contractInfo.anchor_basset_token.contractAddress, this.lcd)
+        this.stluna_token_querier = new TokenQuerier(this.basset.contractInfo.anchor_basset_token_stluna.contractAddress, this.lcd)
     }
 
     async bassethubquery(msg: AnchotBassetHubQueryMsg): Promise<any> {
-        return makeContractStoreQuery(
+        return makeRestStoreQuery(
             this.basset.contractInfo.anchor_basset_hub.contractAddress,
             msg,
-            this.mantleClient
+            this.lcd.config.URL
         )
     }
 
@@ -130,18 +132,18 @@ export default class AnchorbAssetQueryHelper {
     }
 
     async blunarewardquery(msg: BlunaQueryMsg): Promise<any> {
-        return makeContractStoreQuery(
+        return makeRestStoreQuery(
             this.basset.contractInfo.anchor_basset_reward.contractAddress,
             msg,
-            this.mantleClient
+            this.lcd.config.URL
         )
     }
 
     async validatorsquery(msg: ValidatorsQueryMsg): Promise<any> {
-        return makeContractStoreQuery(
+        return makeRestStoreQuery(
             this.basset.contractInfo.anchor_basset_validators_registry.contractAddress,
             msg,
-            this.mantleClient
+            this.lcd.config.URL
         )
     }
 

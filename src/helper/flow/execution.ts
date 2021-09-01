@@ -24,6 +24,7 @@ export async function instantiate(
     [
       new MsgInstantiateContract(
         sender.key.accAddress,
+        "",
         codeId,
         initMsg,
         tokens

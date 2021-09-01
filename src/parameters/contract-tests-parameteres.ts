@@ -11,7 +11,7 @@ export const setTestParams = (
     basset: {
       epoch_period: 10,
       underlying_coin_denom: "uluna",
-      unbonding_period: 21,
+      unbonding_period: 10,
       peg_recovery_fee: "0.001",
       er_threshold: "1.0",
       reward_denom: "uusd",

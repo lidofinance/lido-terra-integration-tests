@@ -192,9 +192,9 @@ async function main() {
     const actual_withdrawal_sum_b = (Number(uluna_balance_b) - inital_uluna_balance_b)
     const actual_withdrawal_sum_c = (Number(uluna_balance_c) - inital_uluna_balance_c)
 
-    const expected_withdrawal_sum_a = await get_expected_sum_from_requests(querier, unbond_requests_a)
-    const expected_withdrawal_sum_b = await get_expected_sum_from_requests(querier, unbond_requests_b)
-    const expected_withdrawal_sum_c = await get_expected_sum_from_requests(querier, unbond_requests_c)
+    const expected_withdrawal_sum_a = await get_expected_sum_from_requests(querier, unbond_requests_a, "bluna")
+    const expected_withdrawal_sum_b = await get_expected_sum_from_requests(querier, unbond_requests_b, "bluna")
+    const expected_withdrawal_sum_c = await get_expected_sum_from_requests(querier, unbond_requests_c, "bluna")
 
 
     assert.ok(floateq(expected_withdrawal_sum_a, actual_withdrawal_sum_a, 1e-5))

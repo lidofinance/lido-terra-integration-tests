@@ -18,11 +18,14 @@ export interface AllHistoryResponse {
   [k: string]: unknown;
 }
 export interface UnbondHistory {
-  amount: Uint128;
-  applied_exchange_rate: Decimal;
+  bluna_amount: Uint128;
+  stluna_amount: Uint128;
+  bluna_applied_exchange_rate: Decimal;
+  stluna_applied_exchange_rate: Decimal;
   batch_id: number;
   released: boolean;
   time: number;
-  withdraw_rate: Decimal;
+  bluna_withdraw_rate: Decimal;
+  stluna_withdraw_rate: Decimal;
   [k: string]: unknown;
 }

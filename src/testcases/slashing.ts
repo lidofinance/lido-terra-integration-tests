@@ -118,7 +118,6 @@ async function main() {
     assert.equal(initial_bluna_balance_a - 150_000_000, await querier.balance_bluna(testState.wallets.a.key.accAddress))
 
     // blocks 383 - 457
-    const ubond_exch_rate = await querier.stluna_exchange_rate()
     for (let i = 0; i < 75; i++) {
         await testState.basset.send_cw20_token(
             stlunaContractAddress,
@@ -156,11 +155,12 @@ async function main() {
     const uluna_balance_b = Number((await testState.wallets.b.lcd.bank.balance(testState.wallets.b.key.accAddress)).get("uluna").amount)
     const actual_withdrawal_sum_a = (Number(uluna_balance_a) - initial_uluna_balance_a)
     const actual_withdrawal_sum_b = (Number(uluna_balance_b) - initial_uluna_balance_b) + 160_000_001
+    const expected_withdrawal_sum_a = await get_expected_sum_from_requests(querier, unbond_requests_a, "bluna")
     const expected_withdrawal_sum_b = await get_expected_sum_from_requests(querier, unbond_requests_b, "stluna")
     
     assert.ok(actual_withdrawal_sum_a < 150_000_001)
     assert.ok(actual_withdrawal_sum_b < 160_000_001)
-    console.log(await get_expected_sum_from_requests(querier, unbond_requests_b, "stluna"))
+    assert.ok(floateq(expected_withdrawal_sum_a, actual_withdrawal_sum_a, 1e-4))
     assert.ok(floateq(expected_withdrawal_sum_b, actual_withdrawal_sum_b, 1e-4))
 }
 
@@ -168,7 +168,7 @@ main()
     .then(() => console.log('done'))
     .then(async () => {
         console.log("saving state...")
-        fs.writeFileSync("slashing_bluna_actions.json", JSON.stringify(getRecord(), null, 2))
-        fs.writeFileSync("slashing_bluna_state.json", JSON.stringify(await mantleState.getState(), null, 2))
+        fs.writeFileSync("slashing_actions.json", JSON.stringify(getRecord(), null, 2))
+        fs.writeFileSync("slashing_state.json", JSON.stringify(await mantleState.getState(), null, 2))
     })
     .catch(console.log)

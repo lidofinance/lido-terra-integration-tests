@@ -16,6 +16,7 @@ export type Decimal = string;
 export interface AllHistoryResponse {
   history: UnbondHistory[];
 }
+
 export interface UnbondHistory {
   batch_id: number;
   bluna_amount: Uint128;

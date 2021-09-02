@@ -4,17 +4,22 @@ import { emptyBlockWithFixedGas } from "../helper/flow/gas-station";
 import { mustFail, mustPass } from "../helper/flow/must";
 import { getRecord } from "../helper/flow/record";
 import { MantleState } from "../mantle-querier/MantleState";
-import { TestState } from "./common";
+import {TestStateLocalTerra} from "./common_localterra";
 var assert = require('assert');
 
 
 let mantleState: MantleState;
 
 async function main() {
-    const testState = new TestState()
-    mantleState = await testState.getMantleState()
+    const testState = new TestStateLocalTerra()
+    await testState.init()
+
+    const blunaContractAddress = testState.basset.contractInfo.anchor_basset_token.contractAddress
+    const querier = new AnchorbAssetQueryHelper(
+        testState.lcdClient,
+        testState.basset,
+    )
     const stlunaContractAddress = testState.basset.contractInfo.anchor_basset_token_stluna.contractAddress
-    const querier = new AnchorbAssetQueryHelper(testState.testkit, testState.basset)
 
 
     await mustPass(testState.basset.bond_for_stluna(testState.wallets.a, 10_000_000_000))
@@ -53,7 +58,7 @@ async function main() {
     assert.equal(await querier.balance_stluna(testState.wallets.a.key.accAddress), 8_000_000_000)
     const uluna_balance = Number((await testState.wallets.a.lcd.bank.balance(testState.wallets.a.key.accAddress)).get("uluna").amount)
     let history = (await querier.all_history()).history
-    let withdrawal_rate = Number(history[0].withdraw_rate)
+    let withdrawal_rate = Number(history[0].stluna_withdraw_rate)
     assert.equal(uluna_balance, initial_uluna_balance + 1_000_000_000 * withdrawal_rate)
 
 
@@ -101,7 +106,7 @@ async function main() {
     const uluna_balance_b = Number((await testState.wallets.a.lcd.bank.balance(testState.wallets.b.key.accAddress)).get("uluna").amount)
     history = (await querier.all_history()).history
     const total_withdrawals = history.length
-    withdrawal_rate = Number(history[history.length - 1].withdraw_rate)
+    withdrawal_rate = Number(history[history.length - 1].stluna_withdraw_rate)
     assert.equal(uluna_balance_b, initial_uluna_balance_b + 1_000_000_000 * withdrawal_rate)
     assert.equal((await querier.token_info_stluna()).total_supply, 6_000_000_000)
     await mustPass(testState.basset.decrease_allowance(stlunaContractAddress, testState.wallets.a, testState.wallets.b.key.accAddress, 1_000_000_000, { never: {} }))
@@ -120,15 +125,4 @@ async function main() {
 
 main()
     .then(() => console.log("done"))
-    .then(async () => {
-        console.log("saving state...");
-        fs.writeFileSync(
-            "stluna_short_test_action.json",
-            JSON.stringify(getRecord(), null, 2)
-        );
-        fs.writeFileSync(
-            "stluna_short_test_state.json",
-            JSON.stringify(await mantleState.getState(), null, 2)
-        );
-    })
     .catch(console.log);

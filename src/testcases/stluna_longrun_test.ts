@@ -9,8 +9,9 @@ import {MantleState} from "../mantle-querier/MantleState";
 import {emptyBlockWithFixedGas} from "../helper/flow/gas-station";
 import {repeat} from "../helper/flow/repeat";
 import {unjail} from "../helper/validator-operation/unjail";
-import {get_expected_sum_from_requests, TestState} from "./common";
+import {TestState} from "./common";
 import AnchorbAssetQueryHelper from "../helper/basset_queryhelper";
+import {disconnectValidator, get_expected_sum_from_requests, TestStateLocalTestNet} from "./common_localtestnet";
 var assert = require('assert');
 
 let mantleState: MantleState;
@@ -18,10 +19,16 @@ let mantleState: MantleState;
 async function main() {
     let j;
     let i
-    const testState = new TestState()
-    mantleState = await testState.getMantleState()
+    const testState = new TestStateLocalTestNet()
+    await testState.init()
+
+    const querier = new AnchorbAssetQueryHelper(
+        testState.lcdClient,
+        testState.basset,
+    )
     const stlunaContractAddress = testState.basset.contractInfo.anchor_basset_token_stluna.contractAddress
-    const querier = new AnchorbAssetQueryHelper(testState.testkit, testState.basset)
+
+    await mustPass(testState.basset.bond(testState.wallets.d, 1_000_000))
 
     const initial_uluna_balance_a = Number((await testState.wallets.a.lcd.bank.balance(testState.wallets.a.key.accAddress)).get("uluna").amount)
     const initial_uluna_balance_b = Number((await testState.wallets.b.lcd.bank.balance(testState.wallets.b.key.accAddress)).get("uluna").amount)
@@ -36,42 +43,15 @@ async function main() {
     //block 68
     await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation))
 
-    //block 81 - 85
-    // deregister oracle vote and waste 5 blocks
-    const prevotesToClear = testState.initialPrevotes[0]
-    const votesToClear = testState.initialVotes[0]
-
-    await testState.testkit.clearAutomaticTx(prevotesToClear.id)
-    await testState.testkit.clearAutomaticTx(votesToClear.id)
-    await repeat(5, async () => {
-        await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 1))
-    })
-
-    //block 86 - 90
-    // Oracle slashing happen at the block 89
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 5))
+    await disconnectValidator("terradnode1")
+    await testState.waitForJailed("terradnode1")
 
     //block 91 unjail & revive oracle
     // unjail & re-register oracle votes
-    await mustPass(unjail(testState.wallets.valAWallet))
+    // temporarly disabling unjailing
+    // await mustPass(unjail(testState.wallets.valAWallet))
 
-    const currentBlockHeight = await mantleState.getCurrentBlockHeight()
 
-    // // register vote for valA
-    const previousVote = await testState.testkit.registerAutomaticTx(registerChainOracleVote(
-        testState.validators[0].account_name,
-        testState.validators[0].Msg.delegator_address,
-        testState.validators[0].Msg.validator_address,
-        currentBlockHeight + 2,
-    ))
-
-    // register votes
-    const previousPrevote = await testState.testkit.registerAutomaticTx(registerChainOraclePrevote(
-        testState.validators[0].account_name,
-        testState.validators[0].Msg.delegator_address,
-        testState.validators[0].Msg.validator_address,
-        currentBlockHeight + 1
-    ))
 
     let stluna_exchange_rate = await querier.stluna_exchange_rate()
     assert.equal(1, stluna_exchange_rate)
@@ -92,6 +72,7 @@ async function main() {
     ))
     await mustPass(testState.basset.update_global_index(testState.wallets.a))
     // exchange rate is growing due to reward rebonding
+    console.log(stluna_exchange_rate, await querier.stluna_exchange_rate())
     assert.ok(await querier.stluna_exchange_rate() > stluna_exchange_rate)
     stluna_exchange_rate = await querier.stluna_exchange_rate()
 
@@ -236,15 +217,4 @@ async function main() {
 
 main()
     .then(() => console.log("done"))
-    .then(async () => {
-        console.log("saving state...");
-        fs.writeFileSync(
-            "blunalongruntest_action.json",
-            JSON.stringify(getRecord(), null, 2)
-        );
-        fs.writeFileSync(
-            "blunalongruntest_state.json",
-            JSON.stringify(await mantleState.getState(), null, 2)
-        );
-    })
     .catch(console.log);

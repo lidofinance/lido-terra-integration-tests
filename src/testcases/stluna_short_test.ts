@@ -5,16 +5,16 @@ import { mustFail, mustPass } from "../helper/flow/must";
 import { getRecord } from "../helper/flow/record";
 import { MantleState } from "../mantle-querier/MantleState";
 import {TestStateLocalTerra} from "./common_localterra";
+import {TestStateLocalTestNet} from "./common_localtestnet";
 var assert = require('assert');
 
 
 let mantleState: MantleState;
 
 async function main() {
-    const testState = new TestStateLocalTerra()
+    const testState = new TestStateLocalTestNet()
     await testState.init()
 
-    const blunaContractAddress = testState.basset.contractInfo.anchor_basset_token.contractAddress
     const querier = new AnchorbAssetQueryHelper(
         testState.lcdClient,
         testState.basset,

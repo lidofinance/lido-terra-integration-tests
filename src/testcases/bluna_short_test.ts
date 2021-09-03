@@ -8,16 +8,15 @@ import {makeContractStoreQuery} from "../mantle-querier/common";
 import {MantleState} from "../mantle-querier/MantleState";
 import {TestState} from "./common";
 import {TestStateLocalTerra} from "./common_localterra";
+import {TestStateLocalTestNet} from "./common_localtestnet";
 var assert = require('assert');
 let mantleState: MantleState;
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
+
 
 
 async function main() {
 
-    const testState = new TestStateLocalTerra()
+    const testState = new TestStateLocalTestNet()
     await testState.init()
 
     const blunaContractAddress = testState.basset.contractInfo.anchor_basset_token.contractAddress
@@ -116,15 +115,4 @@ async function main() {
 
 main()
     .then(() => console.log("done"))
-    .then(async () => {
-        // console.log("saving state...");
-        // fs.writeFileSync(
-        //     "bluna_short_test_action.json",
-        //     JSON.stringify(getRecord(), null, 2)
-        // );
-        // fs.writeFileSync(
-        //     "bluna_short_test_state.json",
-        //     JSON.stringify(await mantleState.getState(), null, 2)
-        // );
-    })
     .catch(console.log);

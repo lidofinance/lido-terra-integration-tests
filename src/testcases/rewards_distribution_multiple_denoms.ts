@@ -2,7 +2,7 @@ import { mustPass } from "../helper/flow/must";
 import {send_transaction} from "../helper/flow/execution";
 import {MsgSend} from "@terra-money/terra.js";
 import {TestStateLocalTerra} from "./common_localterra";
-import AnchorbAssetQueryHelper, {makeRestStoreQuery} from "../helper/basset_queryhelper";
+import {makeRestStoreQuery} from "../helper/basset_queryhelper";
 import {emptyBlockWithFixedGas} from "../helper/flow/gas-station";
 
 
@@ -13,10 +13,6 @@ function approxeq(a, b, e) {
 async function main() {
     const testState = new TestStateLocalTerra()
     await testState.init()
-    const querier = new AnchorbAssetQueryHelper(
-        testState.lcdClient,
-        testState.basset,
-    )
 
     let stLunaBondAmount = 10_000_000_000_000;
     let bLunaBondAmount = 20_000_000_000;

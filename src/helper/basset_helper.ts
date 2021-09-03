@@ -112,7 +112,7 @@ export default class AnchorbAsset {
             {
                 name: params.name || "test_name",
                 symbol: params.symbol || "AAA",
-                decimals: params.decimals || 2,
+                decimals: params.decimals || 6,
                 initial_balances: params.initial_balances || [],
                 hub_contract: params.hub_contract || this.contractInfo.anchor_basset_hub.contractAddress,
                 mint: params.mint

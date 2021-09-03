@@ -21,8 +21,8 @@ async function main() {
         testState.basset,
     )
 
-    let stLunaBondAmount = 20_000_000_000_000;
-    let bLunaBondAmount = 10_000_000_000;
+    let stLunaBondAmount = 300_000_000_000_000;
+    let bLunaBondAmount = 20_000_000_000_000;
 
     await mustPass(testState.basset.bond_for_stluna(testState.wallets.a, stLunaBondAmount))
     await mustPass(testState.basset.bond(testState.wallets.b, bLunaBondAmount))
@@ -117,7 +117,7 @@ async function main() {
     await mustPass(testState.basset.finish(testState.wallets.a));
     let lunaBalanceAfterWithdraw = await getLunaBalance(testState, testState.wallets.a.key.accAddress);
     // we lose 1-2 uluna because of Decimal logic
-    if (!approxeq(Number(BigInt(lunaBalanceAfterWithdraw) - BigInt(lunaBalanceBeforeWithdraw)), withdrawableUnbondedStLuna, 2)) {
+    if (!approxeq(Number(BigInt(lunaBalanceAfterWithdraw) - BigInt(lunaBalanceBeforeWithdraw)), withdrawableUnbondedStLuna, 3)) {
         throw new Error(`withdraw amount is not equal to withdrawableUnbonded: 
                                     ${BigInt(lunaBalanceAfterWithdraw) - BigInt(lunaBalanceBeforeWithdraw)} != ${withdrawableUnbondedStLuna}`)
     }

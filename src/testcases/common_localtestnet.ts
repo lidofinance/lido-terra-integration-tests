@@ -9,28 +9,28 @@ import {send_transaction} from "../helper/flow/execution";
 const {exec} = require('child_process');
 
 export const ValidatorsKeys = [
-    "fever fold wave liar injury lawsuit despair fade cash angry labor session accident process thunder left breeze together coast live marble exhaust lumber neutral",
-    "gasp boat supply render wet biology dwarf narrow donkey safe economy aware unknown know mirror head fatal junior auto aim elder fence raccoon owner",
-    "hat luxury square menu benefit salon payment rifle dawn quote wear hood team junior quick exact era cheap device clown raven month bonus refuse",
-    "moral globe barrel sock kite concert service debate dignity rival lyrics doctor mobile stage cousin wife fee run hospital buffalo fan embody gaze error",
+    "gloom sad wear decorate afraid tooth can gossip tool group work kid home arm lend alone job strategy decide oyster stairs crazy thrive muscle",
+    "silver depend sleep maple bar innocent garlic hire patrol often embrace interest magnet valley tomorrow magnet rural lonely typical egg asset much round resist",
+    "vendor faculty reform unit bunker vocal actual churn squeeze oval enough attitude subway source orange smile spoil walnut favorite ensure defense north bracket once",
+    "zero chef gate lizard toilet armor sense stage debris begin key mimic payment reform lawsuit inch off card search rural blame purse harvest tonight",
 ]
 
 export const vals = [
     {
         name: "terradnode0",
-        address: "terravaloper12ea43h6ztc9p770a9t48vm3gdkamqy37lu9q0m"
+        address: "terravaloper188p7d0w6948y8p4cg5p3m6zx8lzzg8r0vt47ms"
     },
     {
         name: "terradnode1",
-        address: "terravaloper1ra446xangf4s7vz38kdmsms4fxe5qmpw7d6xc7"
+        address: "terravaloper180darp2tj7ns48r0s3l3u8a2ygxjyycsjmyhzz"
     },
     {
         name: "terradnode2",
-        address: "terravaloper13e6t3v5cr9xh9l6r79vaulxj4xaw8p7qj8gv5s"
+        address: "terravaloper1utdag7jnhp9zy667z78dt8hnnud2mu7vax5rsn"
     },
     {
         name: "terradnode3",
-        address: "terravaloper1v33cqmj3qu64vs4vvpljtqg96n8gu2t4mcyq8g"
+        address: "terravaloper1yg247q4kecqnktp2rte030yy43gpj0c9nm5nug"
     },
 ]
 
@@ -44,16 +44,16 @@ export const accKeys = [
 ]
 /* 
 Validators:
-terravaloper12ea43h6ztc9p770a9t48vm3gdkamqy37lu9q0m - node0 192.168.10.2
+terravaloper188p7d0w6948y8p4cg5p3m6zx8lzzg8r0vt47ms - node0 192.168.10.2
 fever fold wave liar injury lawsuit despair fade cash angry labor session accident process thunder left breeze together coast live marble exhaust lumber neutral
 
-terravaloper1ra446xangf4s7vz38kdmsms4fxe5qmpw7d6xc7 - node1 192.168.10.3
+terravaloper180darp2tj7ns48r0s3l3u8a2ygxjyycsjmyhzz - node1 192.168.10.3
 gasp boat supply render wet biology dwarf narrow donkey safe economy aware unknown know mirror head fatal junior auto aim elder fence raccoon owner
 
-terravaloper13e6t3v5cr9xh9l6r79vaulxj4xaw8p7qj8gv5s - node4 192.168.10.4
+terravaloper1utdag7jnhp9zy667z78dt8hnnud2mu7vax5rsn - node4 192.168.10.4
 hat luxury square menu benefit salon payment rifle dawn quote wear hood team junior quick exact era cheap device clown raven month bonus refuse
 
-terravaloper1v33cqmj3qu64vs4vvpljtqg96n8gu2t4mcyq8g - node3 192.168.10.5
+terravaloper1yg247q4kecqnktp2rte030yy43gpj0c9nm5nug - node3 192.168.10.5
 moral globe barrel sock kite concert service debate dignity rival lyrics doctor mobile stage cousin wife fee run hospital buffalo fan embody gaze error
 
 Accounts:

@@ -5,7 +5,7 @@ import {unjail} from "../helper/validator-operation/unjail";
 import {get_expected_sum_from_requests} from "./common_localterra";
 import AnchorbAssetQueryHelper from "../helper/basset_queryhelper";
 import {TestStateLocalTerra} from "./common_localterra";
-import {disconnectValidator, TestStateLocalTestNet} from "./common_localtestnet";
+import {disconnectValidator, TestStateLocalTestNet, vals} from "./common_localtestnet";
 var assert = require('assert');
 
 
@@ -24,7 +24,7 @@ async function main() {
 
 
     // adding validator terradnode1 to jail it later
-    await mustPass(testState.basset.add_validator(testState.wallets.ownerWallet, "terravaloper1ra446xangf4s7vz38kdmsms4fxe5qmpw7d6xc7"))
+    await mustPass(testState.basset.add_validator(testState.wallets.ownerWallet, vals[1].address))
     await mustPass(testState.basset.bond(testState.wallets.ownerWallet, 2_000_000))
 
 

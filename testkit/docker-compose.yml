@@ -73,7 +73,7 @@ services:
     environment:
       TESTNET_LCD_URL: http://terradnode0:1317
       TESTNET_CHAIN_ID: "localnet"
-      MNEMONIC: "fever fold wave liar injury lawsuit despair fade cash angry labor session accident process thunder left breeze together coast live marble exhaust lumber neutral"
+      MNEMONIC: "gloom sad wear decorate afraid tooth can gossip tool group work kid home arm lend alone job strategy decide oyster stairs crazy thrive muscle"
     command: start
   oracle1:
     image: terramoney/pseudo-feeder:bombay
@@ -86,7 +86,7 @@ services:
     environment:
       TESTNET_LCD_URL: http://terradnode1:1317
       TESTNET_CHAIN_ID: "localnet"
-      MNEMONIC: "gasp boat supply render wet biology dwarf narrow donkey safe economy aware unknown know mirror head fatal junior auto aim elder fence raccoon owner"
+      MNEMONIC: "silver depend sleep maple bar innocent garlic hire patrol often embrace interest magnet valley tomorrow magnet rural lonely typical egg asset much round resist"
     command: start
 
   oracle2:
@@ -100,7 +100,7 @@ services:
     environment:
       TESTNET_LCD_URL: http://terradnode2:1317
       TESTNET_CHAIN_ID: "localnet"
-      MNEMONIC: "hat luxury square menu benefit salon payment rifle dawn quote wear hood team junior quick exact era cheap device clown raven month bonus refuse"
+      MNEMONIC: "vendor faculty reform unit bunker vocal actual churn squeeze oval enough attitude subway source orange smile spoil walnut favorite ensure defense north bracket once"
     command: start
 
   oracle3:
@@ -114,7 +114,7 @@ services:
     environment:
       TESTNET_LCD_URL: http://terradnode3:1317
       TESTNET_CHAIN_ID: "localnet"
-      MNEMONIC: "moral globe barrel sock kite concert service debate dignity rival lyrics doctor mobile stage cousin wife fee run hospital buffalo fan embody gaze error"
+      MNEMONIC: "zero chef gate lizard toilet armor sense stage debris begin key mimic payment reform lawsuit inch off card search rural blame purse harvest tonight"
     command: start
 
 networks:

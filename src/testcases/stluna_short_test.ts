@@ -1,15 +1,11 @@
-import * as fs from "fs";
 import AnchorbAssetQueryHelper from "../helper/basset_queryhelper";
 import { emptyBlockWithFixedGas } from "../helper/flow/gas-station";
 import { mustFail, mustPass } from "../helper/flow/must";
-import { getRecord } from "../helper/flow/record";
 import { MantleState } from "../mantle-querier/MantleState";
-import {TestStateLocalTerra} from "./common_localterra";
 import {TestStateLocalTestNet} from "./common_localtestnet";
 var assert = require('assert');
 
 
-let mantleState: MantleState;
 
 async function main() {
     const testState = new TestStateLocalTestNet()

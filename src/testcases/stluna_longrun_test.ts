@@ -1,20 +1,9 @@
-import * as fs from "fs";
 import {floateq, mustPass} from "../helper/flow/must";
-import {getRecord} from "../helper/flow/record";
-import {
-    registerChainOracleVote,
-    registerChainOraclePrevote,
-} from "../helper/oracle/chain-oracle";
-import {MantleState} from "../mantle-querier/MantleState";
 import {emptyBlockWithFixedGas} from "../helper/flow/gas-station";
-import {repeat} from "../helper/flow/repeat";
-import {unjail} from "../helper/validator-operation/unjail";
-import {TestState} from "./common";
 import AnchorbAssetQueryHelper from "../helper/basset_queryhelper";
-import {disconnectValidator, get_expected_sum_from_requests, TestStateLocalTestNet} from "./common_localtestnet";
+import {disconnectValidator, get_expected_sum_from_requests, TestStateLocalTestNet, vals} from "./common_localtestnet";
 var assert = require('assert');
 
-let mantleState: MantleState;
 
 async function main() {
     let j;
@@ -27,7 +16,7 @@ async function main() {
         testState.basset,
     )
     const stlunaContractAddress = testState.basset.contractInfo.anchor_basset_token_stluna.contractAddress
-
+    await mustPass(testState.basset.add_validator(testState.wallets.ownerWallet, vals[1].address))
     await mustPass(testState.basset.bond(testState.wallets.d, 1_000_000))
 
     const initial_uluna_balance_a = Number((await testState.wallets.a.lcd.bank.balance(testState.wallets.a.key.accAddress)).get("uluna").amount)

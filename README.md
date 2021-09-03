@@ -39,7 +39,10 @@ yarn install
 2) Put lido bAsset artifacts in `./anchor-bAsset-contracts/artifacts` dir
 3) To start the 4-set validators environment - run `make start` in the `testkit` dir. Keep in mind, `http://192.168.10.2:1317/oracle/denoms/exchange_rates` starts work after 30-45 blocks(and the same amount of seconds), update_global_index needs the endpoint to work, for most of the testcases this does not matter, but if you want to call update_global_index soon after test starts, give some time to env get ready, to check oracles endpoint you can run 
 ```shell
-make oracle_status 
+$ make oracle_status
+```
+and see
+```shell
 curl http://192.168.10.2:1317/oracle/denoms/exchange_rates
 {"height":"927","result":[
   {

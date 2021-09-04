@@ -24,7 +24,7 @@ import axios from "axios";
 //npx json2ts -i anchor-bAsset-contracts/contracts/anchor_basset_token/schema/ -o src/helper/types/bluna_token/
 
 
-const makeRestStoreQuery = async (contract_address: string,msg:any,endpoint:string): Promise<any> => {
+export const makeRestStoreQuery = async (contract_address: string,msg:any,endpoint:string): Promise<any> => {
     const r = await axios.get(`${endpoint}/wasm/contracts/${contract_address}/store`,{ params: { query_msg: msg } })
     return r.data['result']
 }

@@ -5,6 +5,7 @@ import {unjail} from "../helper/validator-operation/unjail";
 import {get_expected_sum_from_requests} from "./common_localterra";
 import AnchorbAssetQueryHelper from "../helper/basset_queryhelper";
 import {TestStateLocalTerra} from "./common_localterra";
+import {disconnectValidator, TestStateLocalTestNet, vals} from "./common_localtestnet";
 var assert = require('assert');
 
 
@@ -13,7 +14,7 @@ var assert = require('assert');
 async function main() {
     let j
     let i
-    const testState = new TestStateLocalTerra()
+    const testState = new TestStateLocalTestNet()
     await testState.init()
 
     const querier = new AnchorbAssetQueryHelper(
@@ -21,54 +22,24 @@ async function main() {
         testState.basset,
     )
 
-    // "first dummy" bonding just to make exchenage rate = 1
+
+    // adding validator terradnode1 to jail it later
+    await mustPass(testState.basset.add_validator(testState.wallets.ownerWallet, vals[1].address))
     await mustPass(testState.basset.bond(testState.wallets.ownerWallet, 2_000_000))
 
 
     const blunaContractAddress = testState.basset.contractInfo.anchor_basset_token.contractAddress
 
-    //block 67
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation))
 
-    //block 68
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation))
 
-    //block 81 - 85
-    // deregister oracle vote and waste 5 blocks
-    // const prevotesToClear = testState.initialPrevotes[0]
-    // const votesToClear = testState.initialVotes[0]
+    await disconnectValidator("terradnode1")
+    await testState.waitForJailed("terradnode1")
 
-    // await testState.testkit.clearAutomaticTx(prevotesToClear.id)
-    // await testState.testkit.clearAutomaticTx(votesToClear.id)
-    // await repeat(5, async () => {
-    //     await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 1))
-    // })
+
 
     //block 86 - 90
     // Oracle slashing happen at the block 89
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 5))
-
-    //block 91 unjail & revive oracle
-    // unjail & re-register oracle votes
-    await mustPass(unjail(testState.wallets.valAWallet))
-
-    // const currentBlockHeight = await mantleState.getCurrentBlockHeight()
-
-    // // register vote for valA
-    // const previousVote = await testState.testkit.registerAutomaticTx(registerChainOracleVote(
-    //     testState.validators[0].account_name,
-    //     testState.validators[0].Msg.delegator_address,
-    //     testState.validators[0].Msg.validator_address,
-    //     currentBlockHeight + 2,
-    // ))
-
-    // // register votes
-    // const previousPrevote = await testState.testkit.registerAutomaticTx(registerChainOraclePrevote(
-    //     testState.validators[0].account_name,
-    //     testState.validators[0].Msg.delegator_address,
-    //     testState.validators[0].Msg.validator_address,
-    //     currentBlockHeight + 1
-    // ))
+    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 20))
 
     //block 92 - 94
     //bond
@@ -203,15 +174,4 @@ async function main() {
 
 main()
     .then(() => console.log("done"))
-    .then(async () => {
-        // console.log("saving state...");
-        // fs.writeFileSync(
-        //     "blunalongruntest_action.json",
-        //     JSON.stringify(getRecord(), null, 2)
-        // );
-        // fs.writeFileSync(
-        //     "blunalongruntest_state.json",
-        //     JSON.stringify(await mantleState.getState(), null, 2)
-        // );
-    })
     .catch(console.log);

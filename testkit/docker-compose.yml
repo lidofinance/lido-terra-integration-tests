@@ -1,0 +1,127 @@
+version: '3'
+
+services:
+  terradnode0:
+    container_name: terradnode0
+    image: terramoney/localterra-core:bombay
+    ports:
+      - "1317:1317"
+      - "9090:9090"
+      - "26656-26657:26656-26657"
+    environment:
+      - ID=0
+    volumes:
+      - ./configs/node0/terrad/config/:/root/.terra/config
+    command: terrad start
+    networks:
+      localnet:
+        ipv4_address: 192.168.10.2
+
+  terradnode1:
+    container_name: terradnode1
+    image: terramoney/localterra-core:bombay
+    ports:
+      - "9091:9090"
+      - "26659-26660:26656-26657"
+    environment:
+      - ID=1
+    volumes:
+      - ./configs/node1/terrad/config/:/root/.terra/config
+    command: terrad start
+    networks:
+      localnet:
+        ipv4_address: 192.168.10.3
+
+  terradnode2:
+    container_name: terradnode2
+    image: terramoney/localterra-core:bombay
+    environment:
+      - ID=2
+    ports:
+      - "9092:9090"
+      - "26661-26662:26656-26657"
+    volumes:
+      - ./configs/node2/terrad/config/:/root/.terra/config
+    command: terrad start
+    networks:
+      localnet:
+        ipv4_address: 192.168.10.4
+
+  terradnode3:
+    container_name: terradnode3
+    image: terramoney/localterra-core:bombay
+    environment:
+      - ID=3
+    ports:
+      - "9093:9090"
+      - "26663-26664:26656-26657"
+    volumes:
+      - ./configs/node3/terrad/config/:/root/.terra/config
+    command: terrad start
+    networks:
+      localnet:
+        ipv4_address: 192.168.10.5
+
+  oracle0:
+    image: terramoney/pseudo-feeder:bombay
+    pull_policy: always
+    depends_on:
+      - terradnode0
+    networks:
+      localnet:
+        ipv4_address: 192.168.10.250
+    environment:
+      TESTNET_LCD_URL: http://terradnode0:1317
+      TESTNET_CHAIN_ID: "localnet"
+      MNEMONIC: "gloom sad wear decorate afraid tooth can gossip tool group work kid home arm lend alone job strategy decide oyster stairs crazy thrive muscle"
+    command: start
+  oracle1:
+    image: terramoney/pseudo-feeder:bombay
+    pull_policy: always
+    depends_on:
+      - terradnode1
+    networks:
+      localnet:
+        ipv4_address: 192.168.10.251
+    environment:
+      TESTNET_LCD_URL: http://terradnode1:1317
+      TESTNET_CHAIN_ID: "localnet"
+      MNEMONIC: "silver depend sleep maple bar innocent garlic hire patrol often embrace interest magnet valley tomorrow magnet rural lonely typical egg asset much round resist"
+    command: start
+
+  oracle2:
+    image: terramoney/pseudo-feeder:bombay
+    pull_policy: always
+    depends_on:
+      - terradnode2
+    networks:
+      localnet:
+        ipv4_address: 192.168.10.252
+    environment:
+      TESTNET_LCD_URL: http://terradnode2:1317
+      TESTNET_CHAIN_ID: "localnet"
+      MNEMONIC: "vendor faculty reform unit bunker vocal actual churn squeeze oval enough attitude subway source orange smile spoil walnut favorite ensure defense north bracket once"
+    command: start
+
+  oracle3:
+    image: terramoney/pseudo-feeder:bombay
+    pull_policy: always
+    depends_on:
+      - terradnode3
+    networks:
+      localnet:
+        ipv4_address: 192.168.10.253
+    environment:
+      TESTNET_LCD_URL: http://terradnode3:1317
+      TESTNET_CHAIN_ID: "localnet"
+      MNEMONIC: "zero chef gate lizard toilet armor sense stage debris begin key mimic payment reform lawsuit inch off card search rural blame purse harvest tonight"
+    command: start
+
+networks:
+  localnet:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      -
+        subnet: 192.168.10.0/24

@@ -30,8 +30,6 @@ export class TestStateLocalTerra {
         this.gasStation = new MnemonicKey({mnemonic:'noble width taxi input there patrol clown public spell aunt wish punch moment will misery eight excess arena pen turtle minimum grain vague inmate'})
         this.validators_addresses = ["terravaloper1dcegyrekltswvyy0xy69ydgxn9x8x32zdy3ua5"]
         this.anchor = new Anchor(this.wallets.ownerWallet);
-        
-        
     }
 
     async init() {

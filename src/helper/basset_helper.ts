@@ -501,15 +501,16 @@ export default class AnchorbAsset {
             throw new Error(`Couldn't run: ${sendExecuttion.raw_log}`);
         }
     }
+    // export type RedelegationMsg = {
+    //     dst: string,
+    //     amount: Coin
+    // }
 
     public async redelegate_proxy(
         sender: Wallet,
         src_validator_address: string,
-        dst_validator_address: string,
-        amount: number,
+        redelegations: Array<[string, Coin]>,
     ): Promise<void> {
-        const coin = new Coin("uluna", amount);
-        const coins = new Coins([coin]);
         const contract = this.contractInfo["anchor_basset_hub"].contractAddress;
         const bondExecution = await execute(
             sender,
@@ -517,8 +518,7 @@ export default class AnchorbAsset {
             {
                 redelegate_proxy: {
                     src_validator: src_validator_address,
-                    dst_validator: dst_validator_address,
-                    amount: {amount: "100", denom: "uluna"},
+                    redelegations: redelegations.map(([dst_addr,coin]) => {return [dst_addr, {amount: `${coin.amount}`, denom: coin.denom}]}),
                 },
             },
             undefined

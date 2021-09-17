@@ -501,10 +501,6 @@ export default class AnchorbAsset {
             throw new Error(`Couldn't run: ${sendExecuttion.raw_log}`);
         }
     }
-    // export type RedelegationMsg = {
-    //     dst: string,
-    //     amount: Coin
-    // }
 
     public async redelegate_proxy(
         sender: Wallet,

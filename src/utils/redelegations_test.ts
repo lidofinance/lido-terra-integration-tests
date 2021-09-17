@@ -52,7 +52,7 @@ const test_redelegations = () => {
             }
             DistributionSet[redistributed_validators[i].amount]++
         }
-        // at the end, in case there are no `inprogress_redistributions`
+        // at the end, in case there are no `inprogress_redelegations`
         // every validator should have th same amount of delegated coins
         // except may be one due to Math.floor at the beginning of the `get_redelegations` function
         assert.ok(Object.keys(DistributionSet).length <= 2)

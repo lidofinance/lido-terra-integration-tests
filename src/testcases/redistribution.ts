@@ -50,7 +50,7 @@ async function main() {
         })
     ))
 
-    // we are redelegeting to val1 (line34) - terravaloper180darp2tj7ns48r0s3l3u8a2ygxjyycsjmyhzz
+    // we are redelegating to val1 (line34) - terravaloper180darp2tj7ns48r0s3l3u8a2ygxjyycsjmyhzz
     // 4000 uluna and we can not to redelegate from him
     // our delegation state should be
     let expected_validator_state = [{
@@ -95,7 +95,7 @@ async function main() {
         console.log(counter)
         await sleep(1000)
     }
-    // and redeleting again
+    // and redelegating again
     validators = await querier.get_validators_for_delegation()
     await mustPass(redistribute(
         testState.lcdClient,

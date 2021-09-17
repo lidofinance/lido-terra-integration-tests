@@ -1,4 +1,5 @@
 import {get_redelegations, Redelegation, Validator} from "./redelegations"
+var assert = require('assert');
 
 export const apply_redelegations = (validators: Array<Validator>, redelegations: Array<Redelegation>): Array<Validator> => {
     for (let i = 0; i < redelegations.length; i++) {
@@ -22,6 +23,7 @@ const generate_validators = (amount: number): Array<Validator> => {
     return validators
 }
 
+
 const test_redelegations = () => {
     // kind of property based testing
     for (let i = 2; i < 20; i++) {
@@ -34,16 +36,26 @@ const test_redelegations = () => {
         )
         let copyValidators: Array<Validator> = JSON.parse(JSON.stringify(validators))
         let redelegations = get_redelegations(copyValidators, [])
-        validators = apply_redelegations(validators, redelegations)
-        let sum_redelegated = validators.reduce(
+        let redistributed_validators = apply_redelegations(validators, redelegations)
+        let sum_redelegated = redistributed_validators.reduce(
             (acc, {amount}) => {
                 return acc + amount
             },
             0
         )
-        if (sum_orig != sum_redelegated) {
-            throw new Error(`expected ${sum_orig}, got ${sum_redelegated}`);
+        assert.equal(sum_redelegated, sum_orig)
+
+        let DistributionSet = {}
+        for (let i = 0; i < redistributed_validators.length; i++) {
+            if (!DistributionSet.hasOwnProperty(redistributed_validators[i].amount)) {
+                DistributionSet[redistributed_validators[i].amount] = 0
+            }
+            DistributionSet[redistributed_validators[i].amount]++
         }
+        // at the end, in case there are no `inprogress_redistributions`
+        // every validator should have th same amount of delegated coins
+        // except may be one due to Math.floor at the beginning of the `get_redelegations` function
+        assert.ok(Object.keys(DistributionSet).length <= 2)
     }
 }
 

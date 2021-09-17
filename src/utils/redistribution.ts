@@ -1,7 +1,6 @@
-import {Coin, isTxError, LCDClient, Wallet} from "@terra-money/terra.js";
+import {isTxError, LCDClient, Wallet} from "@terra-money/terra.js";
 import {execute} from "../helper/flow/execution";
-import {sleep} from "../testcases/common_localtestnet";
-import {get_redelegations, Redelegation, Validator} from "./redelegations";
+import {get_redelegations, Validator} from "./redelegations";
 
 const incoming_redelegations_inprogress = async (
     wallet: Wallet,

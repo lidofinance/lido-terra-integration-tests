@@ -1,7 +1,7 @@
 import basset from "./basset_helper";
 import mMarket, {BAssetInfo} from "./money_market_helper";
 import terraswap from "./terraswap_helper";
-import {StdFee, Validator, Wallet} from "@terra-money/terra.js";
+import {Fee, Validator, Wallet} from "@terra-money/terra.js";
 import {execute} from "./flow/execution";
 import AnchorToken from "./anchor_token_helper";
 import {Testkit, TestkitInit} from "../testkit/testkit";
@@ -69,7 +69,7 @@ export default class Anchor {
 
     public async store_contracts_localterra(
         bassetLocation: string,
-        fee?: StdFee
+        fee?: Fee
     ): Promise<void> {
         await this.bAsset.storeCodes(this.owner, bassetLocation, fee);
     }
@@ -79,7 +79,7 @@ export default class Anchor {
         mmLocation: string,
         terraswapLocation: string,
         ancLocation: string,
-        fee?: StdFee
+        fee?: Fee
     ): Promise<void> {
         await this.bAsset.storeCodes(this.owner, bassetLocation, fee);
         await this.moneyMarket.storeCodes(this.owner, mmLocation, fee);
@@ -88,7 +88,7 @@ export default class Anchor {
     }
 
     public async instantiate_localterra(
-        fee?: StdFee,
+        fee?: Fee,
         params?: CustomInstantiationParam,
         validators_addresses?: Array<string>,
     ): Promise<void> {
@@ -111,7 +111,7 @@ export default class Anchor {
     }
 
     public async instantiate(
-        fee?: StdFee,
+        fee?: Fee,
         params?: CustomInstantiationParam,
         validators?: Array<TestkitInit.Validator>,
     ): Promise<void> {

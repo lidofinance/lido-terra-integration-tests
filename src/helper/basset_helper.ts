@@ -4,9 +4,16 @@ import {
     isTxError,
     MsgSend,
     MsgStoreCode,
-    StdFee,
+    Fee,
     Wallet,
+    LCDClient,
+    MsgExecuteContract,
+    LegacyAminoMultisigPublicKey,
+    MnemonicKey,
+    SignDoc,
 } from "@terra-money/terra.js";
+import {SignatureV2} from "@terra-money/terra.js/dist/core/SignatureV2";
+import {MultiSignature} from "@terra-money/terra.js/dist/core/MultiSignature";
 import * as fs from "fs";
 import {execute, instantiate, send_transaction} from "./flow/execution";
 
@@ -39,7 +46,7 @@ export default class AnchorbAsset {
     public async storeCodes(
         sender: Wallet,
         location: string,
-        fee?: StdFee
+        fee?: Fee
     ): Promise<void> {
         return contracts.reduce(
             (t, c) =>
@@ -71,7 +78,7 @@ export default class AnchorbAsset {
             registry?: Array<{active: boolean, total_delegated?: string, address: string}>,
             hub_contract: string,
         },
-        fee?: StdFee,
+        fee?: Fee,
     ): Promise<void> {
         const init = await instantiate(
             sender,
@@ -104,7 +111,7 @@ export default class AnchorbAsset {
             mint?: null,
             hub_contract?: string,
         },
-        fee?: StdFee,
+        fee?: Fee,
     ): Promise<void> {
         const init = await instantiate(
             sender,
@@ -138,7 +145,7 @@ export default class AnchorbAsset {
             bluna_reward_contract?: string,
             lido_fee_address?: string,
         },
-        fee?: StdFee,
+        fee?: Fee,
     ): Promise<void> {
         const init = await instantiate(
             sender,
@@ -178,7 +185,7 @@ export default class AnchorbAsset {
             reward_denom?: string;
             validator?: string;
         },
-        fee?: StdFee
+        fee?: Fee
     ): Promise<void> {
         const coins = new Coins([]);
         const init = await instantiate(
@@ -216,7 +223,7 @@ export default class AnchorbAsset {
             hub_contract?: string;
             reward_denom?: string;
         },
-        fee?: StdFee
+        fee?: Fee
     ): Promise<void> {
         const init = await instantiate(
             sender,
@@ -253,7 +260,7 @@ export default class AnchorbAsset {
             mint?: Mint;
             hub_contract?: string;
         },
-        fee?: StdFee
+        fee?: Fee
     ): Promise<void> {
         const init = await instantiate(
             sender,
@@ -301,7 +308,7 @@ export default class AnchorbAsset {
             hub_contract?: string;
             reward_contract?: string;
         },
-        fee?: StdFee
+        fee?: Fee
     ) {
         const init = await instantiate(
             sender,
@@ -337,7 +344,7 @@ export default class AnchorbAsset {
             rewards_dispatcher_contract?: string;
             stluna_token_contract?: string,
         },
-        fee?: StdFee
+        fee?: Fee
     ) {
         const msg = await execute(
             sender,
@@ -367,7 +374,7 @@ export default class AnchorbAsset {
     public async register_validator(
         sender: Wallet,
         validator: string,
-        fee?: StdFee
+        fee?: Fee
     ): Promise<void> {
         const contract = this.contractInfo.anchor_basset_hub.contractAddress;
         const registerValidatorExecution = await execute(
@@ -514,7 +521,7 @@ export default class AnchorbAsset {
             {
                 redelegate_proxy: {
                     src_validator: src_validator_address,
-                    redelegations: redelegations.map(([dst_addr,coin]) => {return [dst_addr, {amount: `${coin.amount}`, denom: coin.denom}]}),
+                    redelegations: redelegations.map(([dst_addr, coin]) => {return [dst_addr, {amount: `${coin.amount}`, denom: coin.denom}]}),
                 },
             },
             undefined
@@ -534,7 +541,7 @@ export default class AnchorbAsset {
             er_threshold?: string;
             reward_denom?: string;
         },
-        fee?: StdFee
+        fee?: Fee
     ): Promise<void> {
         const contract = this.contractInfo.anchor_basset_hub.contractAddress;
         const paramsExecution = await execute(

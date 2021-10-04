@@ -6,18 +6,18 @@ import {
   LocalTerra,
   MsgExecuteContract,
   MsgStoreCode,
-  StdFee,
+  Fee,
   Wallet,
 } from "@terra-money/terra.js";
 import * as fs from "fs";
-import { execute, instantiate, send_transaction } from "./flow/execution";
+import {execute, instantiate, send_transaction} from "./flow/execution";
 
 // TODO: anchor_token should be added in contracts.
 const contracts = ["terraswap_pair", "terraswap_factory", "terraswap_token"];
 
 export default class TerraSwap {
   public contractInfo: {
-    [contractName: string]: { codeId: number; contractAddress: string };
+    [contractName: string]: {codeId: number; contractAddress: string};
   };
 
   constructor() {
@@ -27,7 +27,7 @@ export default class TerraSwap {
   public async storeCodes(
     sender: Wallet,
     location: string,
-    fee?: StdFee
+    fee?: Fee
   ): Promise<void> {
     this.contractInfo["token_pair"] = {
       codeId: 0,
@@ -64,7 +64,7 @@ export default class TerraSwap {
 
   public async instantiate_terraswap(
     sender: Wallet,
-    fee?: StdFee
+    fee?: Fee
   ): Promise<void> {
     const terraswapFactory = await instantiate(
       sender,

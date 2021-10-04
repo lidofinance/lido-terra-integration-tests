@@ -1,22 +1,25 @@
 import {
   BlockTxBroadcastResult,
   Coins,
+  Fee,
+  isTxError,
   Msg,
   MsgExecuteContract,
   MsgInstantiateContract,
-  StdFee,
+  MsgMigrateContract,
+  MsgUpdateContractAdmin,
   Wallet,
 } from "@terra-money/terra.js";
-import { gql } from "graphql-request";
-import { MantleState } from "../../mantle-querier/MantleState";
-import { makeRecord } from "./record";
+import {gql} from "graphql-request";
+import {MantleState} from "../../mantle-querier/MantleState";
+import {makeRecord} from "./record";
 
 export async function instantiate(
   sender: Wallet,
   codeId: number,
   initMsg: object,
   tokens?: Coins,
-  fee?: StdFee
+  fee?: Fee
 ): ReturnType<typeof send_transaction> {
   console.error(`instantiate ${codeId} w/ ${JSON.stringify(initMsg)}`);
   return await send_transaction(
@@ -39,7 +42,7 @@ export async function execute(
   contract: string,
   executeMsg: object,
   tokens?: Coins,
-  fee?: StdFee
+  fee?: Fee
 ): ReturnType<typeof send_transaction> {
   console.error(`execute ${contract} w/ ${JSON.stringify(executeMsg)}`);
   return await send_transaction(
@@ -66,7 +69,7 @@ export async function execute(
 export async function send_transaction(
   sender: Wallet,
   msgs: Msg[],
-  fee: StdFee = new StdFee(10000000, "10000000uusd")
+  fee: Fee = new Fee(10000000, "10000000uusd")
 ): Promise<BlockTxBroadcastResult> {
   return Promise.resolve()
     .then(() =>

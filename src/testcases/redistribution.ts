@@ -1,12 +1,11 @@
 import {Coin} from "@terra-money/terra.js";
 import AnchorbAssetQueryHelper from "../helper/basset_queryhelper";
-import {mustPass} from "../helper/flow/must";
-import {redistribute} from "../utils/redistribution";
+import {mustFail, mustPass} from "../helper/flow/must";
+import {redelegate_proxy_multisig, redistribute} from "../utils/redistribution";
 import {sleep, TestStateLocalTestNet, vals} from "./common_localtestnet"
 var assert = require('assert');
 
 async function main() {
-
     const testState = new TestStateLocalTestNet()
     await testState.init()
 
@@ -14,6 +13,7 @@ async function main() {
         testState.lcdClient,
         testState.basset,
     )
+
 
     await mustPass(testState.basset.bond(testState.wallets.a, 2_500_000_000))
     const initial_delegations = [2_500_000_000, 1_300_000_000, 700_000_000, 300_000_000]
@@ -31,16 +31,43 @@ async function main() {
     }
 
 
-    await mustPass(testState.basset.redelegate_proxy(
+    // updating hub's creator field
+    await mustPass(
+        testState.basset.update_config(testState.wallets.a, testState.multisigPublikKey.address())
+    )
+
+    // previous creator is not allowed to make redeletion anymore
+    await mustFail(testState.basset.redelegate_proxy(
         testState.wallets.ownerWallet,
         vals[0].address,
         [[vals[1].address, new Coin("uluna", "4000")]]
     ))
 
+    //one key is not enouth to sign transaction
+    await mustFail(redelegate_proxy_multisig(
+        testState.lcdClient,
+        testState.basset.contractInfo.anchor_basset_hub.contractAddress,
+        testState.multisigPublikKey,
+        testState.multisigKeys.slice(0,0),
+        vals[0].address,
+        [[vals[1].address, 
+        new Coin("uluna", "4000")]]
+    ))
+
+    await mustPass(redelegate_proxy_multisig(
+        testState.lcdClient,
+        testState.basset.contractInfo.anchor_basset_hub.contractAddress,
+        testState.multisigPublikKey,
+        testState.multisigKeys,vals[0].address,
+        [[vals[1].address, 
+        new Coin("uluna", "4000")]]
+    ))
+
 
     await mustPass(redistribute(
         testState.lcdClient,
-        testState.wallets.a,
+        testState.multisigPublikKey,
+        testState.multisigKeys,
         testState.basset.contractInfo.anchor_basset_hub.contractAddress,
         validators.map((v) => {
             return {
@@ -86,9 +113,9 @@ async function main() {
     let counter = 0
     let threshold = 15
     console.log('waiting all redelegations have completed')
-    while (counter< threshold) {
-        let redelegations = await testState.lcdClient.staking.redelegations()
-        if (redelegations.length==0){
+    while (counter < threshold) {
+        let [redelegations, pagination] = await testState.lcdClient.staking.redelegations(testState.basset.contractInfo.anchor_basset_hub.contractAddress)
+        if (redelegations.length == 0) {
             break
         }
         counter++
@@ -99,7 +126,8 @@ async function main() {
     validators = await querier.get_validators_for_delegation()
     await mustPass(redistribute(
         testState.lcdClient,
-        testState.wallets.a,
+        testState.multisigPublikKey,
+        testState.multisigKeys,
         testState.basset.contractInfo.anchor_basset_hub.contractAddress,
         validators.map((v) => {
             return {

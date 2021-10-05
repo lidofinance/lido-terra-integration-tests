@@ -149,7 +149,7 @@ export class TestStateLocalTestNet {
             new MnemonicKey({mnemonic: 'shrug resist find inch narrow tumble knee fringe wide mandate angry sense grab rack fork snack family until bread lake bridge heavy goat want'})
         ]
         this.multisigPublikKey = new LegacyAminoMultisigPublicKey(2,
-            this.multisigKeys.map((mk) => {return new SimplePublicKey(mk.publicKey?.toString('base64') as string)})
+            this.multisigKeys.map((mk) => {return mk.publicKey as SimplePublicKey})
         );
     }
 

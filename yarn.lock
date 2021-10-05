@@ -113,8 +113,10 @@
   resolved "https://registry.yarnpkg.com/@protobufjs/utf8/-/utf8-1.1.0.tgz#a777360b5b39a1a2e5106f8e858f2fd2d060c570"
   integrity sha1-p3c2C1s5oaLlEG+OhY8v0tBgxXA=
 
-"@terra-money/terra.js@file:../terra.js/":
+"@terra-money/terra.js@^2.1.8":
   version "2.1.8"
+  resolved "https://registry.yarnpkg.com/@terra-money/terra.js/-/terra.js-2.1.8.tgz#beb9426f9906530735e6b490d6e3f8c1090e0959"
+  integrity sha512-ZzZv8jnM4dSaMgu2oi0w1XH9K9mx2zyRfnNZWUYX29y/4/kXo2mGpFzy6HpMTJ0f94oY2aGKbWLetfWRcYt2bw==
   dependencies:
     "@terra-money/terra.proto" "^0.1.7"
     axios "^0.21.1"

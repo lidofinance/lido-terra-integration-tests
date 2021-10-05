@@ -98,7 +98,7 @@ export const redelegate_proxy_multisig = async (
             accInfo.getSequenceNumber()
         ),
     ]);
-    
+
     const multisigRedelegationTxResult = await lcd.tx.broadcast(tx)
     if (isTxError(multisigRedelegationTxResult)) {
         throw new Error(`Couldn't run: ${multisigRedelegationTxResult.raw_log}`);

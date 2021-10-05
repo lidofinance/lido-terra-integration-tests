@@ -1,4 +1,4 @@
-import {LocalTerra, MnemonicKey,  StdFee, Validator, Wallet} from "@terra-money/terra.js";
+import {LocalTerra, MnemonicKey, Fee, Validator, Wallet} from "@terra-money/terra.js";
 import Anchor from "../helper/spawn";
 import AnchorbAsset from "../helper/basset_helper";
 import {setTestParams} from "../parameters/contract-tests-parameteres";
@@ -27,17 +27,17 @@ export class TestStateLocalTerra {
             gasStation: this.lcdClient.wallets.test7,
             valAWallet: this.lcdClient.wallets.validator
         }
-        this.gasStation = new MnemonicKey({mnemonic:'noble width taxi input there patrol clown public spell aunt wish punch moment will misery eight excess arena pen turtle minimum grain vague inmate'})
+        this.gasStation = new MnemonicKey({mnemonic: 'noble width taxi input there patrol clown public spell aunt wish punch moment will misery eight excess arena pen turtle minimum grain vague inmate'})
         this.validators_addresses = ["terravaloper1dcegyrekltswvyy0xy69ydgxn9x8x32zdy3ua5"]
         this.anchor = new Anchor(this.wallets.ownerWallet);
     }
 
     async init() {
-        this.validators = await this.lcdClient.staking.validators()
+        [this.validators] = await this.lcdClient.staking.validators()
         await this.anchor.store_contracts_localterra(
             path.resolve(__dirname, "../../anchor-bAsset-contracts/artifacts"),
         );
-        const fixedFeeForInit = new StdFee(6000000, "2000000uusd");
+        const fixedFeeForInit = new Fee(6000000, "2000000uusd");
         await this.anchor.instantiate_localterra(
             fixedFeeForInit,
             setTestParams(

@@ -12,7 +12,7 @@
   "author": "MSNTCS",
   "license": "ISC",
   "dependencies": {
-    "@terra-money/terra.js": "file:../terra.js/",
+    "@terra-money/terra.js": "^2.1.8",
     "axios": "^0.21.1",
     "date-fns": "^2.16.1",
     "express": "^4.17.1",

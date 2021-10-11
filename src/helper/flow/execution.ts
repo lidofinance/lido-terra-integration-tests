@@ -72,7 +72,6 @@ export async function send_transaction(
     .then(() =>
       sender.createAndSignTx({
         msgs,
-        gasAdjustment: 1.4,
         fee: fee,
       })
     )

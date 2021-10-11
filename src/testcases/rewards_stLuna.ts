@@ -69,9 +69,9 @@ async function main() {
     let lunaBalanceBeforeWithdraw = await getLunaBalance(testState, testState.wallets.a.key.accAddress);
     await mustPass(testState.basset.finish(testState.wallets.a));
     let lunaBalanceAfterWithdraw = await getLunaBalance(testState, testState.wallets.a.key.accAddress);
-    if (!approxeq(Number(BigInt(lunaBalanceAfterWithdraw) - BigInt(lunaBalanceBeforeWithdraw)), withdrawableUnbonded, 2)) {
+    if (!approxeq(Number(BigInt(+lunaBalanceAfterWithdraw) - BigInt(+lunaBalanceBeforeWithdraw)), withdrawableUnbonded, 2)) {
         throw new Error(`withdraw amount is not equal to withdrawableUnboned: 
-                                    ${BigInt(lunaBalanceAfterWithdraw) - BigInt(lunaBalanceBeforeWithdraw)} != ${withdrawableUnbonded}`)
+                                    ${BigInt(+lunaBalanceAfterWithdraw) - BigInt(+lunaBalanceBeforeWithdraw)} != ${withdrawableUnbonded}`)
     }
 
     await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 5));
@@ -112,9 +112,9 @@ async function main() {
     await mustPass(testState.basset.finish(testState.wallets.b));
 
     lunaBalanceAfterWithdraw = await getLunaBalance(testState, testState.wallets.b.key.accAddress);
-    if (!approxeq(Number(BigInt(lunaBalanceAfterWithdraw) - BigInt(lunaBalanceBeforeWithdraw)), withdrawableUnbonded, 2)) {
+    if (!approxeq(Number(BigInt(+lunaBalanceAfterWithdraw) - BigInt(+lunaBalanceBeforeWithdraw)), withdrawableUnbonded, 2)) {
         throw new Error(`withdraw amount is not equal to withdrawableUnboned: 
-                                    ${BigInt(lunaBalanceAfterWithdraw) - BigInt(lunaBalanceBeforeWithdraw)} != ${withdrawableUnbonded}`)
+                                    ${BigInt(+lunaBalanceAfterWithdraw) - BigInt(+lunaBalanceBeforeWithdraw)} != ${withdrawableUnbonded}`)
     }
 }
 

@@ -1,3 +1,4 @@
+import {Coins} from "@terra-money/terra.js";
 import AnchorbAssetQueryHelper from "../helper/basset_queryhelper";
 import {emptyBlockWithFixedGas} from "../helper/flow/gas-station";
 import {mustFail, mustPass} from "../helper/flow/must";
@@ -47,9 +48,9 @@ async function main() {
     // insufficient balance
     await mustFail(testState.basset.convert_stluna_to_bluna(testState.wallets.a, 1_000_000_000_000))
     await mustFail(testState.basset.convert_bluna_to_stluna(testState.wallets.a, 1_000_000_000_000))
-
     // claiming reward after conversion
-    const initial_uusd_balance = Number((await testState.wallets.c.lcd.bank.balance(testState.wallets.c.key.accAddress)).get("uusd").amount)
+    let [coins1] = await testState.wallets.c.lcd.bank.balance(testState.wallets.c.key.accAddress)
+    const initial_uusd_balance = Number(coins1.get("uusd").amount)
     // tx - 1
     await mustPass(testState.basset.bond(testState.wallets.c, 100_000_000_000))
     await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 5))
@@ -63,7 +64,8 @@ async function main() {
 
     // tx - 4 - claiming
     await mustPass(testState.basset.reward2(testState.wallets.c, testState.wallets.c.key.accAddress))
-    const uusd_balance = Number((await testState.wallets.c.lcd.bank.balance(testState.wallets.c.key.accAddress)).get("uusd").amount)
+    let [coins2] = await testState.wallets.c.lcd.bank.balance(testState.wallets.c.key.accAddress)
+    const uusd_balance = Number(coins2.get("uusd").amount)
 
     const tax_rate = await testState.lcdClient.treasury.taxRate()
     const tax_cap = await testState.lcdClient.treasury.taxCap("uusd")

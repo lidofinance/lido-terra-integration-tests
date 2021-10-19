@@ -1,5 +1,5 @@
 import {AutomaticTxRequest, AutomaticTxResponse, Testkit, TestkitInit} from "../testkit/testkit";
-import {Coin, Coins, Dec, Int, LCDClient, MnemonicKey, MsgSend, StdFee, Validator, Wallet} from "@terra-money/terra.js";
+import {Coin, Coins, Dec, Int, LCDClient, MnemonicKey, MsgSend, Fee, Validator, Wallet} from "@terra-money/terra.js";
 import Anchor from "../helper/spawn";
 import AnchorbAsset from "../helper/basset_helper";
 import MoneyMarket from "../helper/money_market_helper";
@@ -113,7 +113,7 @@ export class TestState {
                             new Coins([new Coin("uusd", 1)])
                         ),
                     ],
-                    fee: new StdFee(10000000, "1000000uusd"),
+                    fee: new Fee(10000000, "1000000uusd"),
                 }),
             ],
         });
@@ -176,7 +176,7 @@ export class TestState {
             path.resolve(__dirname, "../../anchor-token-contracts/artifacts")
         );
 
-        const fixedFeeForInit = new StdFee(6000000, "2000000uusd");
+        const fixedFeeForInit = new Fee(6000000, "2000000uusd");
         await this.anchor.instantiate(
             fixedFeeForInit,
             setTestParams(

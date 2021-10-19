@@ -10,7 +10,7 @@ import {
   MsgExecuteContract,
   MsgInstantiateContract,
   MsgStoreCode,
-  StdFee,
+  Fee,
   Wallet,
 } from "@terra-money/terra.js";
 import * as fs from "fs";
@@ -53,7 +53,7 @@ export default class AnchorToken {
   public async storeCodes(
     sender: Wallet,
     location: string,
-    fee?: StdFee
+    fee?: Fee
   ): Promise<void> {
     return contracts.reduce(
       (t, c) =>
@@ -91,7 +91,7 @@ export default class AnchorToken {
       proposal_deposit?: string;
       snapshot_period?: string;
     },
-    fee?: StdFee
+    fee?: Fee
   ): Promise<void> {
     let contract = this.contractInfo["gov"].codeId;
     let token = this.contractInfo["token"].contractAddress;
@@ -137,7 +137,7 @@ export default class AnchorToken {
       staking_token?: string;
       distribution_schedule?: [number, number, string][];
     },
-    fee?: StdFee
+    fee?: Fee
   ): Promise<void> {
     let contract = this.contractInfo["staking"].codeId;
     let token = this.contractInfo["token"].contractAddress;
@@ -179,7 +179,7 @@ export default class AnchorToken {
       anchor_token?: string;
       spend_limit?: string;
     },
-    fee?: StdFee
+    fee?: Fee
   ): Promise<void> {
     let contract = this.contractInfo["community"].codeId;
     let gov = this.contractInfo["gov"].contractAddress;
@@ -222,7 +222,7 @@ export default class AnchorToken {
       faucet_contract?: string;
       reward_factor?: string;
     },
-    fee?: StdFee
+    fee?: Fee
   ): Promise<void> {
     let contract = this.contractInfo["collector"].codeId;
     let gov = this.contractInfo["gov"].contractAddress;
@@ -267,7 +267,7 @@ export default class AnchorToken {
       whitelist?: string[];
       spend_limit?: string;
     },
-    fee?: StdFee
+    fee?: Fee
   ): Promise<void> {
     let contract = this.contractInfo["faucet"].codeId;
     let gov = this.contractInfo["gov"].contractAddress;
@@ -308,7 +308,7 @@ export default class AnchorToken {
       owner?: string;
       anchor_token?: string;
     },
-    fee?: StdFee
+    fee?: Fee
   ): Promise<void> {
     let contract = this.contractInfo["airdrop"].codeId;
     const init = await instantiate(
@@ -349,7 +349,7 @@ export default class AnchorToken {
       initial_balances?: object;
       mint?: Mint;
     },
-    fee?: StdFee
+    fee?: Fee
   ): Promise<void> {
     const init = await instantiate(
       sender,

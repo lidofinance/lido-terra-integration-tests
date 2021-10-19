@@ -8,7 +8,7 @@ import {
   MsgExecuteContract,
   MsgInstantiateContract,
   MsgStoreCode,
-  StdFee,
+  Fee,
   Wallet,
 } from "@terra-money/terra.js";
 import * as fs from "fs";
@@ -44,7 +44,7 @@ export default class MoneyMarket {
   public async storeCodes(
     sender: Wallet,
     location: string,
-    fee?: StdFee
+    fee?: Fee
   ): Promise<void> {
     return contracts.reduce(
       (t, c) =>
@@ -77,7 +77,7 @@ export default class MoneyMarket {
       base_rate?: string;
       interest_multiplier?: string;
     },
-    fee?: StdFee
+    fee?: Fee
   ): Promise<void> {
     const mmInterest = await instantiate(
       sender,
@@ -111,7 +111,7 @@ export default class MoneyMarket {
       owner?: string;
       base_asset?: string;
     },
-    fee?: StdFee
+    fee?: Fee
   ): Promise<void> {
     const mmOracle = await instantiate(
       sender,
@@ -147,7 +147,7 @@ export default class MoneyMarket {
       stable_denom?: string;
       max_premium_rate?: string;
     },
-    fee?: StdFee
+    fee?: Fee
   ): Promise<void> {
     const mmLiquidation = await instantiate(
       sender,
@@ -192,7 +192,7 @@ export default class MoneyMarket {
       anc_emission_rate?: string;
       max_borrow_factor?: string;
     },
-    fee?: StdFee
+    fee?: Fee
   ): Promise<void> {
     const mmMarket = await instantiate(
       sender,
@@ -238,7 +238,7 @@ export default class MoneyMarket {
       bufferDistributionRate?: number;
       price_timeframe?: number;
     },
-    fee?: StdFee
+    fee?: Fee
   ): Promise<void> {
     const oracleAddr = this.contractInfo["moneymarket_oracle"].contractAddress;
     const marketAddr = this.contractInfo["moneymarket_market"].contractAddress;
@@ -288,7 +288,7 @@ export default class MoneyMarket {
       stable_denom?: string;
       basset_info: BAssetInfo;
     },
-    fee?: StdFee
+    fee?: Fee
   ): Promise<void> {
     const oracleAddr = this.contractInfo["moneymarket_oracle"].contractAddress;
     const marketAddr = this.contractInfo["moneymarket_market"].contractAddress;
@@ -334,7 +334,7 @@ export default class MoneyMarket {
       increment_multiplier?: string;
       decrement_multiplier?: string;
     },
-    fee?: StdFee
+    fee?: Fee
   ): Promise<void> {
     const mmDestribution = await instantiate(
       sender,
@@ -721,7 +721,7 @@ export default class MoneyMarket {
     sender: Wallet,
     collateralToken: string,
     ltv: string,
-    fee?: StdFee
+    fee?: Fee
   ): Promise<void> {
     const contract = this.contractInfo["moneymarket_overseer"].contractAddress;
     const unlockCollaterallExecution = await execute(

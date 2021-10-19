@@ -1,4 +1,4 @@
-import {LCDClient, LocalTerra, MnemonicKey, MsgSend, StdFee, Validator, Wallet} from "@terra-money/terra.js";
+import {LCDClient, LocalTerra, MnemonicKey, MsgSend, Fee, Validator, Wallet, LegacyAminoMultisigPublicKey, SimplePublicKey} from "@terra-money/terra.js";
 import Anchor from "../helper/spawn";
 import AnchorbAsset from "../helper/basset_helper";
 import {setTestParams} from "../parameters/contract-tests-parameteres";
@@ -6,6 +6,7 @@ import * as path from "path";
 import AnchorbAssetQueryHelper from "../helper/basset_queryhelper";
 import {UnbondRequestsResponse} from "../helper/types/anchor_basset_hub/unbond_requests_response";
 import {send_transaction} from "../helper/flow/execution";
+import {Pagination} from "@terra-money/terra.js/dist/client/lcd/APIRequester";
 const {exec} = require('child_process');
 
 export const ValidatorsKeys = [
@@ -83,14 +84,23 @@ claw meat hockey day clay cave blossom toy calm rotate home huge tomato faint la
 - name: acc5
   address: terra1jtm9ga0zvgptd2jnv9fysuh82z4ajw2az3xr39
 whale aisle lemon entire uphold retreat couch avocado fork thank flee card blossom hockey universe rich slam spare amused slight pet bright bridge junk
+
+
+- multisig accs
+    'notice oak worry limit wrap speak medal online prefer cluster roof addict wrist behave treat actual wasp year salad speed social layer crew genius',
+    'arrest word woman erupt kiss tank neck achieve diagram gadget siren rare valve replace outside angry dance possible purchase extra yellow cruise pride august',
+    'shrug resist find inch narrow tumble knee fringe wide mandate angry sense grab rack fork snack family until bread lake bridge heavy goat want',
+
+
 */
+
 
 const {
     DOCKER_NETWORK = "testkit_localnet"
 } = process.env
 
 
-function sleep(ms) {
+export function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
@@ -105,6 +115,8 @@ export class TestStateLocalTestNet {
     gasStation: MnemonicKey
     lcdClient: LCDClient
     wallets: Record<string, Wallet>
+    multisigKeys: Array<MnemonicKey>
+    multisigPublikKey: LegacyAminoMultisigPublicKey
     basset: AnchorbAsset
     validators_addresses: Array<string>
     constructor() {
@@ -130,14 +142,24 @@ export class TestStateLocalTestNet {
         this.gasStation = new MnemonicKey({mnemonic: accKeys[5]})
         this.validators_addresses = [vals[0].address]
         this.anchor = new Anchor(this.wallets.ownerWallet);
+
+        this.multisigKeys = [
+            new MnemonicKey({mnemonic: 'notice oak worry limit wrap speak medal online prefer cluster roof addict wrist behave treat actual wasp year salad speed social layer crew genius'}),
+            new MnemonicKey({mnemonic: 'arrest word woman erupt kiss tank neck achieve diagram gadget siren rare valve replace outside angry dance possible purchase extra yellow cruise pride august'}),
+            new MnemonicKey({mnemonic: 'shrug resist find inch narrow tumble knee fringe wide mandate angry sense grab rack fork snack family until bread lake bridge heavy goat want'})
+        ]
+        this.multisigPublikKey = new LegacyAminoMultisigPublicKey(2,
+            this.multisigKeys.map((mk) => {return mk.publicKey as SimplePublicKey})
+        );
     }
 
     async init() {
-        this.validators = await this.lcdClient.staking.validators()
+        let pagination: Pagination;
+        [this.validators, pagination] = await this.lcdClient.staking.validators()
         await this.anchor.store_contracts_localterra(
             path.resolve(__dirname, "../../anchor-bAsset-contracts/artifacts"),
         );
-        const fixedFeeForInit = new StdFee(6000000, "2000000uusd");
+        const fixedFeeForInit = new Fee(6000000, "2000000uusd");
         await this.anchor.instantiate_localterra(
             fixedFeeForInit,
             setTestParams(

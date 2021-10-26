@@ -41,7 +41,7 @@ async function main() {
 
     // unbonding + withdrawal
     const unbond_amount = 1_000_000_000;
-    const initial_uluna_balance = Number((await testState.wallets.a.lcd.bank.balance(testState.wallets.a.key.accAddress)).get("uluna").amount)
+    const initial_uluna_balance = Number((await testState.wallets.a.lcd.bank.balance(testState.wallets.a.key.accAddress))[0].get("uluna").amount)
     await mustPass(testState.basset.send_cw20_token(
         blunaContractAddress,
         testState.wallets.a,
@@ -57,7 +57,7 @@ async function main() {
     console.log(await testState.wallets.a.lcd.bank.balance(testState.basset.contractInfo["anchor_basset_hub"].contractAddress))
     console.log(await querier.get_withdraweble_unbonded(testState.wallets.a.key.accAddress))
     await mustPass(testState.basset.finish(testState.wallets.a))
-    const uluna_balance = Number((await testState.wallets.a.lcd.bank.balance(testState.wallets.a.key.accAddress)).get("uluna").amount)
+    const uluna_balance = Number((await testState.wallets.a.lcd.bank.balance(testState.wallets.a.key.accAddress))[0].get("uluna").amount)
     let withdrawal_rate = Number((await querier.all_history()).history[0].bluna_withdraw_rate)
     assert.equal(uluna_balance, initial_uluna_balance + unbond_amount * withdrawal_rate)
 
@@ -91,7 +91,7 @@ async function main() {
 
     // SendFrom
     await mustPass(testState.basset.increase_allowance(blunaContractAddress, testState.wallets.a, testState.wallets.b.key.accAddress, 2 * unbond_amount, {never: {}}))
-    let initial_uluna_balance_b = Number((await testState.wallets.b.lcd.bank.balance(testState.wallets.b.key.accAddress)).get("uluna").amount)
+    let initial_uluna_balance_b = Number((await testState.wallets.b.lcd.bank.balance(testState.wallets.b.key.accAddress))[0].get("uluna").amount)
     await mustPass(testState.basset.send_from_cw20_token(blunaContractAddress, testState.wallets.b, testState.wallets.a,
         unbond_amount,
         {unbond: {}},
@@ -99,7 +99,7 @@ async function main() {
     assert.equal(await querier.balance_bluna(testState.wallets.a.key.accAddress), 6_000_000_000)
     await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 50))
     await mustPass(testState.basset.finish(testState.wallets.b))
-    let uluna_balance_b = Number((await testState.wallets.b.lcd.bank.balance(testState.wallets.b.key.accAddress)).get("uluna").amount)
+    let uluna_balance_b = Number((await testState.wallets.b.lcd.bank.balance(testState.wallets.b.key.accAddress))[0].get("uluna").amount)
     let withdrawal_history = (await querier.all_history()).history
     withdrawal_rate = Number(withdrawal_history[withdrawal_history.length - 1].bluna_withdraw_rate)
     assert.equal(uluna_balance_b, initial_uluna_balance_b + unbond_amount * withdrawal_rate)

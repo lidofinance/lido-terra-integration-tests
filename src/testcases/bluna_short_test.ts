@@ -34,13 +34,14 @@ async function main() {
     assert.equal(await querier.balance_bluna(testState.wallets.a.key.accAddress), 8_999_000_000)
     assert.equal(await querier.balance_bluna(testState.wallets.b.key.accAddress), 1_000_000_000)
 
-
     await mustPass(testState.basset.burn_cw20_token(blunaContractAddress, testState.wallets.b, 100_000_000))
     assert.equal(await querier.balance_bluna(testState.wallets.b.key.accAddress), 900_000_000)
 
 
     // unbonding + withdrawal
     const unbond_amount = 1_000_000_000;
+    // idx 0 - coins
+    // idx 1 - pages, just ignore them
     const initial_uluna_balance = Number((await testState.wallets.a.lcd.bank.balance(testState.wallets.a.key.accAddress))[0].get("uluna").amount)
     await mustPass(testState.basset.send_cw20_token(
         blunaContractAddress,
@@ -51,11 +52,6 @@ async function main() {
     ))
     assert.equal(await querier.balance_bluna(testState.wallets.a.key.accAddress), 7_999_000_000)
     await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 50))
-    console.log(await querier.all_history())
-    console.log(await querier.token_info_bluna())
-    console.log(await querier.balance_bluna(testState.wallets.a.key.accAddress))
-    console.log(await testState.wallets.a.lcd.bank.balance(testState.basset.contractInfo["anchor_basset_hub"].contractAddress))
-    console.log(await querier.get_withdraweble_unbonded(testState.wallets.a.key.accAddress))
     await mustPass(testState.basset.finish(testState.wallets.a))
     const uluna_balance = Number((await testState.wallets.a.lcd.bank.balance(testState.wallets.a.key.accAddress))[0].get("uluna").amount)
     let withdrawal_rate = Number((await querier.all_history()).history[0].bluna_withdraw_rate)

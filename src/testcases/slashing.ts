@@ -84,7 +84,7 @@ async function main() {
     assert.ok(bluna_ex_rate_after_second_bond < 1)
     assert.ok(stluna_ex_rate_after_second_bond < 1)
     assert.ok(bluna_ex_rate_after_second_bond > bluna_ex_rate_before_second_bond)
-    assert.ok(stluna_ex_rate_after_second_bond == stluna_ex_rate_before_second_bond)
+    assert.ok(floateq(stluna_ex_rate_after_second_bond,stluna_ex_rate_before_second_bond,1e-5))
 
     // blocks 108 - 181
     let prev_exchange_rate = 0.5;

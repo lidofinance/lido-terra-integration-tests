@@ -5,7 +5,7 @@ import {makeRestStoreQuery} from "../helper/basset_queryhelper";
 
 async function getLunaBalance(testState: TestStateLocalTerra, address) {
     let balance = await testState.lcdClient.bank.balance(address);
-    return balance.get("uluna").amount
+    return balance[0].get("uluna").amount
 }
 
 async function main() {

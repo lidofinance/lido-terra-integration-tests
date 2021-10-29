@@ -17,7 +17,7 @@ async function main() {
 
     const blunaContractAddress = testState.basset.contractInfo.anchor_basset_token.contractAddress
     const stlunaContractAddress = testState.basset.contractInfo.anchor_basset_token_stluna.contractAddress
-    const initial_uluna_balance_b = Number((await testState.wallets.b.lcd.bank.balance(testState.wallets.b.key.accAddress)).get("uluna").amount)
+    const initial_uluna_balance_b = Number((await testState.wallets.b.lcd.bank.balance(testState.wallets.b.key.accAddress))[0].get("uluna").amount)
 
     // blocks 69 - 70
     await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 2))
@@ -114,7 +114,7 @@ async function main() {
 
     // blocks 308 - 382
     const initial_bluna_balance_a = await querier.balance_bluna(testState.wallets.a.key.accAddress)
-    const initial_uluna_balance_a = Number((await testState.wallets.a.lcd.bank.balance(testState.wallets.a.key.accAddress)).get("uluna").amount)
+    const initial_uluna_balance_a = Number((await testState.wallets.a.lcd.bank.balance(testState.wallets.a.key.accAddress))[0].get("uluna").amount)
     for (let i = 0; i < 75; i++) {
         await testState.basset.send_cw20_token(
             blunaContractAddress,
@@ -160,8 +160,8 @@ async function main() {
     await mustPass(testState.basset.update_global_index(testState.wallets.a))
     await mustPass(testState.basset.update_global_index(testState.wallets.b))
 
-    const uluna_balance_a = Number((await testState.wallets.a.lcd.bank.balance(testState.wallets.a.key.accAddress)).get("uluna").amount)
-    const uluna_balance_b = Number((await testState.wallets.b.lcd.bank.balance(testState.wallets.b.key.accAddress)).get("uluna").amount)
+    const uluna_balance_a = Number((await testState.wallets.a.lcd.bank.balance(testState.wallets.a.key.accAddress))[0].get("uluna").amount)
+    const uluna_balance_b = Number((await testState.wallets.b.lcd.bank.balance(testState.wallets.b.key.accAddress))[0].get("uluna").amount)
     const actual_withdrawal_sum_a = (Number(uluna_balance_a) - initial_uluna_balance_a)
     const actual_withdrawal_sum_b = (Number(uluna_balance_b) - initial_uluna_balance_b) + 160_000_001
     const expected_withdrawal_sum_a = await get_expected_sum_from_requests(querier, unbond_requests_a, "bluna")

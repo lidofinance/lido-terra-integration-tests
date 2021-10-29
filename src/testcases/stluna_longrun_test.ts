@@ -19,11 +19,11 @@ async function main() {
     await mustPass(testState.basset.add_validator(testState.wallets.ownerWallet, vals[1].address))
     await mustPass(testState.basset.bond(testState.wallets.d, 1_000_000))
 
-    const initial_uluna_balance_a = Number((await testState.wallets.a.lcd.bank.balance(testState.wallets.a.key.accAddress)).get("uluna").amount)
-    const initial_uluna_balance_b = Number((await testState.wallets.b.lcd.bank.balance(testState.wallets.b.key.accAddress)).get("uluna").amount)
-    const initial_uluna_balance_c = Number((await testState.wallets.c.lcd.bank.balance(testState.wallets.c.key.accAddress)).get("uluna").amount)
+    const initial_uluna_balance_a = Number((await testState.wallets.a.lcd.bank.balance(testState.wallets.a.key.accAddress))[0].get("uluna").amount)
+    const initial_uluna_balance_b = Number((await testState.wallets.b.lcd.bank.balance(testState.wallets.b.key.accAddress))[0].get("uluna").amount)
+    const initial_uluna_balance_c = Number((await testState.wallets.c.lcd.bank.balance(testState.wallets.c.key.accAddress))[0].get("uluna").amount)
 
-    const initial_uluna_balance_lido_fee = Number((await testState.wallets.lido_fee.lcd.bank.balance(testState.wallets.lido_fee.key.accAddress)).get("uluna").amount)
+    const initial_uluna_balance_lido_fee = Number((await testState.wallets.lido_fee.lcd.bank.balance(testState.wallets.lido_fee.key.accAddress))[0].get("uluna").amount)
 
 
     //block 67
@@ -178,10 +178,10 @@ async function main() {
     await mustPass(testState.basset.finish(testState.wallets.c))
 
 
-    const uluna_balance_a = Number((await testState.wallets.a.lcd.bank.balance(testState.wallets.a.key.accAddress)).get("uluna").amount)
-    const uluna_balance_b = Number((await testState.wallets.b.lcd.bank.balance(testState.wallets.b.key.accAddress)).get("uluna").amount)
-    const uluna_balance_c = Number((await testState.wallets.c.lcd.bank.balance(testState.wallets.c.key.accAddress)).get("uluna").amount)
-    const uluna_balance_lido_fee = Number((await testState.wallets.lido_fee.lcd.bank.balance(testState.wallets.lido_fee.key.accAddress)).get("uluna").amount)
+    const uluna_balance_a = Number((await testState.wallets.a.lcd.bank.balance(testState.wallets.a.key.accAddress))[0].get("uluna").amount)
+    const uluna_balance_b = Number((await testState.wallets.b.lcd.bank.balance(testState.wallets.b.key.accAddress))[0].get("uluna").amount)
+    const uluna_balance_c = Number((await testState.wallets.c.lcd.bank.balance(testState.wallets.c.key.accAddress))[0].get("uluna").amount)
+    const uluna_balance_lido_fee = Number((await testState.wallets.lido_fee.lcd.bank.balance(testState.wallets.lido_fee.key.accAddress))[0].get("uluna").amount)
 
     const actual_profit_sum_a = (Number(uluna_balance_a) - initial_uluna_balance_a)
     const actual_profit_sum_b = (Number(uluna_balance_b) - initial_uluna_balance_b)

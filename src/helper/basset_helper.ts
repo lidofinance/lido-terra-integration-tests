@@ -921,6 +921,68 @@ export default class AnchorbAsset {
             throw new Error(`Couldn't run: ${msg.raw_log}`);
         }
     }
+
+    public async add_guardians(sender: Wallet, guardians: Array<string>): Promise<void> {
+        const contract = this.contractInfo.lido_terra_hub.contractAddress;
+        const addGuardians = await execute(sender, contract, {
+            add_guardians: {addresses: guardians},
+        });
+        if (isTxError(addGuardians)) {
+            throw new Error(`Couldn't run: ${addGuardians.raw_log}`);
+        }
+    }
+
+    public async remove_guardians(sender: Wallet, guardians: Array<string>): Promise<void> {
+        const contract = this.contractInfo.lido_terra_hub.contractAddress;
+        const removeGuardians = await execute(sender, contract, {
+            remove_guardians: {addresses: guardians},
+        });
+        if (isTxError(removeGuardians)) {
+            throw new Error(`Couldn't run: ${removeGuardians.raw_log}`);
+        }
+    }
+
+    public async pauseContracts(sender: Wallet): Promise<void> {
+        const contract = this.contractInfo.lido_terra_hub.contractAddress;
+        const pauseContracts = await execute(sender, contract, {
+            pause_contracts: {},
+        });
+        if (isTxError(pauseContracts)) {
+            throw new Error(`Couldn't run: ${pauseContracts.raw_log}`);
+        }
+    }
+
+    public async unpauseContracts(sender: Wallet): Promise<void> {
+        const contract = this.contractInfo.lido_terra_hub.contractAddress;
+        const unpauseContracts = await execute(sender, contract, {
+            unpause_contracts: {},
+        });
+        if (isTxError(unpauseContracts)) {
+            throw new Error(`Couldn't run: ${unpauseContracts.raw_log}`);
+        }
+    }
+
+    public async fabricate_mir_claim(
+        sender: Wallet,
+        stage: number,
+        amount: string,
+        proof: Array<string>
+    ): Promise<void> {
+        const execution = await execute(
+            sender,
+            this.contractInfo.lido_terra_airdrop_registry.contractAddress,
+            {
+                fabricate_mir_claim: {
+                    stage: stage,
+                    amount: amount,
+                    proof: proof
+                },
+            }
+        );
+        if (isTxError(execution)) {
+            throw new Error(`Couldn't run: ${execution.raw_log}`);
+        }
+    }
 }
 
 async function execute_bank(

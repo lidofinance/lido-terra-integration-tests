@@ -43,11 +43,11 @@ async function main() {
     await mustPass(testState.basset.update_global_index(testState.wallets.a))
 
     await mustPass(testState.basset.send_cw20_token(
-        testState.basset.contractInfo["anchor_basset_token_stluna"].contractAddress,
+        testState.basset.contractInfo["lido_terra_token_stluna"].contractAddress,
         testState.wallets.a,
         bondAmount,
         {unbond: {}},
-        testState.basset.contractInfo["anchor_basset_hub"].contractAddress
+        testState.basset.contractInfo["lido_terra_hub"].contractAddress
     ));
 
     const stLunaBalance = await querier.balance_stluna(testState.wallets.a.key.accAddress);
@@ -58,7 +58,7 @@ async function main() {
     await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 10));
 
     let withdrawableUnbonded = await makeRestStoreQuery(
-        testState.basset.contractInfo["anchor_basset_hub"].contractAddress,
+        testState.basset.contractInfo["lido_terra_hub"].contractAddress,
         { withdrawable_unbonded: { address: testState.wallets.a.key.accAddress} },
         testState.lcdClient.config.URL
     ).then((r) => r.withdrawable);
@@ -83,11 +83,11 @@ async function main() {
     await mustPass(testState.basset.update_global_index(testState.wallets.a))
 
     await mustPass(testState.basset.send_cw20_token(
-        testState.basset.contractInfo["anchor_basset_token_stluna"].contractAddress,
+        testState.basset.contractInfo["lido_terra_token_stluna"].contractAddress,
         testState.wallets.b,
         balanceB,
         {unbond: {}},
-        testState.basset.contractInfo["anchor_basset_hub"].contractAddress
+        testState.basset.contractInfo["lido_terra_hub"].contractAddress
     ));
 
     const stLunaBalanceB = await querier.balance_stluna( testState.wallets.b.key.accAddress);
@@ -98,7 +98,7 @@ async function main() {
     await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 10));
 
     withdrawableUnbonded = await makeRestStoreQuery(
-        testState.basset.contractInfo["anchor_basset_hub"].contractAddress,
+        testState.basset.contractInfo["lido_terra_hub"].contractAddress,
         { withdrawable_unbonded: { address: testState.wallets.b.key.accAddress} },
         testState.lcdClient.config.URL
     ).then((r) => r.withdrawable);

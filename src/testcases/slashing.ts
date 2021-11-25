@@ -15,8 +15,8 @@ async function main() {
     )
 
 
-    const blunaContractAddress = testState.basset.contractInfo.anchor_basset_token.contractAddress
-    const stlunaContractAddress = testState.basset.contractInfo.anchor_basset_token_stluna.contractAddress
+    const blunaContractAddress = testState.basset.contractInfo.lido_terra_token.contractAddress
+    const stlunaContractAddress = testState.basset.contractInfo.lido_terra_token_stluna.contractAddress
     const initial_uluna_balance_b = Number((await testState.wallets.b.lcd.bank.balance(testState.wallets.b.key.accAddress))[0].get("uluna").amount)
 
     // blocks 69 - 70
@@ -121,7 +121,7 @@ async function main() {
             testState.wallets.a,
             2_000_000,
             {unbond: {}},
-            testState.basset.contractInfo["anchor_basset_hub"].contractAddress
+            testState.basset.contractInfo["lido_terra_hub"].contractAddress
         )
     }
     assert.equal(initial_bluna_balance_a - 150_000_000, await querier.balance_bluna(testState.wallets.a.key.accAddress))
@@ -133,7 +133,7 @@ async function main() {
             testState.wallets.b,
             2_000_000,
             {unbond: {}},
-            testState.basset.contractInfo["anchor_basset_hub"].contractAddress
+            testState.basset.contractInfo["lido_terra_hub"].contractAddress
         )
     }
 
@@ -143,7 +143,7 @@ async function main() {
         testState.wallets.b,
         await querier.balance_stluna(testState.wallets.b.key.accAddress),
         {unbond: {}},
-        testState.basset.contractInfo["anchor_basset_hub"].contractAddress
+        testState.basset.contractInfo["lido_terra_hub"].contractAddress
     )
 
     const unbond_requests_a = await querier.unbond_requests(testState.wallets.a.key.accAddress)

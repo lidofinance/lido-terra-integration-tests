@@ -94,7 +94,7 @@ export default class Anchor {
     ): Promise<void> {
         await this.bAsset.instantiate_hub(this.owner, params?.basset, fee);
         await this.bAsset.instantiate_validators_registry(this.owner, {
-            hub_contract: this.bAsset.contractInfo.anchor_basset_hub.contractAddress,
+            hub_contract: this.bAsset.contractInfo.lido_terra_hub.contractAddress,
             registry: validators_addresses.map((val) => {
                 return {active: true, total_delegated: "100", address: val}
             })
@@ -103,7 +103,7 @@ export default class Anchor {
         await this.bAsset.instantiate_reward(this.owner, {}, fee);
         await this.bAsset.instantiate_token(this.owner, {}, fee);
         await this.bAsset.instantiate_airdrop(this.owner, {}, fee);
-        await this.bAsset.instantiate_anchor_basset_rewards_dispatcher(this.owner, {
+        await this.bAsset.instantiate_lido_terra_rewards_dispatcher(this.owner, {
             lido_fee_address: params.basset.lido_fee_address,
         }, fee)
 
@@ -118,7 +118,7 @@ export default class Anchor {
 
         await this.bAsset.instantiate_hub(this.owner, params?.basset, fee);
         await this.bAsset.instantiate_validators_registry(this.owner, {
-            hub_contract: this.bAsset.contractInfo.anchor_basset_hub.contractAddress,
+            hub_contract: this.bAsset.contractInfo.lido_terra_hub.contractAddress,
             registry: validators.map((val) => {
                 return {active: true, total_delegated: "100", address: val.validator_address}
             })
@@ -127,7 +127,7 @@ export default class Anchor {
         await this.bAsset.instantiate_reward(this.owner, {}, fee);
         await this.bAsset.instantiate_token(this.owner, {}, fee);
         await this.bAsset.instantiate_airdrop(this.owner, {}, fee);
-        await this.bAsset.instantiate_anchor_basset_rewards_dispatcher(this.owner, {
+        await this.bAsset.instantiate_lido_terra_rewards_dispatcher(this.owner, {
             lido_fee_address: params.basset.lido_fee_address,
         }, fee)
 
@@ -219,9 +219,9 @@ export default class Anchor {
             faucet_contract: this.ANC.contractInfo["faucet"].contractAddress,
         });
 
-        const bassetReward = this.bAsset.contractInfo["anchor_basset_reward"]
+        const bassetReward = this.bAsset.contractInfo["lido_terra_reward"]
             .contractAddress;
-        const bassetToken = this.bAsset.contractInfo["anchor_basset_token"]
+        const bassetToken = this.bAsset.contractInfo["lido_terra_token"]
             .contractAddress;
 
         const gov = this.ANC.contractInfo["gov"].contractAddress;
@@ -253,7 +253,7 @@ export default class Anchor {
 
         await this.moneyMarket.oracle_register_feeder(
             this.owner,
-            this.bAsset.contractInfo["anchor_basset_token"].contractAddress,
+            this.bAsset.contractInfo["lido_terra_token"].contractAddress,
             this.owner.key.accAddress
         );
 
@@ -293,14 +293,14 @@ export default class Anchor {
         // ----------------------------------------------------------
         await this.terraswap.create_pair(
             this.owner,
-            this.bAsset.contractInfo["anchor_basset_token"].contractAddress,
+            this.bAsset.contractInfo["lido_terra_token"].contractAddress,
             "uluna"
         );
 
         await this.bAsset.bond(this.owner, 100000000000);
 
         await this.bAsset.increase_allowance(
-            this.bAsset.contractInfo["anchor_basset_token"].contractAddress,
+            this.bAsset.contractInfo["lido_terra_token"].contractAddress,
             this.owner,
             this.terraswap.contractInfo["terraswap_pair"].contractAddress,
             100000000000,
@@ -309,7 +309,7 @@ export default class Anchor {
 
         await this.terraswap.provide_liquidity(
             this.owner,
-            this.bAsset.contractInfo["anchor_basset_token"].contractAddress,
+            this.bAsset.contractInfo["lido_terra_token"].contractAddress,
             "uluna",
             100000000000,
             100000000000

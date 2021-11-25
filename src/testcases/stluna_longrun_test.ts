@@ -15,7 +15,7 @@ async function main() {
         testState.lcdClient,
         testState.basset,
     )
-    const stlunaContractAddress = testState.basset.contractInfo.anchor_basset_token_stluna.contractAddress
+    const stlunaContractAddress = testState.basset.contractInfo.lido_terra_token_stluna.contractAddress
     await mustPass(testState.basset.add_validator(testState.wallets.ownerWallet, vals[1].address))
     await mustPass(testState.basset.bond(testState.wallets.d, 1_000_000))
 
@@ -112,7 +112,7 @@ async function main() {
                 testState.wallets.a,
                 1_000_000,
                 {unbond: {}},
-                testState.basset.contractInfo["anchor_basset_hub"].contractAddress
+                testState.basset.contractInfo["lido_terra_hub"].contractAddress
             )
         }
     }
@@ -121,7 +121,7 @@ async function main() {
         testState.wallets.a,
         await querier.balance_stluna(testState.wallets.a.key.accAddress),
         {unbond: {}},
-        testState.basset.contractInfo["anchor_basset_hub"].contractAddress
+        testState.basset.contractInfo["lido_terra_hub"].contractAddress
     )
 
 
@@ -132,7 +132,7 @@ async function main() {
                 testState.wallets.b,
                 1_000_000,
                 {unbond: {}},
-                testState.basset.contractInfo["anchor_basset_hub"].contractAddress
+                testState.basset.contractInfo["lido_terra_hub"].contractAddress
             )
         }
     }
@@ -141,7 +141,7 @@ async function main() {
         testState.wallets.b,
         await querier.balance_stluna(testState.wallets.b.key.accAddress),
         {unbond: {}},
-        testState.basset.contractInfo["anchor_basset_hub"].contractAddress
+        testState.basset.contractInfo["lido_terra_hub"].contractAddress
     )
 
 
@@ -152,7 +152,7 @@ async function main() {
                 testState.wallets.c,
                 1_000_000,
                 {unbond: {}},
-                testState.basset.contractInfo["anchor_basset_hub"].contractAddress
+                testState.basset.contractInfo["lido_terra_hub"].contractAddress
             )
         }
     }
@@ -162,7 +162,7 @@ async function main() {
         testState.wallets.c,
         await querier.balance_stluna(testState.wallets.c.key.accAddress),
         {unbond: {}},
-        testState.basset.contractInfo["anchor_basset_hub"].contractAddress
+        testState.basset.contractInfo["lido_terra_hub"].contractAddress
     )
     await mustPass(testState.basset.update_global_index(testState.wallets.c))
 

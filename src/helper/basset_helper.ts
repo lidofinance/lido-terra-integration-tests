@@ -23,13 +23,13 @@ type Mint = {
 };
 
 const contracts = [
-    "anchor_airdrop_registry",
-    "anchor_basset_hub",
-    "anchor_basset_reward",
-    "anchor_basset_token",
-    "anchor_basset_token_stluna",
-    "anchor_basset_rewards_dispatcher",
-    "anchor_basset_validators_registry",
+    "lido_terra_airdrop_registry",
+    "lido_terra_hub",
+    "lido_terra_reward",
+    "lido_terra_token",
+    "lido_terra_token_stluna",
+    "lido_terra_rewards_dispatcher",
+    "lido_terra_validators_registry",
 ];
 
 type Expire = {at_height: number} | {at_time: number} | {never: {}};
@@ -82,10 +82,10 @@ export default class AnchorbAsset {
     ): Promise<void> {
         const init = await instantiate(
             sender,
-            this.contractInfo.anchor_basset_validators_registry.codeId,
+            this.contractInfo.lido_terra_validators_registry.codeId,
             {
                 registry: params.registry || [],
-                hub_contract: params.hub_contract || this.contractInfo.anchor_basset_hub.contractAddress
+                hub_contract: params.hub_contract || this.contractInfo.lido_terra_hub.contractAddress
             },
             undefined
         )
@@ -94,10 +94,10 @@ export default class AnchorbAsset {
         }
         const contractAddress =
             init.logs[0].eventsByType.instantiate_contract.contract_address[0];
-        this.contractInfo.anchor_basset_validators_registry.contractAddress = contractAddress;
+        this.contractInfo.lido_terra_validators_registry.contractAddress = contractAddress;
 
         console.log(
-            `anchor_basset_validators_registry: { codeId: ${this.contractInfo.anchor_basset_validators_registry.codeId}, contractAddress: "${this.contractInfo.anchor_basset_validators_registry.contractAddress}"},`
+            `lido_terra_validators_registry: { codeId: ${this.contractInfo.lido_terra_validators_registry.codeId}, contractAddress: "${this.contractInfo.lido_terra_validators_registry.contractAddress}"},`
         );
     }
 
@@ -115,13 +115,13 @@ export default class AnchorbAsset {
     ): Promise<void> {
         const init = await instantiate(
             sender,
-            this.contractInfo.anchor_basset_token_stluna.codeId,
+            this.contractInfo.lido_terra_token_stluna.codeId,
             {
                 name: params.name || "test_name",
                 symbol: params.symbol || "AAA",
                 decimals: params.decimals || 6,
                 initial_balances: params.initial_balances || [],
-                hub_contract: params.hub_contract || this.contractInfo.anchor_basset_hub.contractAddress,
+                hub_contract: params.hub_contract || this.contractInfo.lido_terra_hub.contractAddress,
                 mint: params.mint
             },
             undefined
@@ -131,14 +131,14 @@ export default class AnchorbAsset {
         }
         const contractAddress =
             init.logs[0].eventsByType.instantiate_contract.contract_address[0];
-        this.contractInfo.anchor_basset_token_stluna.contractAddress = contractAddress;
+        this.contractInfo.lido_terra_token_stluna.contractAddress = contractAddress;
 
         console.log(
-            `anchor_basset_token_stluna: { codeId: ${this.contractInfo.anchor_basset_token_stluna.codeId}, contractAddress: "${this.contractInfo.anchor_basset_token_stluna.contractAddress}"},`
+            `lido_terra_token_stluna: { codeId: ${this.contractInfo.lido_terra_token_stluna.codeId}, contractAddress: "${this.contractInfo.lido_terra_token_stluna.contractAddress}"},`
         );
     }
 
-    public async instantiate_anchor_basset_rewards_dispatcher(
+    public async instantiate_lido_terra_rewards_dispatcher(
         sender: Wallet,
         params: {
             hub_contract?: string,
@@ -149,14 +149,14 @@ export default class AnchorbAsset {
     ): Promise<void> {
         const init = await instantiate(
             sender,
-            this.contractInfo.anchor_basset_rewards_dispatcher.codeId,
+            this.contractInfo.lido_terra_rewards_dispatcher.codeId,
             {
-                hub_contract: params.hub_contract || this.contractInfo.anchor_basset_hub.contractAddress,
-                bluna_reward_contract: params.bluna_reward_contract || this.contractInfo["anchor_basset_reward"].contractAddress,
+                hub_contract: params.hub_contract || this.contractInfo.lido_terra_hub.contractAddress,
+                bluna_reward_contract: params.bluna_reward_contract || this.contractInfo["lido_terra_reward"].contractAddress,
                 stluna_reward_denom: "uluna",
                 bluna_reward_denom: "uusd",
                 //FIX: change to real fee address?
-                lido_fee_address: params.lido_fee_address || this.contractInfo["anchor_basset_token"].contractAddress,
+                lido_fee_address: params.lido_fee_address || this.contractInfo["lido_terra_token"].contractAddress,
                 lido_fee_rate: "0.005",
             },
             undefined
@@ -166,10 +166,10 @@ export default class AnchorbAsset {
         }
         const contractAddress =
             init.logs[0].eventsByType.instantiate_contract.contract_address[0];
-        this.contractInfo.anchor_basset_rewards_dispatcher.contractAddress = contractAddress;
+        this.contractInfo.lido_terra_rewards_dispatcher.contractAddress = contractAddress;
 
         console.log(
-            `anchor_basset_rewards_dispatcher: { codeId: ${this.contractInfo.anchor_basset_rewards_dispatcher.codeId}, contractAddress: "${this.contractInfo.anchor_basset_rewards_dispatcher.contractAddress}"},`
+            `lido_terra_rewards_dispatcher: { codeId: ${this.contractInfo.lido_terra_rewards_dispatcher.codeId}, contractAddress: "${this.contractInfo.lido_terra_rewards_dispatcher.contractAddress}"},`
         );
 
     }
@@ -190,7 +190,7 @@ export default class AnchorbAsset {
         const coins = new Coins([]);
         const init = await instantiate(
             sender,
-            this.contractInfo.anchor_basset_hub.codeId,
+            this.contractInfo.lido_terra_hub.codeId,
             {
                 //FIXME: The epoch period and unbonding period must be changed
                 epoch_period: params?.epoch_period,
@@ -210,10 +210,10 @@ export default class AnchorbAsset {
 
         const contractAddress =
             init.logs[0].eventsByType.instantiate_contract.contract_address[0];
-        this.contractInfo.anchor_basset_hub.contractAddress = contractAddress;
+        this.contractInfo.lido_terra_hub.contractAddress = contractAddress;
 
         console.log(
-            `anchor_basset_hub: { codeId: ${this.contractInfo.anchor_basset_hub.codeId}, contractAddress: "${this.contractInfo.anchor_basset_hub.contractAddress}"},`
+            `lido_terra_hub: { codeId: ${this.contractInfo.lido_terra_hub.codeId}, contractAddress: "${this.contractInfo.lido_terra_hub.contractAddress}"},`
         );
     }
 
@@ -227,11 +227,11 @@ export default class AnchorbAsset {
     ): Promise<void> {
         const init = await instantiate(
             sender,
-            this.contractInfo.anchor_basset_reward.codeId,
+            this.contractInfo.lido_terra_reward.codeId,
             {
                 hub_contract:
                     params.hub_contract ||
-                    `${this.contractInfo["anchor_basset_hub"].contractAddress}`,
+                    `${this.contractInfo["lido_terra_hub"].contractAddress}`,
                 reward_denom: params.reward_denom || "uusd",
             },
             undefined,
@@ -243,10 +243,10 @@ export default class AnchorbAsset {
 
         const contractAddress =
             init.logs[0].eventsByType.instantiate_contract.contract_address[0];
-        this.contractInfo.anchor_basset_reward.contractAddress = contractAddress;
+        this.contractInfo.lido_terra_reward.contractAddress = contractAddress;
 
         console.log(
-            `anchor_basset_reward: { codeId: ${this.contractInfo.anchor_basset_reward.codeId}, contractAddress: "${this.contractInfo.anchor_basset_reward.contractAddress}"},`
+            `lido_terra_reward: { codeId: ${this.contractInfo.lido_terra_reward.codeId}, contractAddress: "${this.contractInfo.lido_terra_reward.contractAddress}"},`
         );
     }
 
@@ -264,7 +264,7 @@ export default class AnchorbAsset {
     ): Promise<void> {
         const init = await instantiate(
             sender,
-            this.contractInfo.anchor_basset_token.codeId,
+            this.contractInfo.lido_terra_token.codeId,
             {
                 name: params.name || "bondedLuna",
                 symbol: params.symbol || "BLUNA",
@@ -272,19 +272,19 @@ export default class AnchorbAsset {
                 initial_balances: params.initial_balances || [
                     // cause new hub doesn't have initial bond
                     // {
-                    //     address: `${this.contractInfo["anchor_basset_hub"].contractAddress}`,
+                    //     address: `${this.contractInfo["lido_terra_hub"].contractAddress}`,
                     //     amount: "1000000",
                     // },
                 ],
                 mint: {
                     minter:
                         params.mint?.minter ||
-                        `${this.contractInfo["anchor_basset_hub"].contractAddress}`,
+                        `${this.contractInfo["lido_terra_hub"].contractAddress}`,
                     cap: params.mint?.cap || null,
                 },
                 hub_contract:
                     params.hub_contract ||
-                    `${this.contractInfo["anchor_basset_hub"].contractAddress}`,
+                    `${this.contractInfo["lido_terra_hub"].contractAddress}`,
             },
             undefined,
             fee
@@ -295,10 +295,10 @@ export default class AnchorbAsset {
 
         const contractAddress =
             init.logs[0].eventsByType.instantiate_contract.contract_address[0];
-        this.contractInfo.anchor_basset_token.contractAddress = contractAddress;
+        this.contractInfo.lido_terra_token.contractAddress = contractAddress;
 
         console.log(
-            `anchor_basset_token: { codeId: ${this.contractInfo.anchor_basset_token.codeId}, contractAddress: "${this.contractInfo.anchor_basset_token.contractAddress}"},`
+            `lido_terra_token: { codeId: ${this.contractInfo.lido_terra_token.codeId}, contractAddress: "${this.contractInfo.lido_terra_token.contractAddress}"},`
         );
     }
 
@@ -312,10 +312,10 @@ export default class AnchorbAsset {
     ) {
         const init = await instantiate(
             sender,
-            this.contractInfo.anchor_airdrop_registry.codeId,
+            this.contractInfo.lido_terra_airdrop_registry.codeId,
             {
-                hub_contract: this.contractInfo.anchor_basset_hub.contractAddress,
-                reward_contract: this.contractInfo.anchor_basset_reward.contractAddress,
+                hub_contract: this.contractInfo.lido_terra_hub.contractAddress,
+                reward_contract: this.contractInfo.lido_terra_reward.contractAddress,
             },
             undefined,
             fee
@@ -327,10 +327,10 @@ export default class AnchorbAsset {
 
         const contractAddress =
             init.logs[0].eventsByType.instantiate_contract.contract_address[0];
-        this.contractInfo.anchor_airdrop_registry.contractAddress = contractAddress;
+        this.contractInfo.lido_terra_airdrop_registry.contractAddress = contractAddress;
 
         console.log(
-            `anchor_airdrop_registery: { codeId: ${this.contractInfo.anchor_airdrop_registry.codeId}, contractAddress: "${this.contractInfo.anchor_airdrop_registry.contractAddress}"},`
+            `lido_terra_airdrop_registery: { codeId: ${this.contractInfo.lido_terra_airdrop_registry.codeId}, contractAddress: "${this.contractInfo.lido_terra_airdrop_registry.contractAddress}"},`
         );
     }
 
@@ -348,19 +348,19 @@ export default class AnchorbAsset {
     ) {
         const msg = await execute(
             sender,
-            this.contractInfo["anchor_basset_hub"].contractAddress,
+            this.contractInfo["lido_terra_hub"].contractAddress,
             {
                 update_config: {
                     owner: undefined,
-                    rewards_dispatcher_contract: params.rewards_dispatcher_contract || `${this.contractInfo["anchor_basset_rewards_dispatcher"].contractAddress}`,
-                    stluna_token_contract: params.stluna_token_contract || `${this.contractInfo["anchor_basset_token_stluna"].contractAddress}`,
+                    rewards_dispatcher_contract: params.rewards_dispatcher_contract || `${this.contractInfo["lido_terra_rewards_dispatcher"].contractAddress}`,
+                    stluna_token_contract: params.stluna_token_contract || `${this.contractInfo["lido_terra_token_stluna"].contractAddress}`,
                     bluna_token_contract:
                         params.token_address ||
-                        `${this.contractInfo["anchor_basset_token"].contractAddress}`,
+                        `${this.contractInfo["lido_terra_token"].contractAddress}`,
                     airdrop_registry_contract:
                         params.airdrop_registry_contract ||
-                        `${this.contractInfo["anchor_airdrop_registry"].contractAddress}`,
-                    validators_registry_contract: params.validators_registry || `${this.contractInfo.anchor_basset_validators_registry.contractAddress}`,
+                        `${this.contractInfo["lido_terra_airdrop_registry"].contractAddress}`,
+                    validators_registry_contract: params.validators_registry || `${this.contractInfo.lido_terra_validators_registry.contractAddress}`,
                 },
             },
             undefined,
@@ -376,7 +376,7 @@ export default class AnchorbAsset {
         validator: string,
         fee?: Fee
     ): Promise<void> {
-        const contract = this.contractInfo.anchor_basset_hub.contractAddress;
+        const contract = this.contractInfo.lido_terra_hub.contractAddress;
         const registerValidatorExecution = await execute(
             sender,
             contract,
@@ -397,7 +397,7 @@ export default class AnchorbAsset {
         sender: Wallet,
         validatorAddress: string
     ): Promise<void> {
-        const contract = this.contractInfo.anchor_basset_validators_registry.contractAddress;
+        const contract = this.contractInfo.lido_terra_validators_registry.contractAddress;
         const addValidatorExecution = await execute(sender, contract, {
             add_validator: {
                 validator: {
@@ -415,7 +415,7 @@ export default class AnchorbAsset {
         sender: Wallet,
         validatorAddress: string
     ): Promise<void> {
-        const contract = this.contractInfo.anchor_basset_validators_registry.contractAddress;
+        const contract = this.contractInfo.lido_terra_validators_registry.contractAddress;
         const removeValidatorExecution = await execute(sender, contract, {
             remove_validator: {
                 address: `${validatorAddress}`,
@@ -432,7 +432,7 @@ export default class AnchorbAsset {
     ): Promise<void> {
         const coin = new Coin("uluna", amount);
         const coins = new Coins([coin]);
-        const contract = this.contractInfo["anchor_basset_hub"].contractAddress;
+        const contract = this.contractInfo["lido_terra_hub"].contractAddress;
         const bondExecution = await execute(
             sender,
             contract,
@@ -452,7 +452,7 @@ export default class AnchorbAsset {
     ): Promise<void> {
         const coin = new Coin("uluna", amount);
         const coins = new Coins([coin]);
-        const contract = this.contractInfo["anchor_basset_hub"].contractAddress;
+        const contract = this.contractInfo["lido_terra_hub"].contractAddress;
         const bondExecution = await execute(
             sender,
             contract,
@@ -471,13 +471,13 @@ export default class AnchorbAsset {
     ): Promise<void> {
         const coin = new Coin("uluna", amount);
         const coins = new Coins([coin]);
-        const contract = this.contractInfo["anchor_basset_token_stluna"].contractAddress;
+        const contract = this.contractInfo["lido_terra_token_stluna"].contractAddress;
         const sendExecuttion = await execute(
             sender,
             contract,
             {
                 send: {
-                    contract: this.contractInfo["anchor_basset_hub"].contractAddress,
+                    contract: this.contractInfo["lido_terra_hub"].contractAddress,
                     amount: `${amount}`,
                     msg: Buffer.from(JSON.stringify({convert: {}})).toString("base64"),
                 },
@@ -493,13 +493,13 @@ export default class AnchorbAsset {
     ): Promise<void> {
         const coin = new Coin("uluna", amount);
         const coins = new Coins([coin]);
-        const contract = this.contractInfo["anchor_basset_token"].contractAddress;
+        const contract = this.contractInfo["lido_terra_token"].contractAddress;
         const sendExecuttion = await execute(
             sender,
             contract,
             {
                 send: {
-                    contract: this.contractInfo["anchor_basset_hub"].contractAddress,
+                    contract: this.contractInfo["lido_terra_hub"].contractAddress,
                     amount: `${amount}`,
                     msg: Buffer.from(JSON.stringify({convert: {}})).toString("base64"),
                 },
@@ -514,7 +514,7 @@ export default class AnchorbAsset {
         src_validator_address: string,
         redelegations: Array<[string, Coin]>,
     ): Promise<void> {
-        const contract = this.contractInfo["anchor_basset_hub"].contractAddress;
+        const contract = this.contractInfo["lido_terra_hub"].contractAddress;
         const bondExecution = await execute(
             sender,
             contract,
@@ -543,7 +543,7 @@ export default class AnchorbAsset {
         },
         fee?: Fee
     ): Promise<void> {
-        const contract = this.contractInfo.anchor_basset_hub.contractAddress;
+        const contract = this.contractInfo.lido_terra_hub.contractAddress;
         const paramsExecution = await execute(
             sender,
             contract,
@@ -571,7 +571,7 @@ export default class AnchorbAsset {
         reward_contract?: string,
         token_contract?: string
     ): Promise<void> {
-        const contract = this.contractInfo.anchor_basset_hub.contractAddress;
+        const contract = this.contractInfo.lido_terra_hub.contractAddress;
         const paramsExecution = await execute(sender, contract, {
             update_config: {
                 owner: owner,
@@ -585,7 +585,7 @@ export default class AnchorbAsset {
     }
 
     public async finish(sender: Wallet): Promise<void> {
-        const contract = this.contractInfo.anchor_basset_hub.contractAddress;
+        const contract = this.contractInfo.lido_terra_hub.contractAddress;
         const finishExecution = await execute(sender, contract, {
             withdraw_unbonded: {},
         });
@@ -595,7 +595,7 @@ export default class AnchorbAsset {
     }
 
     public async update_global_index(sender: Wallet): Promise<void> {
-        const contract = this.contractInfo.anchor_basset_hub.contractAddress;
+        const contract = this.contractInfo.lido_terra_hub.contractAddress;
         const finishExe = await execute(sender, contract, {
             update_global_index: {
                 // airdrop_hooks: null,
@@ -607,7 +607,7 @@ export default class AnchorbAsset {
     }
 
     public async update_global_index_with_result(sender: Wallet): Promise<ReturnType<typeof send_transaction>> {
-        const contract = this.contractInfo.anchor_basset_hub.contractAddress;
+        const contract = this.contractInfo.lido_terra_hub.contractAddress;
         const finishExe = await execute(sender, contract, {
             update_global_index: {
                 // airdrop_hooks: null,
@@ -620,7 +620,7 @@ export default class AnchorbAsset {
     }
 
     public async slashing(sender: Wallet): Promise<void> {
-        const contract = this.contractInfo.anchor_basset_hub.contractAddress;
+        const contract = this.contractInfo.lido_terra_hub.contractAddress;
         const slashingExe = await execute(sender, contract, {
             check_slashing: {},
         });
@@ -630,7 +630,7 @@ export default class AnchorbAsset {
     }
 
     public async reward(sender: Wallet): Promise<void> {
-        const contract = this.contractInfo.anchor_basset_reward.contractAddress;
+        const contract = this.contractInfo.lido_terra_reward.contractAddress;
         const rewardExe = await execute(sender, contract, {
             claim_rewards: {recipient: null},
         });
@@ -640,7 +640,7 @@ export default class AnchorbAsset {
     }
 
     public async reward2(sender: Wallet, address: string): Promise<void> {
-        const contract = this.contractInfo.anchor_basset_reward.contractAddress;
+        const contract = this.contractInfo.lido_terra_reward.contractAddress;
         const rewardExe = await execute(sender, contract, {
             claim_rewards: {recipient: address},
         });
@@ -650,7 +650,7 @@ export default class AnchorbAsset {
     }
 
     public async reward_swap(sender: Wallet): Promise<void> {
-        const contract = this.contractInfo.anchor_basset_reward.contractAddress;
+        const contract = this.contractInfo.lido_terra_reward.contractAddress;
         const swapExe = await execute(sender, contract, {
             swap_to_reward_denom: {},
         });
@@ -663,7 +663,7 @@ export default class AnchorbAsset {
         sender: Wallet,
         prev_balance: string
     ): Promise<void> {
-        const contract = this.contractInfo.anchor_basset_reward.contractAddress;
+        const contract = this.contractInfo.lido_terra_reward.contractAddress;
         const updateGlobalExe = await execute(sender, contract, {
             update_global_index: {prev_balance: prev_balance},
         });
@@ -676,7 +676,7 @@ export default class AnchorbAsset {
         sender: Wallet,
         reward_denom?: string
     ): Promise<void> {
-        const contract = this.contractInfo.anchor_basset_reward.contractAddress;
+        const contract = this.contractInfo.lido_terra_reward.contractAddress;
         const updateDenomExe = await execute(sender, contract, {
             update_reward_denom: {reward_denom: reward_denom},
         });
@@ -690,7 +690,7 @@ export default class AnchorbAsset {
         address?: string,
         amount?: string
     ): Promise<void> {
-        const contract = this.contractInfo.anchor_basset_reward.contractAddress;
+        const contract = this.contractInfo.lido_terra_reward.contractAddress;
         const increaseExe = await execute(sender, contract, {
             increase_balance: {address: address, amount: amount},
         });
@@ -704,7 +704,7 @@ export default class AnchorbAsset {
         address?: string,
         amount?: string
     ): Promise<void> {
-        const contract = this.contractInfo.anchor_basset_reward.contractAddress;
+        const contract = this.contractInfo.lido_terra_reward.contractAddress;
         const decreaseExe = await execute(sender, contract, {
             decrease_balance: {address: address, amount: amount},
         });
@@ -892,7 +892,7 @@ export default class AnchorbAsset {
     ): Promise<void> {
         const execution = await execute(
             sender,
-            this.contractInfo.anchor_airdrop_registry.contractAddress,
+            this.contractInfo.lido_terra_airdrop_registry.contractAddress,
             {
                 add_airdrop_info: {
                     airdrop_token: "ANC",

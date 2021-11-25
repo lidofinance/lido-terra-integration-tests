@@ -4,7 +4,7 @@ import AnchorbAsset from "../helper/basset_helper";
 import {setTestParams} from "../parameters/contract-tests-parameteres";
 import * as path from "path";
 import AnchorbAssetQueryHelper from "../helper/basset_queryhelper";
-import {UnbondRequestsResponse} from "../helper/types/anchor_basset_hub/unbond_requests_response";
+import {UnbondRequestsResponse} from "../helper/types/lido_terra_hub/unbond_requests_response";
 import {send_transaction} from "../helper/flow/execution";
 import {Pagination} from "@terra-money/terra.js/dist/client/lcd/APIRequester";
 const {exec} = require('child_process');

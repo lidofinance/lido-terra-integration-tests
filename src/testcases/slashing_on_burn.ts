@@ -12,8 +12,8 @@ async function main() {
         testState.basset,
     )
 
-    const blunaContractAddress = testState.basset.contractInfo.anchor_basset_token.contractAddress
-    const stlunaContractAddress = testState.basset.contractInfo.anchor_basset_token_stluna.contractAddress
+    const blunaContractAddress = testState.basset.contractInfo.lido_terra_token.contractAddress
+    const stlunaContractAddress = testState.basset.contractInfo.lido_terra_token_stluna.contractAddress
 
     await mustPass(testState.basset.bond(testState.wallets.a, 4_000_000_000))
     assert.equal(await querier.balance_bluna(testState.wallets.a.key.accAddress), 4_000_000_000)

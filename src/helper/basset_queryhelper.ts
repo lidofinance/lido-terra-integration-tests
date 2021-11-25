@@ -10,18 +10,18 @@ import {MinterResponse} from "./types/cw20_token/token_init_msg";
 import {QueryMsg as ValidatorsQueryMsg} from "./types/validators_registry/query_msg";
 import {HolderResponse, HoldersResponse} from "./types/basset_reward/holders_response";
 import {QueryMsg as BlunaQueryMsg} from "./types/basset_reward/query_msg";
-import {QueryMsg as AnchotBassetHubQueryMsg} from "./types/anchor_basset_hub/query_msg";
+import {QueryMsg as AnchotBassetHubQueryMsg} from "./types/lido_terra_hub/query_msg";
 import {StateResponse} from "./types/basset_reward/state_response";
 import {ConfigResponse} from "./types/basset_reward/config_response";
-import {State} from "./types/anchor_basset_hub/state";
+import {State} from "./types/lido_terra_hub/state";
 import {AccruedRewardsResponse} from "./types/basset_reward/accrued_rewards_response";
-import {AllHistoryResponse} from "./types/anchor_basset_hub/all_history_response";
-import {UnbondRequestsResponse} from "./types/anchor_basset_hub/unbond_requests_response";
-import {WithdrawableUnbondedResponse} from "./types/anchor_basset_hub/withdrawable_unbonded_response";
+import {AllHistoryResponse} from "./types/lido_terra_hub/all_history_response";
+import {UnbondRequestsResponse} from "./types/lido_terra_hub/unbond_requests_response";
+import {WithdrawableUnbondedResponse} from "./types/lido_terra_hub/withdrawable_unbonded_response";
 import {LCDClient} from "@terra-money/terra.js";
 import axios from "axios";
 
-//npx json2ts -i anchor-bAsset-contracts/contracts/anchor_basset_token/schema/ -o src/helper/types/bluna_token/
+//npx json2ts -i anchor-bAsset-contracts/contracts/lido_terra_token/schema/ -o src/helper/types/bluna_token/
 
 
 export const makeRestStoreQuery = async (contract_address: string,msg:any,endpoint:string): Promise<any> => {
@@ -113,19 +113,19 @@ export default class AnchorbAssetQueryHelper {
     constructor(lcd: LCDClient, basset: AnchorbAsset) {
         this.lcd = lcd;
         this.basset = basset;
-        this.bluna_token_querier = new TokenQuerier(this.basset.contractInfo.anchor_basset_token.contractAddress, this.lcd)
-        this.stluna_token_querier = new TokenQuerier(this.basset.contractInfo.anchor_basset_token_stluna.contractAddress, this.lcd)
+        this.bluna_token_querier = new TokenQuerier(this.basset.contractInfo.lido_terra_token.contractAddress, this.lcd)
+        this.stluna_token_querier = new TokenQuerier(this.basset.contractInfo.lido_terra_token_stluna.contractAddress, this.lcd)
     }
 
     async bassethubquery(msg: AnchotBassetHubQueryMsg): Promise<any> {
         return makeRestStoreQuery(
-            this.basset.contractInfo.anchor_basset_hub.contractAddress,
+            this.basset.contractInfo.lido_terra_hub.contractAddress,
             msg,
             this.lcd.config.URL
         )
     }
 
-    async get_anchor_basset_hub_state(): Promise<State> {
+    async get_lido_terra_hub_state(): Promise<State> {
         return this.bassethubquery({
             state: {}
         }).then(r => r as State)
@@ -133,7 +133,7 @@ export default class AnchorbAssetQueryHelper {
 
     async blunarewardquery(msg: BlunaQueryMsg): Promise<any> {
         return makeRestStoreQuery(
-            this.basset.contractInfo.anchor_basset_reward.contractAddress,
+            this.basset.contractInfo.lido_terra_reward.contractAddress,
             msg,
             this.lcd.config.URL
         )
@@ -141,7 +141,7 @@ export default class AnchorbAssetQueryHelper {
 
     async validatorsquery(msg: ValidatorsQueryMsg): Promise<any> {
         return makeRestStoreQuery(
-            this.basset.contractInfo.anchor_basset_validators_registry.contractAddress,
+            this.basset.contractInfo.lido_terra_validators_registry.contractAddress,
             msg,
             this.lcd.config.URL
         )
@@ -261,22 +261,22 @@ export default class AnchorbAssetQueryHelper {
     }
 
     public async bluna_exchange_rate(): Promise<number> {
-        return this.get_anchor_basset_hub_state()
+        return this.get_lido_terra_hub_state()
             .then(r => Number(r.bluna_exchange_rate))
     }
 
     public async stluna_exchange_rate(): Promise<number> {
-        return this.get_anchor_basset_hub_state()
+        return this.get_lido_terra_hub_state()
             .then(r => Number(r.stluna_exchange_rate))
     }
 
     public async total_bond_bluna_amount(): Promise<number> {
-        return this.get_anchor_basset_hub_state()
+        return this.get_lido_terra_hub_state()
             .then(r => Number(r.total_bond_bluna_amount))
     }
 
     public async total_bond_stluna_amount(): Promise<number> {
-        return this.get_anchor_basset_hub_state()
+        return this.get_lido_terra_hub_state()
             .then(r => Number(r.total_bond_stluna_amount))
     }
 

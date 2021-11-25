@@ -15,7 +15,7 @@ async function main() {
         testState.lcdClient,
         testState.basset,
     )
-    const stlunaContractAddress = testState.basset.contractInfo.anchor_basset_token_stluna.contractAddress
+    const stlunaContractAddress = testState.basset.contractInfo.lido_terra_token_stluna.contractAddress
 
 
     await mustPass(testState.basset.bond_for_stluna(testState.wallets.a, 10_000_000_000))
@@ -48,7 +48,7 @@ async function main() {
         testState.wallets.a,
         1_000_000_000,
         {unbond: {}},
-        testState.basset.contractInfo["anchor_basset_hub"].contractAddress
+        testState.basset.contractInfo["lido_terra_hub"].contractAddress
     ))
     await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 50))
     await mustPass(testState.basset.finish(testState.wallets.a))
@@ -62,11 +62,11 @@ async function main() {
 
 
     // MUST FAIL
-    // // mint message allowed only from anchor_basset_hub contract as sender
+    // // mint message allowed only from lido_terra_hub contract as sender
     await mustFail(testState.basset.mint_cw20_token(
         stlunaContractAddress,
         testState.wallets.a,
-        testState.basset.contractInfo["anchor_basset_hub"].contractAddress,
+        testState.basset.contractInfo["lido_terra_hub"].contractAddress,
         100000))
 
     // TransferFrom
@@ -101,7 +101,7 @@ async function main() {
     await mustPass(testState.basset.send_from_cw20_token(stlunaContractAddress, testState.wallets.b, testState.wallets.a,
         1_000_000_000,
         {unbond: {}},
-        testState.basset.contractInfo["anchor_basset_hub"].contractAddress))
+        testState.basset.contractInfo["lido_terra_hub"].contractAddress))
     await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 50))
     await mustPass(testState.basset.finish(testState.wallets.b))
     const uluna_balance_b = Number((await testState.wallets.a.lcd.bank.balance(testState.wallets.b.key.accAddress))[0].get("uluna").amount)
@@ -115,7 +115,7 @@ async function main() {
     await mustFail(testState.basset.send_from_cw20_token(stlunaContractAddress, testState.wallets.b, testState.wallets.a,
         1_000_000_000,
         {unbond: {}},
-        testState.basset.contractInfo["anchor_basset_hub"].contractAddress)
+        testState.basset.contractInfo["lido_terra_hub"].contractAddress)
     )
     assert.equal(total_withdrawals, (await querier.all_history()).history.length)
     assert.equal(uluna_balance_b, Number((await testState.wallets.a.lcd.bank.balance(testState.wallets.b.key.accAddress))[0].get("uluna").amount))

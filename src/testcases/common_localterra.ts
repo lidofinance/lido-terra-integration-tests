@@ -4,7 +4,7 @@ import AnchorbAsset from "../helper/basset_helper";
 import {setTestParams} from "../parameters/contract-tests-parameteres";
 import * as path from "path";
 import AnchorbAssetQueryHelper from "../helper/basset_queryhelper";
-import {UnbondRequestsResponse} from "../helper/types/anchor_basset_hub/unbond_requests_response";
+import {UnbondRequestsResponse} from "../helper/types/lido_terra_hub/unbond_requests_response";
 
 
 export class TestStateLocalTerra {
@@ -35,7 +35,7 @@ export class TestStateLocalTerra {
     async init() {
         [this.validators] = await this.lcdClient.staking.validators()
         await this.anchor.store_contracts_localterra(
-            path.resolve(__dirname, "../../anchor-bAsset-contracts/artifacts"),
+            path.resolve(__dirname, "../../lido-terra-contracts/artifacts"),
         );
         const fixedFeeForInit = new Fee(6000000, "2000000uusd");
         await this.anchor.instantiate_localterra(

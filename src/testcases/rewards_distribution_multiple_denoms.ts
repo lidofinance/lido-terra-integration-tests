@@ -27,7 +27,7 @@ async function main() {
     await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 5));
 
     await mustPass(send_transaction(testState.wallets.ownerWallet, [
-        new MsgSend(testState.wallets.ownerWallet.key.accAddress, testState.basset.contractInfo["anchor_basset_rewards_dispatcher"].contractAddress, "1000000ukrw,1000000usdr,1000000umnt,10000000000000uusd"),
+        new MsgSend(testState.wallets.ownerWallet.key.accAddress, testState.basset.contractInfo["lido_terra_rewards_dispatcher"].contractAddress, "1000000ukrw,1000000usdr,1000000umnt,10000000000000uusd"),
     ]));
 
     await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 5));
@@ -36,7 +36,7 @@ async function main() {
     await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 5));
 
     let state = await makeRestStoreQuery(
-        testState.basset.contractInfo["anchor_basset_hub"].contractAddress,
+        testState.basset.contractInfo["lido_terra_hub"].contractAddress,
         { state: {} },
         testState.lcdClient.config.URL
     ).then((r) => r);
@@ -65,7 +65,7 @@ async function main() {
     await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 5));
 
     const accruedRewards = await makeRestStoreQuery(
-        testState.basset.contractInfo["anchor_basset_reward"].contractAddress,
+        testState.basset.contractInfo["lido_terra_reward"].contractAddress,
         { accrued_rewards: { address: testState.wallets.b.key.accAddress } },
         testState.lcdClient.config.URL
     ).then((r) => r.rewards);

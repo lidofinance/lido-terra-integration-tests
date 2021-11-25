@@ -10,7 +10,7 @@ import { setTestParams } from "../parameters/contract-tests-parameteres";
 import { configureMMOracle } from "../helper/oracle/mm-oracle";
 import { MantleState } from "../mantle-querier/MantleState";
 import * as path from "path";
-import {UnbondRequestsResponse} from "../helper/types/anchor_basset_hub/unbond_requests_response";
+import {UnbondRequestsResponse} from "../helper/types/lido_terra_hub/unbond_requests_response";
 import AnchorbAssetQueryHelper from "../helper/basset_queryhelper";
 
 export class TestState {
@@ -192,7 +192,7 @@ export class TestState {
             configureMMOracle(
                 this.keys.owner,
                 this.anchor.moneyMarket.contractInfo["moneymarket_oracle"].contractAddress,
-                this.anchor.bAsset.contractInfo["anchor_basset_token"].contractAddress,
+                this.anchor.bAsset.contractInfo["lido_terra_token"].contractAddress,
                 1.0
             )
         );
@@ -206,11 +206,11 @@ export class TestState {
 
         // create mantle state
         console.log({
-            bLunaHub: this.basset.contractInfo["anchor_basset_hub"].contractAddress,
-            bAssetToken: this.basset.contractInfo["anchor_basset_token"].contractAddress,
-            bAssetReward: this.basset.contractInfo["anchor_basset_reward"].contractAddress,
+            bLunaHub: this.basset.contractInfo["lido_terra_hub"].contractAddress,
+            bAssetToken: this.basset.contractInfo["lido_terra_token"].contractAddress,
+            bAssetReward: this.basset.contractInfo["lido_terra_reward"].contractAddress,
             bAssetAirdrop:
-                this.basset.contractInfo["anchor_airdrop_registry"].contractAddress,
+                this.basset.contractInfo["lido_terra_airdrop_registry"].contractAddress,
             mmInterest:
                 this.moneyMarket.contractInfo["moneymarket_interest_model"].contractAddress,
             mmOracle: this.moneyMarket.contractInfo["moneymarket_oracle"].contractAddress,
@@ -239,12 +239,12 @@ export class TestState {
 
         const mantleState = new MantleState(
             {
-                bLunaHub: this.basset.contractInfo["anchor_basset_hub"].contractAddress,
-                bAssetToken: this.basset.contractInfo["anchor_basset_token"].contractAddress,
-                stLunaToken: this.basset.contractInfo["anchor_basset_token_stluna"].contractAddress,
-                bAssetReward: this.basset.contractInfo["anchor_basset_reward"].contractAddress,
+                bLunaHub: this.basset.contractInfo["lido_terra_hub"].contractAddress,
+                bAssetToken: this.basset.contractInfo["lido_terra_token"].contractAddress,
+                stLunaToken: this.basset.contractInfo["lido_terra_token_stluna"].contractAddress,
+                bAssetReward: this.basset.contractInfo["lido_terra_reward"].contractAddress,
                 bAssetAirdrop:
-                    this.basset.contractInfo["anchor_airdrop_registry"].contractAddress,
+                    this.basset.contractInfo["lido_terra_airdrop_registry"].contractAddress,
                 mmInterest:
                     this.moneyMarket.contractInfo["moneymarket_interest_model"].contractAddress,
                 mmOracle: this.moneyMarket.contractInfo["moneymarket_oracle"].contractAddress,

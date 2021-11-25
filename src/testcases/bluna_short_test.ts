@@ -19,7 +19,7 @@ async function main() {
     const testState = new TestStateLocalTestNet()
     await testState.init()
 
-    const blunaContractAddress = testState.basset.contractInfo.anchor_basset_token.contractAddress
+    const blunaContractAddress = testState.basset.contractInfo.lido_terra_token.contractAddress
     const querier = new AnchorbAssetQueryHelper(
         testState.lcdClient,
         testState.basset,
@@ -48,7 +48,7 @@ async function main() {
         testState.wallets.a,
         unbond_amount,
         {unbond: {}},
-        testState.basset.contractInfo["anchor_basset_hub"].contractAddress
+        testState.basset.contractInfo["lido_terra_hub"].contractAddress
     ))
     assert.equal(await querier.balance_bluna(testState.wallets.a.key.accAddress), 7_999_000_000)
     await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 50))
@@ -60,11 +60,11 @@ async function main() {
 
 
 
-    // mint message allowed only from anchor_basset_hub contract as sender
+    // mint message allowed only from lido_terra_hub contract as sender
     await mustFail(testState.basset.mint_cw20_token(
         blunaContractAddress,
         testState.wallets.a,
-        testState.basset.contractInfo["anchor_basset_hub"].contractAddress,
+        testState.basset.contractInfo["lido_terra_hub"].contractAddress,
         100000))
 
     // TransferFrom
@@ -91,7 +91,7 @@ async function main() {
     await mustPass(testState.basset.send_from_cw20_token(blunaContractAddress, testState.wallets.b, testState.wallets.a,
         unbond_amount,
         {unbond: {}},
-        testState.basset.contractInfo["anchor_basset_hub"].contractAddress))
+        testState.basset.contractInfo["lido_terra_hub"].contractAddress))
     assert.equal(await querier.balance_bluna(testState.wallets.a.key.accAddress), 6_000_000_000)
     await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 50))
     await mustPass(testState.basset.finish(testState.wallets.b))
@@ -105,7 +105,7 @@ async function main() {
     await mustFail(testState.basset.send_from_cw20_token(blunaContractAddress, testState.wallets.b, testState.wallets.a,
         100000,
         {unbond: {}},
-        testState.basset.contractInfo["anchor_basset_hub"].contractAddress))
+        testState.basset.contractInfo["lido_terra_hub"].contractAddress))
 
 }
 

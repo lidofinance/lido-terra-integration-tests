@@ -28,7 +28,7 @@ async function main() {
     await mustPass(testState.basset.bond(testState.wallets.ownerWallet, 2_000_000))
 
 
-    const blunaContractAddress = testState.basset.contractInfo.anchor_basset_token.contractAddress
+    const blunaContractAddress = testState.basset.contractInfo.lido_terra_token.contractAddress
 
 
 
@@ -97,7 +97,7 @@ async function main() {
                 testState.wallets.a,
                 1_000_000,
                 {unbond: {}},
-                testState.basset.contractInfo["anchor_basset_hub"].contractAddress
+                testState.basset.contractInfo["lido_terra_hub"].contractAddress
             )
         }
     }
@@ -112,7 +112,7 @@ async function main() {
                 testState.wallets.b,
                 1_000_000,
                 {unbond: {}},
-                testState.basset.contractInfo["anchor_basset_hub"].contractAddress
+                testState.basset.contractInfo["lido_terra_hub"].contractAddress
             )
         }
     }
@@ -127,7 +127,7 @@ async function main() {
                 testState.wallets.c,
                 1_000_000,
                 {unbond: {}},
-                testState.basset.contractInfo["anchor_basset_hub"].contractAddress
+                testState.basset.contractInfo["lido_terra_hub"].contractAddress
             )
         }
     }

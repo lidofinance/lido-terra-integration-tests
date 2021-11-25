@@ -12,7 +12,7 @@ export async function anchor(owner: Wallet): Promise<Contracts> {
     const anchor = new Anchor(owner)
     const fixedFeeForInit = new StdFee(6000000, "2000000uusd")
     await anchor.store_contracts(
-        path.resolve(locationBase, './anchor-bAsset-contracts/artifacts'),
+        path.resolve(locationBase, './lido-terra-contracts/artifacts'),
         path.resolve(locationBase, './money-market-contracts/artifacts'),
         path.resolve(locationBase, './terraswap/artifacts'),
         fixedFeeForInit
@@ -71,9 +71,9 @@ export async function anchor(owner: Wallet): Promise<Contracts> {
     }), Promise.resolve())
 
     return {
-        "bLunaHub": basset.contractInfo["anchor_basset_hub"].contractAddress,
-        "bAssetToken": basset.contractInfo["anchor_basset_token"].contractAddress,
-        "bAssetReward": basset.contractInfo["anchor_basset_reward"].contractAddress,
+        "bLunaHub": basset.contractInfo["lido_terra_hub"].contractAddress,
+        "bAssetToken": basset.contractInfo["lido_terra_token"].contractAddress,
+        "bAssetReward": basset.contractInfo["lido_terra_reward"].contractAddress,
         "mmInterest": moneyMarket.contractInfo["moneymarket_interest"].contractAddress,
         "mmOracle": moneyMarket.contractInfo["moneymarket_oracle"].contractAddress,
         "mmMarket": moneyMarket.contractInfo["moneymarket_market"].contractAddress,

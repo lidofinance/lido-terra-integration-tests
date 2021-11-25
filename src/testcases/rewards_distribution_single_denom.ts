@@ -31,7 +31,7 @@ async function main() {
 
     // let's pretened we've got a huge rewards amount somehow
     await mustPass(send_transaction(testState.wallets.ownerWallet, [
-        new MsgSend(testState.wallets.ownerWallet.key.accAddress, testState.basset.contractInfo["anchor_basset_rewards_dispatcher"].contractAddress, "10000000000000uusd"),
+        new MsgSend(testState.wallets.ownerWallet.key.accAddress, testState.basset.contractInfo["lido_terra_rewards_dispatcher"].contractAddress, "10000000000000uusd"),
     ]));
 
     await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 5));
@@ -40,7 +40,7 @@ async function main() {
     await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 5));
 
     let state = await makeRestStoreQuery(
-        testState.basset.contractInfo["anchor_basset_hub"].contractAddress,
+        testState.basset.contractInfo["lido_terra_hub"].contractAddress,
         { state: {} },
         testState.lcdClient.config.URL
     ).then((r) => r);
@@ -67,7 +67,7 @@ async function main() {
     }
 
     const accruedRewards = await makeRestStoreQuery(
-        testState.basset.contractInfo["anchor_basset_reward"].contractAddress,
+        testState.basset.contractInfo["lido_terra_reward"].contractAddress,
         { accrued_rewards: { address: testState.wallets.b.key.accAddress } },
         testState.lcdClient.config.URL
     ).then((r) => r.rewards);
@@ -77,11 +77,11 @@ async function main() {
 
     //withdraw stLuna
     await mustPass(testState.basset.send_cw20_token(
-        testState.basset.contractInfo["anchor_basset_token_stluna"].contractAddress,
+        testState.basset.contractInfo["lido_terra_token_stluna"].contractAddress,
         testState.wallets.a,
         stLunaBondAmount,
         {unbond: {}},
-        testState.basset.contractInfo["anchor_basset_hub"].contractAddress
+        testState.basset.contractInfo["lido_terra_hub"].contractAddress
     ));
 
     const stLunaBalance = await querier.balance_stluna(testState.wallets.a.key.accAddress);
@@ -92,7 +92,7 @@ async function main() {
     await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 5));
 
     let withdrawableUnbondedStLuna = await makeRestStoreQuery(
-        testState.basset.contractInfo["anchor_basset_hub"].contractAddress,
+        testState.basset.contractInfo["lido_terra_hub"].contractAddress,
         { withdrawable_unbonded: { address: testState.wallets.a.key.accAddress} },
         testState.lcdClient.config.URL
     ).then((r) => r.withdrawable);
@@ -104,17 +104,17 @@ async function main() {
     //withdraw bLuna
     await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 5));
     await mustPass(testState.basset.send_cw20_token(
-        testState.basset.contractInfo["anchor_basset_token"].contractAddress,
+        testState.basset.contractInfo["lido_terra_token"].contractAddress,
         testState.wallets.b,
         bLunaBondAmount,
         {unbond: {}},
-        testState.basset.contractInfo["anchor_basset_hub"].contractAddress
+        testState.basset.contractInfo["lido_terra_hub"].contractAddress
     ));
 
     await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 5));
 
     let withdrawableUnbondedBLuna = await makeRestStoreQuery(
-        testState.basset.contractInfo["anchor_basset_hub"].contractAddress,
+        testState.basset.contractInfo["lido_terra_hub"].contractAddress,
         { withdrawable_unbonded: { address: testState.wallets.b.key.accAddress} },
         testState.lcdClient.config.URL
     ).then((r) => r.withdrawable);

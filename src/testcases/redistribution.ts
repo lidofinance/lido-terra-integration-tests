@@ -46,7 +46,7 @@ async function main() {
     //one key is not enouth to sign transaction
     await mustFail(redelegate_proxy_multisig(
         testState.lcdClient,
-        testState.basset.contractInfo.anchor_basset_hub.contractAddress,
+        testState.basset.contractInfo.lido_terra_hub.contractAddress,
         testState.multisigPublikKey,
         testState.multisigKeys.slice(0,0),
         vals[0].address,
@@ -56,7 +56,7 @@ async function main() {
 
     await mustPass(redelegate_proxy_multisig(
         testState.lcdClient,
-        testState.basset.contractInfo.anchor_basset_hub.contractAddress,
+        testState.basset.contractInfo.lido_terra_hub.contractAddress,
         testState.multisigPublikKey,
         testState.multisigKeys,vals[0].address,
         [[vals[1].address, 
@@ -68,7 +68,7 @@ async function main() {
         testState.lcdClient,
         testState.multisigPublikKey,
         testState.multisigKeys,
-        testState.basset.contractInfo.anchor_basset_hub.contractAddress,
+        testState.basset.contractInfo.lido_terra_hub.contractAddress,
         validators.map((v) => {
             return {
                 validator: v.address,
@@ -114,7 +114,7 @@ async function main() {
     let threshold = 15
     console.log('waiting all redelegations have completed')
     while (counter < threshold) {
-        let [redelegations, pagination] = await testState.lcdClient.staking.redelegations(testState.basset.contractInfo.anchor_basset_hub.contractAddress)
+        let [redelegations, pagination] = await testState.lcdClient.staking.redelegations(testState.basset.contractInfo.lido_terra_hub.contractAddress)
         if (redelegations.length == 0) {
             break
         }
@@ -128,7 +128,7 @@ async function main() {
         testState.lcdClient,
         testState.multisigPublikKey,
         testState.multisigKeys,
-        testState.basset.contractInfo.anchor_basset_hub.contractAddress,
+        testState.basset.contractInfo.lido_terra_hub.contractAddress,
         validators.map((v) => {
             return {
                 validator: v.address,

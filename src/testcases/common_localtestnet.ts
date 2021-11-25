@@ -122,7 +122,7 @@ export class TestStateLocalTestNet {
     constructor() {
         this.lcdClient = new LCDClient({
             chainID: "localnet",
-            URL: "http://192.168.10.2:1317/"
+            URL: "http://127.0.0.1:1317/"
         })
         this.wallets = {
             valAWallet: this.lcdClient.wallet(new MnemonicKey({mnemonic: ValidatorsKeys[0]})),
@@ -157,7 +157,7 @@ export class TestStateLocalTestNet {
         let pagination: Pagination;
         [this.validators, pagination] = await this.lcdClient.staking.validators()
         await this.anchor.store_contracts_localterra(
-            path.resolve(__dirname, "../../anchor-bAsset-contracts/artifacts"),
+            path.resolve(__dirname, "../../lido-terra-contracts/artifacts"),
         );
         const fixedFeeForInit = new Fee(6000000, "2000000uusd");
         await this.anchor.instantiate_localterra(

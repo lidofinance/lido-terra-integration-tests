@@ -10,6 +10,10 @@ async function getLunaBalance(testState: TestStateLocalTerra, address) {
     return balance[0].get("uluna").amount
 }
 
+function approxeq(a, b, e) {
+    return Math.abs(a - b) <= e;
+}
+
 async function main() {
     const testState = new TestStateLocalTerra()
     await testState.init()
@@ -40,8 +44,10 @@ async function main() {
         throw new Error(`expected withdrawableUnbonded != actual withdrawableUnbonded: ${unbondAmount} != ${withdrawableUnbonded}`)
     }
 
+    // some rogue transfer
+    let rogueLunaAmount = 5000000
     await mustPass(send_transaction(testState.wallets.ownerWallet, [
-        new MsgSend(testState.wallets.ownerWallet.key.accAddress, testState.basset.contractInfo["lido_terra_hub"].contractAddress, "5uluna"),
+        new MsgSend(testState.wallets.ownerWallet.key.accAddress, testState.basset.contractInfo["lido_terra_hub"].contractAddress, `${rogueLunaAmount}uluna`),
     ]));
 
     await mustPass(testState.basset.send_cw20_token(
@@ -67,9 +73,9 @@ async function main() {
     await mustPass(testState.basset.finish(testState.wallets.a));
     let lunaBalanceAfterWithdraw = await getLunaBalance(testState, testState.wallets.a.key.accAddress);
 
-    if (BigInt(+lunaBalanceAfterWithdraw) - BigInt(+lunaBalanceBeforeWithdraw) <= BigInt(withdrawableUnbonded)) {
-        throw new Error(`withdraw amount is less than withdrawableUnboned: 
-                                    ${BigInt(+lunaBalanceAfterWithdraw) - BigInt(+lunaBalanceBeforeWithdraw)} <= ${withdrawableUnbonded}`)
+    if (!approxeq(+lunaBalanceAfterWithdraw - +lunaBalanceBeforeWithdraw, +withdrawableUnbonded + +rogueLunaAmount, 2)) {
+        throw new Error(`withdraw amount is not equal to withdrawableUnboned: 
+                                    ${+lunaBalanceAfterWithdraw - +lunaBalanceBeforeWithdraw} != ${+withdrawableUnbonded + +rogueLunaAmount}`)
     }
 }
 

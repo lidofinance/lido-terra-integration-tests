@@ -17,6 +17,10 @@ import RewardStlunaTest from "./rewards_stLuna"
 import SlashingOnBurnTest from "./slashing_on_burn"
 import axios from "axios";
 
+import BlunaLongRunningTest from "./bluna_longrun_test"
+import StlunaLongRunningTest from "./stluna_longrun_test"
+import SlashingTest from "./slashing"
+
 
 
 const net = require('net');
@@ -99,16 +103,16 @@ const stop_testnet = async () => {
     console.log(`${stdout}`)
 }
 
-const localtestnet_runner = async (tests: Array<(contracts?: Record<string, number>) => Promise<void>>, contracts?: Record<string, number>) => {
+const isolated_runner = async (tests: Array<() => Promise<void>>) => {
     for (let i = 0; i < tests.length; i++) {
         const test = tests[i]
-        // console.log(test.caller)
-        // await stop_testnet()
-        // await start_testnet()
+        await stop_testnet()
+        await start_testnet()
+        await waitForOracles(1317, "localhost", 80)
         //giving some time to start env
-        // await waitForPort()
-        await test(contracts)
-        // await stop_testnet()
+        await waitForPort()
+        await test()
+        await stop_testnet()
     }
 }
 
@@ -117,7 +121,7 @@ const configure_shared_testnet = async (walletPoolSize = 10): Promise<Record<str
     await start_testnet()
     //giving some time to start env
     await waitForPort()
-    await waitForOracles(1317, "localhost", 40)
+    await waitForOracles(1317, "localhost", 80)
     const chainID = "localnet"
     const URL = "http://127.0.0.1:1317/"
     const lcd = new LCDClient({
@@ -137,18 +141,18 @@ const configure_shared_testnet = async (walletPoolSize = 10): Promise<Record<str
     // return {}
 }
 
-const shared_runner = async (tests: Array<(contracts?: Record<string, number>) => Promise<void>>, contracts?: Record<string, number>) => {
+const shared_concurrent_runner = async (tests: Array<(contracts?: Record<string, number>) => Promise<void>>, contracts?: Record<string, number>) => {
     return Promise.all(
         tests.map((t) => t(contracts))
     )
 }
 
-const localtestnet_testcases: Array<(contracts?: Record<string, number>) => Promise<void>> = [
+const localtestnet_shared_testcases: Array<(contracts?: Record<string, number>) => Promise<void>> = [
     BlunaShortTest,
     STlunaShortTest,
     ConversionTest,
     PausableContractsTest,
-    // RedistributionsTest,
+    RedistributionsTest,
     RewardsBlunaTest,
     RewardDistributionMultipleDenomsTest,
     RewardDistributionSIngleDenomTest,
@@ -156,12 +160,21 @@ const localtestnet_testcases: Array<(contracts?: Record<string, number>) => Prom
     SlashingOnBurnTest
 ]
 
+const isolated_testcases: Array<() => Promise<void>> = [
+    BlunaLongRunningTest,
+    StlunaLongRunningTest,
+    SlashingTest
+]
+
 // each test needs 6 wallets
-configure_shared_testnet(localtestnet_testcases.length * 6)
+configure_shared_testnet(localtestnet_shared_testcases.length * 6)
     .then((contracts) => {
         console.log("uploaded contracts ", contracts)
-        return shared_runner(localtestnet_testcases, contracts)
+        return shared_concurrent_runner(localtestnet_shared_testcases, contracts)
     })
+    .then(
+        () => {return isolated_runner(isolated_testcases)}
+    )
     .then(() => {console.log("done")})
     .catch((err) => {
         console.log(err)

@@ -11,7 +11,7 @@ var assert = require('assert');
 
 // let mantleState: MantleState;
 
-async function main() {
+export default async function main() {
     let j
     let i
     const testState = new TestStateLocalTestNet()
@@ -172,6 +172,8 @@ async function main() {
 
 }
 
-main()
-    .then(() => console.log("done"))
-    .catch(console.log);
+if (require.main === module) {
+    main()
+        .then(() => console.log("done"))
+        .catch(console.log);
+}

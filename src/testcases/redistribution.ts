@@ -48,9 +48,9 @@ export default async function main(contracts?: Record<string, number>) {
         testState.lcdClient,
         testState.basset.contractInfo.lido_terra_hub.contractAddress,
         testState.multisigPublikKey,
-        testState.multisigKeys.slice(0,0),
+        testState.multisigKeys.slice(0, 0),
         vals[0].address,
-        [[vals[1].address, 
+        [[vals[1].address,
         new Coin("uluna", "4000")]]
     ))
 
@@ -58,8 +58,8 @@ export default async function main(contracts?: Record<string, number>) {
         testState.lcdClient,
         testState.basset.contractInfo.lido_terra_hub.contractAddress,
         testState.multisigPublikKey,
-        testState.multisigKeys,vals[0].address,
-        [[vals[1].address, 
+        testState.multisigKeys, vals[0].address,
+        [[vals[1].address,
         new Coin("uluna", "4000")]]
     ))
 

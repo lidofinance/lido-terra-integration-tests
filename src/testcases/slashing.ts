@@ -6,7 +6,7 @@ import AnchorbAssetQueryHelper from "../helper/basset_queryhelper";
 import * as assert from "assert";
 import {disconnectValidator, TestStateLocalTestNet, vals} from "./common_localtestnet";
 
-async function main() {
+export default async function main() {
     const testState = new TestStateLocalTestNet()
     await testState.init()
     const querier = new AnchorbAssetQueryHelper(
@@ -173,6 +173,8 @@ async function main() {
     assert.ok(floateq(expected_withdrawal_sum_b, actual_withdrawal_sum_b, 1e-4))
 }
 
-main()
-    .then(() => console.log('done'))
-    .catch(console.log)
+if (require.main === module) {
+    main()
+        .then(() => console.log("done"))
+        .catch(console.log);
+}

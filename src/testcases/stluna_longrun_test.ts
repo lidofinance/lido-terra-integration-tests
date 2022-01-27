@@ -5,7 +5,7 @@ import {disconnectValidator, get_expected_sum_from_requests, TestStateLocalTestN
 var assert = require('assert');
 
 
-async function main() {
+export default async function main() {
     let j;
     let i
     const testState = new TestStateLocalTestNet()
@@ -65,7 +65,9 @@ async function main() {
     assert.ok(await querier.stluna_exchange_rate() > stluna_exchange_rate)
     stluna_exchange_rate = await querier.stluna_exchange_rate()
 
-
+    // with a localtestnet environment, stluna ex rate at this point of test is equal ~570
+    // each bond iteration we a loosing 0.7ustluna,
+    // 2_000_000/570 = 3504.7 = 3504 
     for (j = 0; j < 3; j++) {
         for (i = 0; i < 25; i++) {
             await mustPass(testState.basset.bond_for_stluna(testState.wallets.b, 2_000_000))
@@ -73,10 +75,12 @@ async function main() {
     }
     // we are bonding 3 * 25 = 75 iterations by 2_000_000 uluna each, 150_000_000 in total
     // we are expecting to have (150_000_000 / stluna_exchange_rate) stluna tokens
+    // since we loosing a lot of ustluna due to contract accuracy and huge stluna exrate
+    // we have to set lower accuracy in assertion
     assert.ok(floateq(
         150_000_000 / stluna_exchange_rate,
         await querier.balance_stluna(testState.wallets.b.key.accAddress),
-        1e-6,
+        1e-3,
     ))
     await mustPass(testState.basset.update_global_index(testState.wallets.b))
     // exchange rate is growing due to reward rebonding
@@ -94,7 +98,7 @@ async function main() {
     assert.ok(floateq(
         150_000_000 / stluna_exchange_rate,
         await querier.balance_stluna(testState.wallets.c.key.accAddress),
-        1e-6,
+        1e-3,
     ))
     await mustPass(testState.basset.update_global_index(testState.wallets.c))
     // exchange rate is growing due to reward rebonding
@@ -204,6 +208,8 @@ async function main() {
 
 }
 
-main()
-    .then(() => console.log("done"))
-    .catch(console.log);
+if (require.main === module) {
+    main()
+        .then(() => console.log("done"))
+        .catch(console.log);
+}

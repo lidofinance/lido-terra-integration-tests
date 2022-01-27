@@ -169,7 +169,6 @@ export class TestStateLocalTestNet {
         } else {
             wallets = predefinedKeys.map((keys => {return this.lcdClient.wallet(new MnemonicKey({mnemonic: keys}))}))
         }
-        // console.log(wallets)
         this.wallets = {
             valAWallet: this.lcdClient.wallet(new MnemonicKey({mnemonic: ValidatorsKeys[0]})),
             valBWallet: this.lcdClient.wallet(new MnemonicKey({mnemonic: ValidatorsKeys[1]})),

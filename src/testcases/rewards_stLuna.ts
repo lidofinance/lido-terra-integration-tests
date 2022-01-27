@@ -2,18 +2,19 @@ import {mustPass} from "../helper/flow/must";
 import {emptyBlockWithFixedGas} from "../helper/flow/gas-station";
 import {TestStateLocalTerra} from "./common_localterra";
 import AnchorbAssetQueryHelper, {makeRestStoreQuery} from "../helper/basset_queryhelper";
+import {TestStateLocalTestNet} from "./common_localtestnet";
 
 function approxeq(a, b, e) {
     return Math.abs(a - b) <= e;
 }
 
-async function getLunaBalance(testState: TestStateLocalTerra, address) {
+async function getLunaBalance(testState: TestStateLocalTestNet, address) {
     let balance = await testState.lcdClient.bank.balance(address);
     return balance[0].get("uluna").amount
 }
 
-async function main() {
-    const testState = new TestStateLocalTerra()
+export default async function main(contracts?: Record<string, number>) {
+    const testState = new TestStateLocalTestNet(contracts)
     await testState.init()
     const querier = new AnchorbAssetQueryHelper(
         testState.lcdClient,
@@ -39,7 +40,7 @@ async function main() {
         throw new Error(`invalid stLuna balance: ${balanceB} > ${bondAmount}`)
     }
 
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 10));
+    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 20));
     await mustPass(testState.basset.update_global_index(testState.wallets.a))
 
     await mustPass(testState.basset.send_cw20_token(
@@ -55,7 +56,7 @@ async function main() {
         throw new Error("stLuna balance must be zero")
     }
 
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 10));
+    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 20));
 
     let withdrawableUnbonded = await makeRestStoreQuery(
         testState.basset.contractInfo["lido_terra_hub"].contractAddress,
@@ -95,7 +96,7 @@ async function main() {
         throw new Error("stLuna balance must be zero")
     }
 
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 10));
+    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 20));
 
     withdrawableUnbonded = await makeRestStoreQuery(
         testState.basset.contractInfo["lido_terra_hub"].contractAddress,
@@ -118,6 +119,8 @@ async function main() {
     }
 }
 
-main()
-    .then(() => console.log("done"))
-.catch(console.log);
+if (require.main === module) {
+    main()
+        .then(() => console.log("done"))
+        .catch(console.log);
+}

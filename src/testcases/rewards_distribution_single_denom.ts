@@ -1,22 +1,23 @@
-import { mustPass, floateq} from "../helper/flow/must";
+import {mustPass, floateq} from "../helper/flow/must";
 import {emptyBlockWithFixedGas} from "../helper/flow/gas-station";
 import {TestStateLocalTerra} from "./common_localterra";
 import AnchorbAssetQueryHelper, {makeRestStoreQuery} from "../helper/basset_queryhelper";
 import {send_transaction} from "../helper/flow/execution";
 import {MsgSend} from "@terra-money/terra.js";
+import {TestStateLocalTestNet} from "./common_localtestnet";
 
 function approxeq(a, b, e) {
     return Math.abs(a - b) <= e;
 }
 
-async function getLunaBalance(testState: TestStateLocalTerra, address) {
+async function getLunaBalance(testState: TestStateLocalTestNet, address) {
     let balance = await testState.lcdClient.bank.balance(address);
     return balance[0].get("uluna").amount
 }
 
 
-async function main() {
-    const testState = new TestStateLocalTerra()
+export default async function main(contracts?: Record<string, number>) {
+    const testState = new TestStateLocalTestNet(contracts)
     await testState.init()
     const querier = new AnchorbAssetQueryHelper(
         testState.lcdClient,
@@ -34,14 +35,14 @@ async function main() {
         new MsgSend(testState.wallets.ownerWallet.key.accAddress, testState.basset.contractInfo["lido_terra_rewards_dispatcher"].contractAddress, "10000000000000uusd"),
     ]));
 
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 5));
+    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 20));
     await mustPass(testState.basset.update_global_index(testState.wallets.ownerWallet));
 
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 5));
+    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 20));
 
     let state = await makeRestStoreQuery(
         testState.basset.contractInfo["lido_terra_hub"].contractAddress,
-        { state: {} },
+        {state: {}},
         testState.lcdClient.config.URL
     ).then((r) => r);
 
@@ -57,7 +58,7 @@ async function main() {
 
     // check that bLuna/stLuna rewards (in uusd) ratio is the same as bLuna/stLuna bond ratio with some accuracy due to fees
     // stLuna rewards are rebonded to validators and bLuna rewards are available as rewards for bLuna holders
-    if (!floateq(bLunaRewards / (stLunaRewards * uusdExhangeRate), (state.total_bond_bluna_amount / state.total_bond_stluna_amount), 0.003)) {
+    if (!floateq(bLunaRewards / (stLunaRewards * uusdExhangeRate), (state.total_bond_bluna_amount / state.total_bond_stluna_amount), 0.02)) {
         throw new Error(`invalid rewards distribution: stLunaRewards=${stLunaRewards * uusdExhangeRate}, 
                                                        bLunaRewards=${bLunaRewards}, 
                                                        stLunaBonded=${state.total_bond_stluna_amount}, 
@@ -68,7 +69,7 @@ async function main() {
 
     const accruedRewards = await makeRestStoreQuery(
         testState.basset.contractInfo["lido_terra_reward"].contractAddress,
-        { accrued_rewards: { address: testState.wallets.b.key.accAddress } },
+        {accrued_rewards: {address: testState.wallets.b.key.accAddress}},
         testState.lcdClient.config.URL
     ).then((r) => r.rewards);
     if (accruedRewards <= 0) {
@@ -89,11 +90,11 @@ async function main() {
         throw new Error("stLuna balance must be zero")
     }
 
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 5));
+    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 20));
 
     let withdrawableUnbondedStLuna = await makeRestStoreQuery(
         testState.basset.contractInfo["lido_terra_hub"].contractAddress,
-        { withdrawable_unbonded: { address: testState.wallets.a.key.accAddress} },
+        {withdrawable_unbonded: {address: testState.wallets.a.key.accAddress}},
         testState.lcdClient.config.URL
     ).then((r) => r.withdrawable);
     if (withdrawableUnbondedStLuna <= stLunaBondAmount) {
@@ -102,7 +103,7 @@ async function main() {
 
 
     //withdraw bLuna
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 5));
+    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 20));
     await mustPass(testState.basset.send_cw20_token(
         testState.basset.contractInfo["lido_terra_token"].contractAddress,
         testState.wallets.b,
@@ -111,18 +112,18 @@ async function main() {
         testState.basset.contractInfo["lido_terra_hub"].contractAddress
     ));
 
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 5));
+    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 20));
 
     let withdrawableUnbondedBLuna = await makeRestStoreQuery(
         testState.basset.contractInfo["lido_terra_hub"].contractAddress,
-        { withdrawable_unbonded: { address: testState.wallets.b.key.accAddress} },
+        {withdrawable_unbonded: {address: testState.wallets.b.key.accAddress}},
         testState.lcdClient.config.URL
     ).then((r) => r.withdrawable);
     if (withdrawableUnbondedBLuna != bLunaBondAmount) {
         throw new Error("withdrawableUnbonded is not equal to bonded amount")
     }
 
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 5));
+    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 20));
 
     let lunaBalanceBeforeWithdrawB = await getLunaBalance(testState, testState.wallets.b.key.accAddress);
     await mustPass(testState.basset.finish(testState.wallets.b));
@@ -143,6 +144,9 @@ async function main() {
     }
 }
 
-main()
-    .then(() => console.log("done"))
-.catch(console.log);
+
+if (require.main === module) {
+    main()
+        .then(() => console.log("done"))
+        .catch(console.log);
+}

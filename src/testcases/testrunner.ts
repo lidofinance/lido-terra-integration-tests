@@ -11,40 +11,45 @@ import ConversionTest from "./conversion"
 import PausableContractsTest from "./pausable_contracts"
 import RedistributionsTest from "./redistribution"
 import RewardsBlunaTest from "./rewards_bLuna"
+import RewardDistributionMultipleDenomsTest from "./rewards_distribution_multiple_denoms"
+import RewardDistributionSIngleDenomTest from "./rewards_distribution_single_denom"
+import RewardStlunaTest from "./rewards_stLuna"
+import SlashingOnBurnTest from "./slashing_on_burn"
+import axios from "axios";
+
 
 
 const net = require('net');
 
 
 
-export default async function isPortReachable(port: number, host: string, timeout = 1000) {
-    if (typeof host !== 'string') {
-        throw new TypeError('Specify a `host`');
-    }
-
-    const promise = new Promise((resolve, reject) => {
-        const socket = new net.Socket();
-
-        const onError = () => {
-            socket.destroy();
-            reject();
-        };
-
-        socket.setTimeout(timeout);
-        socket.once('error', onError);
-        socket.once('timeout', onError);
-
-        socket.connect(port, host, () => {
-            socket.end();
-            resolve(true);
-        });
-    });
-
+export default async function isLCDReachable(port: number, host: string) {
     try {
-        await promise;
-        return true;
+        return await axios.get(`http://${host}:${port}/`).catch((err) => {
+            /* 
+                looking for 
+                {
+                    "code": 12,
+                    "message": "Not Implemented",
+                    "details": [
+                    ]
+                }
+                501 swagger error to make sure its ready
+            */
+            return err.response.data.code == 12
+        })
     } catch {
-        return false;
+        return false
+    }
+}
+
+const isOracleReachable = async (port: number, host: string) => {
+    try {
+        return await axios.get(`http://${host}:${port}/oracle/denoms/exchange_rates`).then((resp) => {
+            return resp.data.result != null
+        })
+    } catch {
+        return false
     }
 }
 
@@ -52,14 +57,31 @@ const waitForPort = async (port = 1317, host = "localhost", threshold = 10): Pro
     let c = 0
     while (true) {
         c++
-        console.log(c)
+        console.log("waiting for swagger ", c)
         if (threshold != undefined && c > threshold) {
-            throw new Error(`timed out for waiting port ${host}:${port}`);
+            throw new Error(`timed out for waiting swagger ${host}:${port}`);
         }
-        const reacheble = await isPortReachable(port, host, 1000)
+        const reacheble = await isLCDReachable(port, host)
         if (reacheble) {
             break
         }
+        await sleep(1000)
+    }
+}
+
+const waitForOracles = async (port = 1317, host = "localhost", threshold = 10): Promise<void> => {
+    let c = 0
+    while (true) {
+        c++
+        console.log("waiting for oracle ", c)
+        if (threshold != undefined && c > threshold) {
+            throw new Error(`timed out for waiting oracles ${host}:${port}`);
+        }
+        const reacheble = await isOracleReachable(port, host)
+        if (reacheble) {
+            break
+        }
+        await sleep(1000)
     }
 }
 
@@ -90,11 +112,12 @@ const localtestnet_runner = async (tests: Array<(contracts?: Record<string, numb
     }
 }
 
-const configure_shared_testnet = async (walletPoolSize = 50): Promise<Record<string, number>> => {
-    // await stop_testnet()
-    // await start_testnet()
-    // //giving some time to start env
-    // await waitForPort()
+const configure_shared_testnet = async (walletPoolSize = 10): Promise<Record<string, number>> => {
+    await stop_testnet()
+    await start_testnet()
+    //giving some time to start env
+    await waitForPort()
+    await waitForOracles(1317, "localhost", 40)
     const chainID = "localnet"
     const URL = "http://127.0.0.1:1317/"
     const lcd = new LCDClient({
@@ -121,15 +144,20 @@ const shared_runner = async (tests: Array<(contracts?: Record<string, number>) =
 }
 
 const localtestnet_testcases: Array<(contracts?: Record<string, number>) => Promise<void>> = [
-    // BlunaShortTest,
-    // STlunaShortTest,
-    // ConversionTest,
+    BlunaShortTest,
+    STlunaShortTest,
+    ConversionTest,
     PausableContractsTest,
     // RedistributionsTest,
-    // RewardsBlunaTest
+    RewardsBlunaTest,
+    RewardDistributionMultipleDenomsTest,
+    RewardDistributionSIngleDenomTest,
+    RewardStlunaTest,
+    SlashingOnBurnTest
 ]
 
-configure_shared_testnet()
+// each test needs 6 wallets
+configure_shared_testnet(localtestnet_testcases.length * 6)
     .then((contracts) => {
         console.log("uploaded contracts ", contracts)
         return shared_runner(localtestnet_testcases, contracts)

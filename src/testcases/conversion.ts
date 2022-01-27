@@ -3,11 +3,12 @@ import AnchorbAssetQueryHelper from "../helper/basset_queryhelper";
 import {emptyBlockWithFixedGas} from "../helper/flow/gas-station";
 import {mustFail, mustPass} from "../helper/flow/must";
 import {TestStateLocalTerra} from "./common_localterra";
+import {TestStateLocalTestNet} from "./common_localtestnet";
 
 let assert = require('assert');
 
-async function main() {
-    const testState = new TestStateLocalTerra()
+export default async function main(contracts?: Record<string, number>) {
+    const testState = new TestStateLocalTestNet(contracts)
     await testState.init()
 
     const querier = new AnchorbAssetQueryHelper(
@@ -79,7 +80,9 @@ async function main() {
         (tax_amount > tax_cap_amount ? tax_cap_amount : tax_amount)) // deduct_tax (capped)
 }
 
-main()
-    .then(() => console.log("done"))
-    .then(async () => {})
-    .catch(console.log);
+if (require.main === module) {
+    main()
+        .then(() => console.log("done"))
+        .catch(console.log);
+}
+

@@ -7,8 +7,8 @@ var assert = require('assert');
 
 
 
-async function main() {
-    const testState = new TestStateLocalTestNet()
+export default async function main(contracts?: Record<string, number>) {
+    const testState = new TestStateLocalTestNet(contracts)
     await testState.init()
 
     const querier = new AnchorbAssetQueryHelper(
@@ -52,7 +52,7 @@ async function main() {
     ))
     await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 50))
     await mustPass(testState.basset.finish(testState.wallets.a))
-    assert.equal(await querier.total_bond_stluna_amount(), 8_750_000_000 )
+    assert.equal(await querier.total_bond_stluna_amount(), 8_750_000_000)
     assert.equal((await querier.token_info_stluna()).total_supply, 7_000_000_000)
     assert.equal(await querier.balance_stluna(testState.wallets.a.key.accAddress), 7_000_000_000)
     const uluna_balance = Number((await testState.wallets.a.lcd.bank.balance(testState.wallets.a.key.accAddress))[0].get("uluna").amount)
@@ -125,6 +125,8 @@ async function main() {
 
 }
 
-main()
-    .then(() => console.log("done"))
-    .catch(console.log);
+if (require.main === module) {
+    main()
+        .then(() => console.log("done"))
+        .catch(console.log);
+}

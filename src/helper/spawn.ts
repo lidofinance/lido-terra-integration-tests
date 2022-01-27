@@ -87,6 +87,20 @@ export default class Anchor {
         await this.ANC.storeCodes(this.owner, ancLocation, fee);
     }
 
+    public async instantiate_prepared_contracts(
+        contracts: Record<string, number>,
+        fee?: Fee,
+        params?: CustomInstantiationParam,
+        validators_addresses?: Array<string>
+    ): Promise<void> {
+        console.log(contracts)
+        Object.keys(contracts).reduce((acc, key) => {
+            this.bAsset.contractInfo[key] = {codeId: contracts[key], contractAddress: ""}
+            return ""
+        }, "");
+        await this.instantiate_localterra(fee, params, validators_addresses)
+    }
+
     public async instantiate_localterra(
         fee?: Fee,
         params?: CustomInstantiationParam,

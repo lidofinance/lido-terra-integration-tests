@@ -1,4 +1,4 @@
-import {LCDClient, LocalTerra, MnemonicKey, MsgSend, Fee, Validator, Wallet, LegacyAminoMultisigPublicKey, SimplePublicKey} from "@terra-money/terra.js";
+import {LCDClient, LocalTerra, MnemonicKey, MsgSend, Fee, Validator, Wallet, LegacyAminoMultisigPublicKey, SimplePublicKey, isTxError, MsgStoreCode, Key} from "@terra-money/terra.js";
 import Anchor from "../helper/spawn";
 import AnchorbAsset from "../helper/basset_helper";
 import {setTestParams} from "../parameters/contract-tests-parameteres";
@@ -7,6 +7,7 @@ import AnchorbAssetQueryHelper from "../helper/basset_queryhelper";
 import {UnbondRequestsResponse} from "../helper/types/lido_terra_hub/unbond_requests_response";
 import {send_transaction} from "../helper/flow/execution";
 import {Pagination} from "@terra-money/terra.js/dist/client/lcd/APIRequester";
+import * as fs from "fs";
 const {exec} = require('child_process');
 
 export const ValidatorsKeys = [
@@ -35,7 +36,7 @@ export const vals = [
     },
 ]
 
-export const accKeys = [
+export const predefinedKeys = [
     "song wood skull unfair cute rude water dog convince summer sell comic flower enter proud scout orient alarm bulk jealous enable index tip wolf",
     "broccoli civil caution forum drum burst become frequent brother valley truly amazing eager strategy arrow snack vehicle turtle switch fiber pact story cruise bulb",
     "devote negative jacket recipe onion health that jungle stuff catch soft region this indoor tired erase fiber adjust nurse half develop issue often broccoli",
@@ -99,6 +100,42 @@ const {
     DOCKER_NETWORK = "testkit_localnet"
 } = process.env
 
+export let globalWalletPool: Wallet[] = []
+
+export const contracts = [
+    "lido_terra_airdrop_registry",
+    "lido_terra_hub",
+    "lido_terra_reward",
+    "lido_terra_token",
+    "lido_terra_token_stluna",
+    "lido_terra_rewards_dispatcher",
+    "lido_terra_validators_registry",
+];
+
+export const uploadCode = (location: string, sender: Wallet, fee?: Fee): Promise<Record<string, number>> => {
+    return contracts.reduce(
+        (t, c) =>
+            t.then(async (prev: Record<string, number>): Promise<Record<string, number>> => {
+                const bytecode = fs.readFileSync(`${location}/${c}.wasm`);
+                const storeCode = new MsgStoreCode(
+                    sender.key.accAddress,
+                    bytecode.toString("base64")
+                );
+
+                const result = await send_transaction(sender, [storeCode], fee);
+                if (isTxError(result)) {
+                    throw new Error(`Couldn't upload ${c}: ${result.raw_log}`);
+                }
+
+                const codeId = +result.logs[0].eventsByType.store_code.code_id[0];
+
+                prev[c] = codeId
+                console.log(prev)
+                return prev
+            }),
+        Promise.resolve({})
+    );
+}
 
 export function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -112,34 +149,43 @@ export const disconnectValidator = async (name: string): Promise<any> => {
 export class TestStateLocalTestNet {
     validators: Validator[]
     anchor: Anchor
-    gasStation: MnemonicKey
+    gasStation: Key
     lcdClient: LCDClient
     wallets: Record<string, Wallet>
     multisigKeys: Array<MnemonicKey>
     multisigPublikKey: LegacyAminoMultisigPublicKey
     basset: AnchorbAsset
     validators_addresses: Array<string>
-    constructor() {
+    contracts?: Record<string, number>
+    constructor(contracts?: Record<string, number>) {
         this.lcdClient = new LCDClient({
             chainID: "localnet",
             URL: "http://127.0.0.1:1317/"
         })
+        this.contracts = contracts
+        let wallets: Wallet[]
+        if (contracts != undefined) {
+            wallets = globalWalletPool.splice(0, 6)
+        } else {
+            wallets = predefinedKeys.map((keys => {return this.lcdClient.wallet(new MnemonicKey({mnemonic: keys}))}))
+        }
+        // console.log(wallets)
         this.wallets = {
             valAWallet: this.lcdClient.wallet(new MnemonicKey({mnemonic: ValidatorsKeys[0]})),
             valBWallet: this.lcdClient.wallet(new MnemonicKey({mnemonic: ValidatorsKeys[1]})),
             valCWallet: this.lcdClient.wallet(new MnemonicKey({mnemonic: ValidatorsKeys[2]})),
             valDWallet: this.lcdClient.wallet(new MnemonicKey({mnemonic: ValidatorsKeys[3]})),
 
-            ownerWallet: this.lcdClient.wallet(new MnemonicKey({mnemonic: accKeys[0]})),
-            a: this.lcdClient.wallet(new MnemonicKey({mnemonic: accKeys[0]})),
-            b: this.lcdClient.wallet(new MnemonicKey({mnemonic: accKeys[1]})),
-            c: this.lcdClient.wallet(new MnemonicKey({mnemonic: accKeys[2]})),
-            d: this.lcdClient.wallet(new MnemonicKey({mnemonic: accKeys[3]})),
+            ownerWallet: wallets[0],
+            a: wallets[0],
+            b: wallets[1],
+            c: wallets[2],
+            d: wallets[3],
 
-            lido_fee: this.lcdClient.wallet(new MnemonicKey({mnemonic: accKeys[4]})),
-            gasStation: this.lcdClient.wallet(new MnemonicKey({mnemonic: accKeys[5]})),
+            lido_fee: wallets[4],
+            gasStation: wallets[5],
         }
-        this.gasStation = new MnemonicKey({mnemonic: accKeys[5]})
+        this.gasStation = wallets[5].key
         this.validators_addresses = [vals[0].address]
         this.anchor = new Anchor(this.wallets.ownerWallet);
 
@@ -156,19 +202,31 @@ export class TestStateLocalTestNet {
     async init() {
         let pagination: Pagination;
         [this.validators, pagination] = await this.lcdClient.staking.validators()
-        await this.anchor.store_contracts_localterra(
-            path.resolve(__dirname, "../../lido-terra-contracts/artifacts"),
-        );
         const fixedFeeForInit = new Fee(6000000, "2000000uusd");
-        await this.anchor.instantiate_localterra(
-            fixedFeeForInit,
-            setTestParams(
-                this.validators_addresses[0],
-                this.wallets.a.key.accAddress,
-                this.wallets.lido_fee.key.accAddress,
-            ),
-            this.validators_addresses
-        );
+        if (this.contracts != undefined) {
+            await this.anchor.instantiate_prepared_contracts(
+                this.contracts,
+                fixedFeeForInit,
+                setTestParams(
+                    this.validators_addresses[0],
+                    this.wallets.a.key.accAddress,
+                    this.wallets.lido_fee.key.accAddress,
+                ),
+                this.validators_addresses)
+        } else {
+            await this.anchor.store_contracts_localterra(
+                path.resolve(__dirname, "../../lido-terra-contracts/artifacts"),
+            );
+            await this.anchor.instantiate_localterra(
+                fixedFeeForInit,
+                setTestParams(
+                    this.validators_addresses[0],
+                    this.wallets.a.key.accAddress,
+                    this.wallets.lido_fee.key.accAddress,
+                ),
+                this.validators_addresses
+            );
+        }
         this.basset = this.anchor.bAsset;
     }
 

@@ -350,7 +350,7 @@ timeout_prevote = "1s"
 timeout_prevote_delta = "500ms"
 timeout_precommit = "500ms"
 timeout_precommit_delta = "500ms"
-timeout_commit = "1500ms"
+timeout_commit = "5000ms"
 
 # How many blocks to look back to check existence of the node's consensus votes before joining consensus
 # When non-zero, the node will panic upon restart

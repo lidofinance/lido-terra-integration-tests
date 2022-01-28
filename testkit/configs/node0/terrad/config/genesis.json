@@ -14,9 +14,7 @@
       "max_bytes": "1048576"
     },
     "validator": {
-      "pub_key_types": [
-        "ed25519"
-      ]
+      "pub_key_types": ["ed25519"]
     },
     "version": {}
   },
@@ -594,10 +592,7 @@
         "clients_consensus": [],
         "clients_metadata": [],
         "params": {
-          "allowed_clients": [
-            "06-solomachine",
-            "07-tendermint"
-          ]
+          "allowed_clients": ["06-solomachine", "07-tendermint"]
         },
         "create_localhost": false,
         "next_client_sequence": "0"
@@ -645,7 +640,7 @@
     },
     "oracle": {
       "params": {
-        "vote_period": "15",
+        "vote_period": "5",
         "vote_threshold": "0.500000000000000000",
         "reward_band": "0.020000000000000000",
         "reward_distribution_window": "5256000",

@@ -294,7 +294,7 @@
     },
     "distribution": {
       "params": {
-        "community_tax": "0.020000000000000000",
+        "community_tax": "0.000000000000000000",
         "base_proposer_reward": "0.010000000000000000",
         "bonus_proposer_reward": "0.040000000000000000",
         "withdraw_addr_enabled": true
@@ -636,7 +636,7 @@
       },
       "params": {
         "mint_denom": "uluna",
-        "inflation_rate_change": "0.130000000000000000",
+        "inflation_rate_change": "0.00000000000000000",
         "inflation_max": "0.200000000000000000",
         "inflation_min": "0.070000000000000000",
         "goal_bonded": "0.670000000000000000",
@@ -645,7 +645,7 @@
     },
     "oracle": {
       "params": {
-        "vote_period": "15",
+        "vote_period": "5",
         "vote_threshold": "0.500000000000000000",
         "reward_band": "0.020000000000000000",
         "reward_distribution_window": "5256000",

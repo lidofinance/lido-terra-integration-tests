@@ -5,7 +5,7 @@ import {mustPass} from "../helper/flow/must";
 const execSync = require('child_process').execSync;
 
 import BlunaShortTest from "./bluna_short_test";
-import {predefinedKeys, globalWalletPool, sleep, uploadCode} from "./common_localtestnet";
+import {predefinedKeys, globalWalletPool, sleep, uploadCode, faucetMnemonic} from "./common_localtestnet";
 import STlunaShortTest from "./stluna_short_test"
 import ConversionTest from "./conversion"
 import PausableContractsTest from "./pausable_contracts"
@@ -108,9 +108,9 @@ const isolated_runner = async (tests: Array<() => Promise<void>>) => {
         const test = tests[i]
         await stop_testnet()
         await start_testnet()
-        await waitForOracles(1317, "localhost", 80)
-        //giving some time to start env
         await waitForPort()
+        await waitForOracles(1317, "localhost", 80)
+        //give some time to start env
         await test()
         await stop_testnet()
     }
@@ -119,7 +119,7 @@ const isolated_runner = async (tests: Array<() => Promise<void>>) => {
 const configure_shared_testnet = async (walletPoolSize = 10): Promise<Record<string, number>> => {
     await stop_testnet()
     await start_testnet()
-    //giving some time to start env
+    //give some time to start env
     await waitForPort()
     await waitForOracles(1317, "localhost", 80)
     const chainID = "localnet"
@@ -128,7 +128,7 @@ const configure_shared_testnet = async (walletPoolSize = 10): Promise<Record<str
         chainID: chainID,
         URL: URL
     })
-    const masterWallet = lcd.wallet(new MnemonicKey({mnemonic: predefinedKeys[0]}))
+    const masterWallet = lcd.wallet(new MnemonicKey({mnemonic: faucetMnemonic}))
     let msgs: Msg[] = []
     for (let i = 0; i < walletPoolSize; i++) {
         const wallet = lcd.wallet(new MnemonicKey())
@@ -161,8 +161,8 @@ const localtestnet_shared_testcases: Array<(contracts?: Record<string, number>) 
 ]
 
 const isolated_testcases: Array<() => Promise<void>> = [
-    BlunaLongRunningTest,
     StlunaLongRunningTest,
+    BlunaLongRunningTest,
     SlashingTest
 ]
 

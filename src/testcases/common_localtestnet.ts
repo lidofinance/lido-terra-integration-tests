@@ -42,8 +42,10 @@ export const predefinedKeys = [
     "devote negative jacket recipe onion health that jungle stuff catch soft region this indoor tired erase fiber adjust nurse half develop issue often broccoli",
     "rose chalk climb drum innocent cruise rich soap brother barely human humble run coffee gadget symptom kit food hobby west pill harvest exile gap",
     "claw meat hockey day clay cave blossom toy calm rotate home huge tomato faint language gate life midnight slab session palm forum raw alien",
-    "whale aisle lemon entire uphold retreat couch avocado fork thank flee card blossom hockey universe rich slam spare amused slight pet bright bridge junk"
+    "whale aisle lemon entire uphold retreat couch avocado fork thank flee card blossom hockey universe rich slam spare amused slight pet bright bridge junk",
+    "gospel trap material fuel habit note album believe bonus color body axis ozone column improve boy day marine senior tobacco genre umbrella pact loan"
 ]
+export const faucetMnemonic = "common betray real priority silent someone tobacco increase sugar polar auction pony sport license rude feel swarm ill piece artist hidden silk submit travel"
 /* 
 Validators:
 terravaloper188p7d0w6948y8p4cg5p3m6zx8lzzg8r0vt47ms - node0 192.168.10.2
@@ -86,6 +88,13 @@ claw meat hockey day clay cave blossom toy calm rotate home huge tomato faint la
   address: terra1jtm9ga0zvgptd2jnv9fysuh82z4ajw2az3xr39
 whale aisle lemon entire uphold retreat couch avocado fork thank flee card blossom hockey universe rich slam spare amused slight pet bright bridge junk
 
+-name: acc6
+  addressa: terra133kkg0vfughrdmd5vjegjzuz436ehs0jsrs8t4
+gospel trap material fuel habit note album believe bonus color body axis ozone column improve boy day marine senior tobacco genre umbrella pact loan
+
+- name: faucetAcc
+  address: terra1nm4c55l3h4zzwlhe97hhwdlestm08ygkxnh75x
+common betray real priority silent someone tobacco increase sugar polar auction pony sport license rude feel swarm ill piece artist hidden silk submit travel
 
 - multisig accs
     'notice oak worry limit wrap speak medal online prefer cluster roof addict wrist behave treat actual wasp year salad speed social layer crew genius',
@@ -175,6 +184,7 @@ export class TestStateLocalTestNet {
             valCWallet: this.lcdClient.wallet(new MnemonicKey({mnemonic: ValidatorsKeys[2]})),
             valDWallet: this.lcdClient.wallet(new MnemonicKey({mnemonic: ValidatorsKeys[3]})),
 
+            faucetAccount: this.lcdClient.wallet(new MnemonicKey({mnemonic: faucetMnemonic})),
             ownerWallet: wallets[0],
             a: wallets[0],
             b: wallets[1],

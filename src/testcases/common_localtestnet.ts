@@ -7,6 +7,7 @@ import AnchorbAssetQueryHelper from "../helper/basset_queryhelper";
 import {UnbondRequestsResponse} from "../helper/types/lido_terra_hub/unbond_requests_response";
 import {send_transaction} from "../helper/flow/execution";
 import {Pagination} from "@terra-money/terra.js/dist/client/lcd/APIRequester";
+import ConverterPool from "../helper/stluna_bluna_converter_helper";
 const {exec} = require('child_process');
 
 export const ValidatorsKeys = [
@@ -118,6 +119,7 @@ export class TestStateLocalTestNet {
     multisigKeys: Array<MnemonicKey>
     multisigPublikKey: LegacyAminoMultisigPublicKey
     basset: AnchorbAsset
+    converter: ConverterPool
     validators_addresses: Array<string>
     constructor() {
         this.lcdClient = new LCDClient({
@@ -158,6 +160,7 @@ export class TestStateLocalTestNet {
         [this.validators, pagination] = await this.lcdClient.staking.validators()
         await this.anchor.store_contracts_localterra(
             path.resolve(__dirname, "../../lido-terra-contracts/artifacts"),
+            path.resolve(__dirname, "../../converter/artifacts")
         );
         const fixedFeeForInit = new Fee(6000000, "2000000uusd");
         await this.anchor.instantiate_localterra(
@@ -170,6 +173,7 @@ export class TestStateLocalTestNet {
             this.validators_addresses
         );
         this.basset = this.anchor.bAsset;
+        this.converter = this.anchor.converterPool;
     }
 
     async waitForJailed(name: string, threshold?: number): Promise<void> {

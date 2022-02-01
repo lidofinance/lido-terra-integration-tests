@@ -36,6 +36,7 @@ export class TestStateLocalTerra {
         [this.validators] = await this.lcdClient.staking.validators()
         await this.anchor.store_contracts_localterra(
             path.resolve(__dirname, "../../lido-terra-contracts/artifacts"),
+            path.resolve(__dirname, "../../converter/artifacts")
         );
         const fixedFeeForInit = new Fee(6000000, "2000000uusd");
         await this.anchor.instantiate_localterra(

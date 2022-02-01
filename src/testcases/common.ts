@@ -173,7 +173,8 @@ export class TestState {
             path.resolve(__dirname, "../../anchor-bAsset-contracts/artifacts"),
             path.resolve(__dirname, "../../money-market-contracts/artifacts"),
             path.resolve(__dirname, "../../terraswap/artifacts"),
-            path.resolve(__dirname, "../../anchor-token-contracts/artifacts")
+            path.resolve(__dirname, "../../anchor-token-contracts/artifacts"),
+            path.resolve(__dirname, "../../converter/artifacts")
         );
 
         const fixedFeeForInit = new Fee(6000000, "2000000uusd");

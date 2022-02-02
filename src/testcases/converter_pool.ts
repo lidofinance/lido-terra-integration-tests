@@ -7,6 +7,10 @@ import * as assert from "assert";
 import {disconnectValidator, TestStateLocalTestNet, vals} from "./common_localtestnet";
 import {makeContractStoreQuery} from "../mantle-querier/common";
 
+function approxeq(a, b, e) {
+    console.log(a, b);
+    return Math.abs(a - b) <= e;
+}
 
 async function simulation_query(url, converterContractAddress, offerTokenAddress, amount) {
     let queryResp = await makeRestStoreQuery(converterContractAddress, {simulation: {offer_asset: {amount: amount, info: {token: {contract_addr: offerTokenAddress}}}}}, url);
@@ -30,6 +34,10 @@ async function main() {
     const stlunaContractAddress = testState.basset.contractInfo.lido_terra_token_stluna.contractAddress
     const converterContractAddress = testState.converter.contractInfo.lido_terra_stluna_bluna_converter_contract.contractAddress;
 
+    await mustPass(testState.basset.add_validator(testState.wallets.ownerWallet, vals[1].address))
+    await mustPass(testState.basset.add_validator(testState.wallets.ownerWallet, vals[2].address))
+    await mustPass(testState.basset.add_validator(testState.wallets.ownerWallet, vals[3].address))
+
     let stLunaBondAmount = 20_000_000_000;
     let bLunaBondAmount = 20_000_000_000;
 
@@ -39,19 +47,32 @@ async function main() {
     await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 10));
     await mustPass(testState.basset.update_global_index(testState.wallets.ownerWallet));
 
-    // want to swap 10 stluna to bluna. I should get the same amount as simulation tells
+    // I want to swap 10 stluna to bluna. I should get the same amount as simulation tells
     let swapAmount = "10000000";
     let returnbLunaAmount = await simulation_query(testState.lcdClient.config.URL, converterContractAddress, stlunaContractAddress, swapAmount);
+
+    // check reverse simulation query
+    // what amount of stLuna should I provide to get returnbLunaAmount above?
+    let offerstLunaAmount = await reverse_simulation_query(testState.lcdClient.config.URL, converterContractAddress, blunaContractAddress, returnbLunaAmount);
+    assert.ok(approxeq(+swapAmount, +offerstLunaAmount, 1));
+
     let bLunaBalanceBeforeSwap = await querier.balance_bluna(testState.wallets.a.key.accAddress);
     await mustPass(testState.converter.swap(testState.wallets.a, +swapAmount, stlunaContractAddress));
     let bLunaBalanceAfterSwap = await querier.balance_bluna(testState.wallets.a.key.accAddress);
     assert.strictEqual(bLunaBalanceAfterSwap - bLunaBalanceBeforeSwap, +returnbLunaAmount);
 
-    // want to swap 10 bluna to stluna. I should get the same amount as simulation tells
+    // I want to swap 10 bluna to stluna. I should get the same amount as simulation tells. But lets get the return amount
+    // on another address
     let returnstLunaAmount = await simulation_query(testState.lcdClient.config.URL, converterContractAddress, blunaContractAddress, swapAmount);
-    let stLunaBalanceBeforeSwap = await querier.balance_stluna(testState.wallets.b.key.accAddress);
-    await mustPass(testState.converter.swap(testState.wallets.b, +swapAmount, blunaContractAddress));
-    let stLunaBalanceAfterSwap = await querier.balance_stluna(testState.wallets.b.key.accAddress);
+
+    // check reverse simulation query
+    // what amount of bLuna should I provide to get returnstLunaAmount above?
+    let offerbLunaAmount = await reverse_simulation_query(testState.lcdClient.config.URL, converterContractAddress, stlunaContractAddress, returnstLunaAmount);
+    assert.ok(approxeq(+swapAmount, +offerbLunaAmount, 1));
+
+    let stLunaBalanceBeforeSwap = await querier.balance_stluna(testState.wallets.c.key.accAddress);
+    await mustPass(testState.converter.swap(testState.wallets.b, +swapAmount, blunaContractAddress, testState.wallets.c.key.accAddress));
+    let stLunaBalanceAfterSwap = await querier.balance_stluna(testState.wallets.c.key.accAddress);
     assert.strictEqual(stLunaBalanceAfterSwap - stLunaBalanceBeforeSwap, +returnstLunaAmount);
 
 
@@ -60,15 +81,16 @@ async function main() {
     await testState.waitForJailed("terradnode1")
 
     await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 20))
-    // await mustPass(testState.basset.update_global_index(testState.wallets.ownerWallet));
-
-    await mustPass(testState.basset.slashing(testState.wallets.a))
-    await mustPass(testState.basset.slashing(testState.wallets.b))
-
-    console.log("KEKKEKEKE", await querier.bluna_exchange_rate());
+    await mustPass(testState.basset.update_global_index(testState.wallets.ownerWallet));
 
     // I want to swap 10 stluna to bluna again. I should get the same amount as simulation tells
     returnbLunaAmount = await simulation_query(testState.lcdClient.config.URL, converterContractAddress, stlunaContractAddress, swapAmount);
+
+    // check reverse simulation query
+    // what amount of stLuna should I provide to get returnbLunaAmount above?
+    offerstLunaAmount = await reverse_simulation_query(testState.lcdClient.config.URL, converterContractAddress, blunaContractAddress, returnbLunaAmount);
+    assert.ok(approxeq(+swapAmount, +offerstLunaAmount, 2));
+
     bLunaBalanceBeforeSwap = await querier.balance_bluna(testState.wallets.a.key.accAddress);
     await mustPass(testState.converter.swap(testState.wallets.a, +swapAmount, stlunaContractAddress));
     bLunaBalanceAfterSwap = await querier.balance_bluna(testState.wallets.a.key.accAddress);
@@ -76,6 +98,12 @@ async function main() {
 
     // I want to swap 10 bluna to stluna. I should get the same amount as simulation tells
     returnstLunaAmount = await simulation_query(testState.lcdClient.config.URL, converterContractAddress, blunaContractAddress, swapAmount);
+
+    // check reverse simulation query
+    // what amount of bLuna should I provide to get returnstLunaAmount above?
+    offerbLunaAmount = await reverse_simulation_query(testState.lcdClient.config.URL, converterContractAddress, stlunaContractAddress, returnstLunaAmount);
+    assert.ok(approxeq(+swapAmount, +offerbLunaAmount, 3));
+
     stLunaBalanceBeforeSwap = await querier.balance_stluna(testState.wallets.b.key.accAddress);
     await mustPass(testState.converter.swap(testState.wallets.b, +swapAmount, blunaContractAddress));
     stLunaBalanceAfterSwap = await querier.balance_stluna(testState.wallets.b.key.accAddress);

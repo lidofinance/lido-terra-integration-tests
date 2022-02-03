@@ -48,7 +48,7 @@ async function main() {
     await mustPass(testState.basset.update_global_index(testState.wallets.ownerWallet));
 
     // I want to swap 10 stluna to bluna. I should get the same amount as simulation tells
-    let swapAmount = "10000000";
+    let swapAmount = "1000000000";
     let returnbLunaAmount = await simulation_query(testState.lcdClient.config.URL, converterContractAddress, stlunaContractAddress, swapAmount);
 
     // check reverse simulation query

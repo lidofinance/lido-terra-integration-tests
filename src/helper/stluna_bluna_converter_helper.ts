@@ -54,8 +54,8 @@ export default class ConverterPool {
             sender,
             this.contractInfo.lido_terra_stluna_bluna_converter_contract.codeId,
             {
-                stluna_addr: stluna_contract,
-                bluna_addr: bluna_contract,
+                stluna_address: stluna_contract,
+                bluna_address: bluna_contract,
                 hub_address: hub_contract,
             },
             undefined,

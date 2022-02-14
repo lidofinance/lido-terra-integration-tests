@@ -1,4 +1,4 @@
-import {mustPass, mustFail} from "../helper/flow/must";
+import {mustPass, mustFail, mustFailWithErrorMsg} from "../helper/flow/must";
 import {emptyBlockWithFixedGas} from "../helper/flow/gas-station";
 import {TestStateLocalTerra} from "./common_localterra";
 
@@ -11,6 +11,15 @@ async function main() {
 
     await mustPass(testState.basset.bond_for_stluna(testState.wallets.c, stLunaBondAmount))
     await mustPass(testState.basset.bond(testState.wallets.d, bLunaBondAmount))
+
+    await mustPass(testState.basset.send_cw20_token(
+        testState.basset.contractInfo.lido_terra_token.contractAddress,
+        testState.wallets.d,
+        10000,
+        {unbond: {}},
+        testState.basset.contractInfo["lido_terra_hub"].contractAddress
+    ));
+    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 10));
 
     await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 5));
     await mustPass(testState.basset.update_global_index(testState.wallets.ownerWallet));
@@ -28,7 +37,7 @@ async function main() {
     await mustFail(testState.basset.update_global_index(testState.wallets.ownerWallet)); // hub must be paused
     await mustFail(testState.basset.bond(testState.wallets.d, bLunaBondAmount)); // hub must be paused
     await mustFail(testState.basset.bond_for_stluna(testState.wallets.d, stLunaBondAmount)); // hub must be paused
-    await mustFail(testState.basset.finish(testState.wallets.d)); // hub must be paused
+    await mustFailWithErrorMsg(testState.basset.finish(testState.wallets.d), "the contract is temporarily paused"); // hub must be paused
     await mustFail(testState.basset.reward(testState.wallets.d)); // reward contract must be paused
     await mustFail(testState.basset.transfer_cw20_token(
         testState.basset.contractInfo.lido_terra_token.contractAddress, testState.wallets.d, testState.wallets.c, 1_000_000_000)
@@ -50,7 +59,8 @@ async function main() {
     // check that all contracts are unpaused
     await mustPass(testState.basset.update_global_index(testState.wallets.ownerWallet));
     await mustPass(testState.basset.bond(testState.wallets.d, bLunaBondAmount));
-    await mustPass(testState.basset.bond_for_stluna(testState.wallets.d, stLunaBondAmount))
+    await mustPass(testState.basset.bond_for_stluna(testState.wallets.d, stLunaBondAmount));
+    await mustPass(testState.basset.finish(testState.wallets.d));
     await mustPass(testState.basset.reward(testState.wallets.d));
     await mustPass(testState.basset.transfer_cw20_token(
         testState.basset.contractInfo.lido_terra_token.contractAddress, testState.wallets.d, testState.wallets.c, 1_000_000_000)

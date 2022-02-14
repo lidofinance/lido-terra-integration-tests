@@ -19,3 +19,14 @@ export const mustFail = <T>(p: Promise<T>): Promise<Error> => {
     })
 }
 
+export const mustFailWithErrorMsg = <T>(p: Promise<T>, errorMsg: String): Promise<Error> => {
+    return p
+        .then(r => {
+            throw new Error(`Action should have failed but succeeded ${r}`);
+        }, (reason) => {
+            if (!reason.message.includes(errorMsg)) {
+                throw new Error(`Action failed with invalid error ${reason}`);
+            }
+            return null
+        })
+}

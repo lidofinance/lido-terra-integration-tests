@@ -20,7 +20,7 @@ import axios from "axios";
 import BlunaLongRunningTest from "./bluna_longrun_test"
 import StlunaLongRunningTest from "./stluna_longrun_test"
 import SlashingTest from "./slashing"
-import {createNodesConfigs, defaultProjConf} from "../utils/node_configurator";
+import {createNodesConfigs, defaultProjConf, ghProjConf, fastProjConf} from "../utils/node_configurator";
 
 
 
@@ -92,8 +92,27 @@ const waitForOracles = async (port = 1317, host = "localhost", threshold = 10): 
 
 const docker_config = path.join(__dirname, "..", "..", "testkit", "docker-compose.yml")
 
-const start_testnet = async () => {
-    const confDir = createNodesConfigs(defaultProjConf)
+export const start_testnet = async () => {
+    const {
+        TERRA_CONFIG_VERSION = "fast"
+    } = process.env
+    console.log(`env variable TERRA_CONFIG_VERSION set to ${TERRA_CONFIG_VERSION}. Avaliable variants: default,fast,github`)
+    let conf: any;
+    switch (TERRA_CONFIG_VERSION) {
+        case "fast":
+            conf = fastProjConf
+            break;
+        case "default":
+            conf = defaultProjConf
+            break;
+        case "github":
+            conf = ghProjConf
+            break;
+        default:
+            break;
+    }
+
+    const confDir = createNodesConfigs(conf)
     const stdout = execSync(`CONF_DIR=${confDir} docker-compose -f ${docker_config} up -d`);
     console.log(`${stdout}`)
 }

@@ -1,7 +1,6 @@
 clear:
 	for i in `seq 0 3`; do rm -f ./configs/node$${i}/terrad/config/write*; done;
 
-
 start:
 	docker-compose up -d
 

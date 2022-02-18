@@ -83,6 +83,26 @@ const configToml = {
     timeout_commit: "1500ms",
 }
 
+const fastConfigToml = {
+    timeout_propose: "3s",
+    timeout_propose_delta: "500ms",
+    timeout_prevote: "1s",
+    timeout_prevote_delta: "500ms",
+    timeout_precommit: "500ms",
+    timeout_precommit_delta: "500ms",
+    timeout_commit: "500ms",
+}
+
+const ghConfigToml = {
+    timeout_propose: "3s",
+    timeout_propose_delta: "500ms",
+    timeout_prevote: "1s",
+    timeout_prevote_delta: "500ms",
+    timeout_precommit: "500ms",
+    timeout_precommit_delta: "500ms",
+    timeout_commit: "5000ms",
+}
+
 const genesis = {
     unbonding_time: "10s",
     slash_fraction_downtime: "0.01",
@@ -96,9 +116,34 @@ const genesis = {
     min_valid_per_window: "0.050000000000000000"
 }
 
+const fastGenesis = {
+    unbonding_time: "10s",
+    slash_fraction_downtime: "0.01",
+    signed_blocks_window: "10",
+    min_signed_per_window: "0.500000000000000000",
+    //oracles
+    vote_period: "15",
+    vote_threshold: "0.500000000000000000",
+    slash_fraction: "0.000100000000000000",
+    slash_window: "100800",
+    min_valid_per_window: "0.050000000000000000"
+}
+
 export const defaultProjConf = {
     nodes: nodes,
     configToml: configToml,
+    genesis: genesis,
+}
+
+export const fastProjConf = {
+    nodes: nodes,
+    configToml: fastConfigToml,
+    genesis: fastGenesis,
+}
+
+export const ghProjConf = {
+    nodes: nodes,
+    configToml: ghConfigToml,
     genesis: genesis,
 }
 
@@ -143,6 +188,6 @@ export const createNodesConfigs = (projConf: any): string => {
     return tmp
 }
 
-
-createNodesConfigs(defaultProjConf)
-
+if (require.main === module) {
+    createNodesConfigs(defaultProjConf)
+}

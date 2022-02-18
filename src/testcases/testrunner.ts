@@ -167,21 +167,21 @@ const shared_concurrent_runner = async (tests: Array<(contracts?: Record<string,
 }
 
 const localtestnet_shared_testcases: Array<(contracts?: Record<string, number>) => Promise<void>> = [
-    // BlunaShortTest,
-    // STlunaShortTest,
-    // ConversionTest,
-    // PausableContractsTest,
-    // RedistributionsTest,
-    // RewardsBlunaTest,
-    // RewardDistributionMultipleDenomsTest,
-    // RewardDistributionSIngleDenomTest,
-    // RewardStlunaTest,
-    // SlashingOnBurnTest
+    BlunaShortTest,
+    STlunaShortTest,
+    ConversionTest,
+    PausableContractsTest,
+    RedistributionsTest,
+    RewardsBlunaTest,
+    RewardDistributionMultipleDenomsTest,
+    RewardDistributionSIngleDenomTest,
+    RewardStlunaTest,
+    SlashingOnBurnTest
 ]
 
 const isolated_testcases: Array<() => Promise<void>> = [
-    // StlunaLongRunningTest,
-    // BlunaLongRunningTest,
+    StlunaLongRunningTest,
+    BlunaLongRunningTest,
     SlashingTest
 ]
 

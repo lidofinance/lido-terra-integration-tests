@@ -685,8 +685,8 @@
     },
     "oracle": {
       "params": {
-        "vote_period": "7",
-        "vote_threshold": "0.500000000000000000",
+        "vote_period": "${genesis.vote_period}",
+        "vote_threshold": "${genesis.vote_threshold}",
         "reward_band": "0.020000000000000000",
         "reward_distribution_window": "5256000",
         "whitelist": [
@@ -707,9 +707,9 @@
             "tobin_tax": "0.020000000000000000"
           }
         ],
-        "slash_fraction": "0.000100000000000000",
-        "slash_window": "100800",
-        "min_valid_per_window": "0.050000000000000000"
+        "slash_fraction": "${genesis.slash_fraction}",
+        "slash_window": "${genesis.slash_window}",
+        "min_valid_per_window": "${genesis.min_valid_per_window}"
       },
       "feeder_delegations": [],
       "exchange_rates": [],
@@ -721,18 +721,18 @@
     "params": null,
     "slashing": {
       "params": {
-        "signed_blocks_window": "10",
-        "min_signed_per_window": "0.500000000000000000",
+        "signed_blocks_window": "${genesis.signed_blocks_window}",
+        "min_signed_per_window": "${genesis.min_signed_per_window}",
         "downtime_jail_duration": "600s",
         "slash_fraction_double_sign": "0.050000000000000000",
-        "slash_fraction_downtime": "0.010000000000000000"
+        "slash_fraction_downtime": "${genesis.slash_fraction_downtime}"
       },
       "signing_infos": [],
       "missed_blocks": []
     },
     "staking": {
       "params": {
-        "unbonding_time": "10s",
+        "unbonding_time": "${genesis.unbonding_time}",
         "max_validators": 100,
         "max_entries": 100,
         "historical_entries": 10000,

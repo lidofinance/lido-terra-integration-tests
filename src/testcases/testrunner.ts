@@ -20,6 +20,7 @@ import axios from "axios";
 import BlunaLongRunningTest from "./bluna_longrun_test"
 import StlunaLongRunningTest from "./stluna_longrun_test"
 import SlashingTest from "./slashing"
+import {createNodesConfigs, defaultProjConf} from "../utils/node_configurator";
 
 
 
@@ -89,12 +90,11 @@ const waitForOracles = async (port = 1317, host = "localhost", threshold = 10): 
     }
 }
 
-console.log(__dirname)
 const docker_config = path.join(__dirname, "..", "..", "testkit", "docker-compose.yml")
-console.log(docker_config)
 
 const start_testnet = async () => {
-    const stdout = execSync(`docker-compose -f ${docker_config} up -d`);
+    const confDir = createNodesConfigs(defaultProjConf)
+    const stdout = execSync(`CONF_DIR=${confDir} docker-compose -f ${docker_config} up -d`);
     console.log(`${stdout}`)
 }
 
@@ -148,21 +148,21 @@ const shared_concurrent_runner = async (tests: Array<(contracts?: Record<string,
 }
 
 const localtestnet_shared_testcases: Array<(contracts?: Record<string, number>) => Promise<void>> = [
-    BlunaShortTest,
-    STlunaShortTest,
-    ConversionTest,
-    PausableContractsTest,
-    RedistributionsTest,
-    RewardsBlunaTest,
-    RewardDistributionMultipleDenomsTest,
-    RewardDistributionSIngleDenomTest,
-    RewardStlunaTest,
-    SlashingOnBurnTest
+    // BlunaShortTest,
+    // STlunaShortTest,
+    // ConversionTest,
+    // PausableContractsTest,
+    // RedistributionsTest,
+    // RewardsBlunaTest,
+    // RewardDistributionMultipleDenomsTest,
+    // RewardDistributionSIngleDenomTest,
+    // RewardStlunaTest,
+    // SlashingOnBurnTest
 ]
 
 const isolated_testcases: Array<() => Promise<void>> = [
-    StlunaLongRunningTest,
-    BlunaLongRunningTest,
+    // StlunaLongRunningTest,
+    // BlunaLongRunningTest,
     SlashingTest
 ]
 

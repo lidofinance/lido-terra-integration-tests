@@ -4,7 +4,7 @@ import {MsgSend} from "@terra-money/terra.js";
 import {TestStateLocalTerra} from "./common_localterra";
 import {makeRestStoreQuery} from "../helper/basset_queryhelper";
 import {emptyBlockWithFixedGas} from "../helper/flow/gas-station";
-import {TestStateLocalTestNet} from "./common_localtestnet";
+import {defaultSleepTime, sleep, TestStateLocalTestNet} from "./common_localtestnet";
 
 export default async function main(contracts?: Record<string, number>) {
     const testState = new TestStateLocalTestNet(contracts)
@@ -19,22 +19,22 @@ export default async function main(contracts?: Record<string, number>) {
     await mustPass(testState.basset.bond_for_stluna(testState.wallets.a, stLunaBondAmount))
     await mustPass(testState.basset.bond(testState.wallets.b, bLunaBondAmount))
 
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 5));
+    await sleep(defaultSleepTime)
     await mustPass(testState.basset.update_global_index(testState.wallets.ownerWallet));
 
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 5));
+    await sleep(defaultSleepTime)
     await mustPass(testState.basset.update_global_index(testState.wallets.ownerWallet));
 
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 5));
+    await sleep(defaultSleepTime)
 
     await mustPass(send_transaction(testState.wallets.ownerWallet, [
         new MsgSend(testState.wallets.ownerWallet.key.accAddress, testState.basset.contractInfo["lido_terra_rewards_dispatcher"].contractAddress, "1000000ukrw,1000000usdr,1000000umnt,10000000000000uusd"),
     ]));
 
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 5));
+    await sleep(defaultSleepTime)
     await mustPass(testState.basset.update_global_index(testState.wallets.ownerWallet));
 
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 5));
+    await sleep(defaultSleepTime)
 
     let state = await makeRestStoreQuery(
         testState.basset.contractInfo["lido_terra_hub"].contractAddress,
@@ -67,7 +67,7 @@ export default async function main(contracts?: Record<string, number>) {
                                                        blunaBonded/stLunaBonded ratio = ${(state.total_bond_bluna_amount / state.total_bond_stluna_amount)}`);
     }
 
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 5));
+    await sleep(defaultSleepTime)
 
     const accruedRewards = await makeRestStoreQuery(
         testState.basset.contractInfo["lido_terra_reward"].contractAddress,

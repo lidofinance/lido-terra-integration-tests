@@ -2,7 +2,7 @@ import AnchorbAssetQueryHelper from "../helper/basset_queryhelper";
 import {emptyBlockWithFixedGas} from "../helper/flow/gas-station";
 import {floateq, mustFail, mustPass} from "../helper/flow/must";
 import {MantleState} from "../mantle-querier/MantleState";
-import {TestStateLocalTestNet} from "./common_localtestnet";
+import {defaultSleepTime, sleep, TestStateLocalTestNet} from "./common_localtestnet";
 var assert = require('assert');
 
 
@@ -50,7 +50,7 @@ export default async function main(contracts?: Record<string, number>) {
         {unbond: {}},
         testState.basset.contractInfo["lido_terra_hub"].contractAddress
     ))
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 50))
+    await sleep(defaultSleepTime)
     await mustPass(testState.basset.finish(testState.wallets.a))
     assert.equal(await querier.total_bond_stluna_amount(), 8_750_000_000)
     assert.equal((await querier.token_info_stluna()).total_supply, 7_000_000_000)
@@ -102,7 +102,7 @@ export default async function main(contracts?: Record<string, number>) {
         1_000_000_000,
         {unbond: {}},
         testState.basset.contractInfo["lido_terra_hub"].contractAddress))
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 50))
+        await sleep(defaultSleepTime)
     await mustPass(testState.basset.finish(testState.wallets.b))
     const uluna_balance_b = Number((await testState.wallets.a.lcd.bank.balance(testState.wallets.b.key.accAddress))[0].get("uluna").amount)
     history = (await querier.all_history()).history

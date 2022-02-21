@@ -94,7 +94,7 @@ const docker_config = path.join(__dirname, "..", "..", "testkit", "docker-compos
 
 export const start_testnet = async () => {
     const {
-        TERRA_CONFIG_VERSION = "fast"
+        TERRA_CONFIG_VERSION = "default"
     } = process.env
     console.log(`env variable TERRA_CONFIG_VERSION set to ${TERRA_CONFIG_VERSION}. Avaliable variants: default,fast,github`)
     let conf: any;

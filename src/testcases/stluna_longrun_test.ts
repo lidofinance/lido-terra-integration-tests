@@ -1,7 +1,7 @@
 import {floateq, mustPass} from "../helper/flow/must";
 import {emptyBlockWithFixedGas} from "../helper/flow/gas-station";
 import AnchorbAssetQueryHelper from "../helper/basset_queryhelper";
-import {disconnectValidator, get_expected_sum_from_requests, TestStateLocalTestNet, vals} from "./common_localtestnet";
+import {defaultSleepTime, disconnectValidator, get_expected_sum_from_requests, sleep, TestStateLocalTestNet, vals} from "./common_localtestnet";
 var assert = require('assert');
 
 
@@ -27,10 +27,10 @@ export default async function main() {
 
 
     //block 67
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation))
+    await sleep(defaultSleepTime)
 
     //block 68
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation))
+    await sleep(defaultSleepTime)
 
     await disconnectValidator("terradnode1")
     await testState.waitForJailed("terradnode1")
@@ -46,7 +46,7 @@ export default async function main() {
     assert.equal(1, stluna_exchange_rate)
     //block 92 - 94
     //bond
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 3))
+    await sleep(defaultSleepTime)
     for (j = 0; j < 3; j++) {
         for (i = 0; i < 25; i++) {
             await mustPass(testState.basset.bond_for_stluna(testState.wallets.a, 2_000_000))
@@ -106,7 +106,7 @@ export default async function main() {
     stluna_exchange_rate = await querier.stluna_exchange_rate()
 
     //block 95
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 50))
+    await sleep(defaultSleepTime)
 
     const ubond_exch_rate = await querier.stluna_exchange_rate()
     for (j = 0; j < 3; j++) {
@@ -160,7 +160,7 @@ export default async function main() {
             )
         }
     }
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 20))
+    await sleep(defaultSleepTime)
     await testState.basset.send_cw20_token(
         stlunaContractAddress,
         testState.wallets.c,
@@ -172,7 +172,7 @@ export default async function main() {
 
 
     //block 99 - 159
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 50))
+    await sleep(defaultSleepTime)
     const unbond_requests_a = await querier.unbond_requests(testState.wallets.a.key.accAddress)
     const unbond_requests_b = await querier.unbond_requests(testState.wallets.b.key.accAddress)
     const unbond_requests_c = await querier.unbond_requests(testState.wallets.c.key.accAddress)

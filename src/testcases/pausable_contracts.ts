@@ -13,7 +13,6 @@ export default async function main(contracts?: Record<string, number>) {
     await mustPass(testState.basset.bond_for_stluna(testState.wallets.c, stLunaBondAmount))
     await mustPass(testState.basset.bond(testState.wallets.d, bLunaBondAmount))
 
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 5));
     await mustPass(testState.basset.update_global_index(testState.wallets.ownerWallet));
 
     // only the owner can manage guardians

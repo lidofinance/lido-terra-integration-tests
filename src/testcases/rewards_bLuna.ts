@@ -2,7 +2,7 @@ import {mustPass} from "../helper/flow/must";
 import {emptyBlockWithFixedGas} from "../helper/flow/gas-station";
 import {TestStateLocalTerra} from "./common_localterra";
 import {makeRestStoreQuery} from "../helper/basset_queryhelper";
-import {TestStateLocalTestNet} from "./common_localtestnet";
+import {defaultSleepTime, sleep, TestStateLocalTestNet} from "./common_localtestnet";
 
 async function getLunaBalance(testState: TestStateLocalTestNet, address) {
     let balance = await testState.lcdClient.bank.balance(address);
@@ -47,7 +47,7 @@ export default async function main(contracts?: Record<string, number>) {
         throw new Error("accruedRewards must be more than zero");
     }
 
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 20));
+    await sleep(defaultSleepTime)
 
     let withdrawableUnbonded = await makeRestStoreQuery(
         testState.basset.contractInfo["lido_terra_hub"].contractAddress,
@@ -67,7 +67,7 @@ export default async function main(contracts?: Record<string, number>) {
                                     ${BigInt(+lunaBalanceAfterWithdraw) - BigInt(+lunaBalanceBeforeWithdraw)} != ${withdrawableUnbonded}`)
     }
 
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 5));
+    await sleep(defaultSleepTime)
 
     await mustPass(testState.basset.update_global_index(testState.wallets.a))
 
@@ -88,7 +88,7 @@ export default async function main(contracts?: Record<string, number>) {
         throw new Error("accruedRewards must be more than zero");
     }
 
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 20));
+    await sleep(defaultSleepTime)
 
     withdrawableUnbonded = await makeRestStoreQuery(
         testState.basset.contractInfo["lido_terra_hub"].contractAddress,
@@ -99,7 +99,7 @@ export default async function main(contracts?: Record<string, number>) {
         throw new Error(`withdrawableUnbonded is not equal to bonded amount: ${withdrawableUnbonded} != ${bondAmount}`)
     }
 
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 5));
+    await sleep(defaultSleepTime)
 
     lunaBalanceBeforeWithdraw = await getLunaBalance(testState, testState.wallets.b.key.accAddress);
     await mustPass(testState.basset.finish(testState.wallets.b));

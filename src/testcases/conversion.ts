@@ -3,7 +3,7 @@ import AnchorbAssetQueryHelper from "../helper/basset_queryhelper";
 import {emptyBlockWithFixedGas} from "../helper/flow/gas-station";
 import {floateq, mustFail, mustPass} from "../helper/flow/must";
 import {TestStateLocalTerra} from "./common_localterra";
-import {TestStateLocalTestNet} from "./common_localtestnet";
+import {defaultSleepTime, sleep, TestStateLocalTestNet} from "./common_localtestnet";
 
 let assert = require('assert');
 
@@ -54,7 +54,7 @@ export default async function main(contracts?: Record<string, number>) {
     const initial_uusd_balance = Number(coins1.get("uusd").amount)
     // tx - 1
     await mustPass(testState.basset.bond(testState.wallets.c, 100_000_000_000))
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 5))
+    await sleep(defaultSleepTime)
 
     // tx - 2
     await mustPass(testState.basset.update_global_index(testState.wallets.c))

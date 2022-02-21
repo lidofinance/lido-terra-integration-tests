@@ -10,6 +10,8 @@ import {Pagination} from "@terra-money/terra.js/dist/client/lcd/APIRequester";
 import * as fs from "fs";
 const {exec} = require('child_process');
 
+export const defaultSleepTime = 15_000;
+
 export const ValidatorsKeys = [
     "gloom sad wear decorate afraid tooth can gossip tool group work kid home arm lend alone job strategy decide oyster stairs crazy thrive muscle",
     "silver depend sleep maple bar innocent garlic hire patrol often embrace interest magnet valley tomorrow magnet rural lonely typical egg asset much round resist",

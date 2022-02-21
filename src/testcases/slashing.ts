@@ -4,7 +4,7 @@ import { emptyBlockWithFixedGas } from "../helper/flow/gas-station";
 import {get_expected_sum_from_requests} from "./common_localterra";
 import AnchorbAssetQueryHelper from "../helper/basset_queryhelper";
 import * as assert from "assert";
-import {disconnectValidator, TestStateLocalTestNet, vals} from "./common_localtestnet";
+import {defaultSleepTime, disconnectValidator, sleep, TestStateLocalTestNet, vals} from "./common_localtestnet";
 
 export default async function main() {
     const testState = new TestStateLocalTestNet()
@@ -20,7 +20,7 @@ export default async function main() {
     const initial_uluna_balance_b = Number((await testState.wallets.b.lcd.bank.balance(testState.wallets.b.key.accAddress))[0].get("uluna").amount)
 
     // blocks 69 - 70
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 2))
+    await sleep(defaultSleepTime)
 
 
     await mustPass(testState.basset.add_validator(testState.wallets.ownerWallet, vals[1].address))
@@ -34,7 +34,7 @@ export default async function main() {
     await mustPass(testState.basset.bond_for_stluna(testState.wallets.b, 10_000_000))
 
     //blocks 73 - 81
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 9))
+    await sleep(defaultSleepTime)
 
     let total_bluna_bond_amount_before_slashing = await querier.total_bond_bluna_amount()
     let total_stluna_bond_amount_before_slashing = await querier.total_bond_stluna_amount()
@@ -42,14 +42,14 @@ export default async function main() {
     await disconnectValidator("terradnode1")
     await testState.waitForJailed("terradnode1")
 
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 20))
+    await sleep(defaultSleepTime)
 
     // blocks 87 - 88
     await mustPass(testState.basset.slashing(testState.wallets.a))
     await mustPass(testState.basset.slashing(testState.wallets.b))
 
     // blocks 89 - 93
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 5))
+    await sleep(defaultSleepTime)
 
     let total_bluna_bond_amount_after_slashing = await querier.total_bond_bluna_amount()
     let total_stluna_bond_amount_after_slashing = await querier.total_bond_stluna_amount()
@@ -68,7 +68,7 @@ export default async function main() {
     assert.ok(await querier.stluna_exchange_rate() < 1)
 
     // blocks 96 - 105
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 10))
+    await sleep(defaultSleepTime)
 
     let bluna_ex_rate_before_second_bond = await querier.bluna_exchange_rate()
     let stluna_ex_rate_before_second_bond = await querier.stluna_exchange_rate()
@@ -110,7 +110,7 @@ export default async function main() {
     assert.ok(await querier.stluna_exchange_rate() > stluna_ex_rate_before_update)
 
     // blocks 258 - 307
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 50))
+    await sleep(defaultSleepTime)
 
     // blocks 308 - 382
     const initial_bluna_balance_a = await querier.balance_bluna(testState.wallets.a.key.accAddress)
@@ -150,7 +150,7 @@ export default async function main() {
     const unbond_requests_b = await querier.unbond_requests(testState.wallets.b.key.accAddress)
 
     // blocks 459 - 508
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 50))
+    await sleep(defaultSleepTime)
 
     // blocks 509 - 510
     await mustPass(testState.basset.finish(testState.wallets.a))

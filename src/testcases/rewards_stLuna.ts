@@ -2,7 +2,7 @@ import {mustPass} from "../helper/flow/must";
 import {emptyBlockWithFixedGas} from "../helper/flow/gas-station";
 import {TestStateLocalTerra} from "./common_localterra";
 import AnchorbAssetQueryHelper, {makeRestStoreQuery} from "../helper/basset_queryhelper";
-import {TestStateLocalTestNet} from "./common_localtestnet";
+import {defaultSleepTime, sleep, TestStateLocalTestNet} from "./common_localtestnet";
 
 function approxeq(a, b, e) {
     return Math.abs(a - b) <= e;
@@ -33,7 +33,7 @@ export default async function main(contracts?: Record<string, number>) {
         throw new Error("invalid stLuna balance")
     }
 
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, emptyBlocks));
+    await sleep(defaultSleepTime)
     await mustPass(testState.basset.update_global_index(testState.wallets.a))
     await mustPass(testState.basset.bond_for_stluna(testState.wallets.b, bondAmount))
 
@@ -42,7 +42,7 @@ export default async function main(contracts?: Record<string, number>) {
         throw new Error(`invalid stLuna balance: ${balanceB} > ${bondAmount}`)
     }
 
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, emptyBlocks));
+    await sleep(defaultSleepTime)
     await mustPass(testState.basset.update_global_index(testState.wallets.a))
 
     await mustPass(testState.basset.send_cw20_token(
@@ -58,7 +58,7 @@ export default async function main(contracts?: Record<string, number>) {
         throw new Error("stLuna balance must be zero")
     }
 
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, emptyBlocks));
+    await sleep(defaultSleepTime)
 
     let withdrawableUnbonded = await makeRestStoreQuery(
         testState.basset.contractInfo["lido_terra_hub"].contractAddress,
@@ -77,11 +77,11 @@ export default async function main(contracts?: Record<string, number>) {
                                     ${BigInt(+lunaBalanceAfterWithdraw) - BigInt(+lunaBalanceBeforeWithdraw)} != ${withdrawableUnbonded}`)
     }
 
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, emptyBlocks));
+    await sleep(defaultSleepTime)
 
     await mustPass(testState.basset.update_global_index(testState.wallets.a))
 
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, emptyBlocks));
+    await sleep(defaultSleepTime)
 
     await mustPass(testState.basset.update_global_index(testState.wallets.a))
 
@@ -98,7 +98,7 @@ export default async function main(contracts?: Record<string, number>) {
         throw new Error("stLuna balance must be zero")
     }
 
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, emptyBlocks));
+    await sleep(defaultSleepTime)
 
     withdrawableUnbonded = await makeRestStoreQuery(
         testState.basset.contractInfo["lido_terra_hub"].contractAddress,
@@ -109,7 +109,7 @@ export default async function main(contracts?: Record<string, number>) {
         throw new Error("withdrawableUnbonded must be more than bond amount")
     }
 
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, emptyBlocks));
+    await sleep(defaultSleepTime)
 
     lunaBalanceBeforeWithdraw = await getLunaBalance(testState, testState.wallets.b.key.accAddress);
     await mustPass(testState.basset.finish(testState.wallets.b));

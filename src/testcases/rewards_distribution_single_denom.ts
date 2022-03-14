@@ -4,7 +4,9 @@ import {TestStateLocalTerra} from "./common_localterra";
 import AnchorbAssetQueryHelper, {makeRestStoreQuery} from "../helper/basset_queryhelper";
 import {send_transaction} from "../helper/flow/execution";
 import {MsgSend} from "@terra-money/terra.js";
-import {defaultSleepTime, sleep, TestStateLocalTestNet} from "./common_localtestnet";
+import {checkRewardDistribution, defaultSleepTime, sleep, TestStateLocalTestNet} from "./common_localtestnet";
+import * as fs from "fs";
+
 
 function approxeq(a, b, e) {
     return Math.abs(a - b) <= e;
@@ -39,30 +41,7 @@ export default async function main(contracts?: Record<string, number>) {
     await mustPass(testState.basset.update_global_index(testState.wallets.ownerWallet));
 
 
-    let state = await makeRestStoreQuery(
-        testState.basset.contractInfo["lido_terra_hub"].contractAddress,
-        {state: {}},
-        testState.lcdClient.config.URL
-    ).then((r) => r);
-
-    let result = await testState.basset.update_global_index_with_result(testState.wallets.ownerWallet);
-
-    const stLunaRewardsRegex = /stluna_rewards","value":"([\d]+)/gm;
-    const bLunaRewardsRegex = /bluna_rewards","value":"([\d]+)/gm;
-    let stLunaRewards = parseInt(stLunaRewardsRegex.exec(result.raw_log)[1]); // in uluna
-    let bLunaRewards = parseInt(bLunaRewardsRegex.exec(result.raw_log)[1]); // in uusd
-
-    let uusdExhangeRate = +(await testState.lcdClient.oracle.exchangeRate("uusd")).amount
-    // check that bLuna/stLuna rewards (in uusd) ratio is the same as bLuna/stLuna bond ratio with some accuracy due to fees
-    // stLuna rewards are rebonded to validators and bLuna rewards are available as rewards for bLuna holders
-    if (!floateq(bLunaRewards / (stLunaRewards * uusdExhangeRate), (state.total_bond_bluna_amount / state.total_bond_stluna_amount), 0.003)) {
-        throw new Error(`invalid rewards distribution: stLunaRewards=${stLunaRewards * uusdExhangeRate}, 
-                                                       bLunaRewards=${bLunaRewards}, 
-                                                       stLunaBonded=${state.total_bond_stluna_amount}, 
-                                                       bLunaBonded=${state.total_bond_bluna_amount},
-                                                       bluna/stLuna rewards ratio = ${bLunaRewards / (stLunaRewards * uusdExhangeRate)},
-                                                       blunaBonded/stLunaBonded ratio = ${(state.total_bond_bluna_amount / state.total_bond_stluna_amount)}`);
-    }
+    await mustPass(checkRewardDistribution(testState))
 
     const accruedRewards = await makeRestStoreQuery(
         testState.basset.contractInfo["lido_terra_reward"].contractAddress,

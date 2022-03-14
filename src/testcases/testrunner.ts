@@ -180,12 +180,12 @@ const localtestnet_shared_testcases: Array<(contracts?: Record<string, number>) 
 ]
 
 const isolated_testcases: Array<() => Promise<void>> = [
-    StlunaLongRunningTest,
     BlunaLongRunningTest,
-    SlashingTest
-]
+    StlunaLongRunningTest,
+    SlashingTest,
+];
 
-// each test needs 6 wallets
+
 configure_shared_testnet(localtestnet_shared_testcases.length * 6)
     .then((contracts) => {
         console.log("uploaded contracts ", contracts)
@@ -200,3 +200,4 @@ configure_shared_testnet(localtestnet_shared_testcases.length * 6)
         console.log("failed");
         process.exit(1)
     })
+

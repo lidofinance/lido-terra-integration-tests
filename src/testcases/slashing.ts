@@ -1,6 +1,6 @@
 import * as fs from 'fs'
-import { floateq as floateq, mustPass } from "../helper/flow/must";
-import { emptyBlockWithFixedGas } from "../helper/flow/gas-station";
+import {floateq as floateq, mustPass} from "../helper/flow/must";
+import {emptyBlockWithFixedGas} from "../helper/flow/gas-station";
 import {get_expected_sum_from_requests} from "./common_localterra";
 import AnchorbAssetQueryHelper from "../helper/basset_queryhelper";
 import * as assert from "assert";
@@ -56,7 +56,7 @@ export default async function main() {
 
     assert.ok(
         floateq(total_stluna_bond_amount_before_slashing / total_bluna_bond_amount_before_slashing,
-        total_stluna_bond_amount_after_slashing / total_bluna_bond_amount_after_slashing, 0.01))
+            total_stluna_bond_amount_after_slashing / total_bluna_bond_amount_after_slashing, 0.01))
 
     assert.ok(await querier.bluna_exchange_rate() < 1)
     assert.ok(await querier.stluna_exchange_rate() < 1)
@@ -84,7 +84,7 @@ export default async function main() {
     assert.ok(bluna_ex_rate_after_second_bond < 1)
     assert.ok(stluna_ex_rate_after_second_bond < 1)
     assert.ok(bluna_ex_rate_after_second_bond > bluna_ex_rate_before_second_bond)
-    assert.ok(floateq(stluna_ex_rate_after_second_bond,stluna_ex_rate_before_second_bond,1e-5))
+    assert.ok(floateq(stluna_ex_rate_after_second_bond, stluna_ex_rate_before_second_bond, 1e-5))
 
     // blocks 108 - 181
     let prev_exchange_rate = 0.5;
@@ -141,7 +141,18 @@ export default async function main() {
     await testState.basset.send_cw20_token(
         stlunaContractAddress,
         testState.wallets.b,
-        await querier.balance_stluna(testState.wallets.b.key.accAddress),
+        await querier.balance_stluna(testState.wallets.b.key.accAddress) - 1,
+        {unbond: {}},
+        testState.basset.contractInfo["lido_terra_hub"].contractAddress
+    )
+
+    await sleep(defaultSleepTime)
+
+    // there is always a chance that the last request will not be unbonded, so we sacrifice 1 uluna
+    await testState.basset.send_cw20_token(
+        stlunaContractAddress,
+        testState.wallets.b,
+        1,
         {unbond: {}},
         testState.basset.contractInfo["lido_terra_hub"].contractAddress
     )
@@ -163,14 +174,14 @@ export default async function main() {
     const uluna_balance_a = Number((await testState.wallets.a.lcd.bank.balance(testState.wallets.a.key.accAddress))[0].get("uluna").amount)
     const uluna_balance_b = Number((await testState.wallets.b.lcd.bank.balance(testState.wallets.b.key.accAddress))[0].get("uluna").amount)
     const actual_withdrawal_sum_a = (Number(uluna_balance_a) - initial_uluna_balance_a)
-    const actual_withdrawal_sum_b = (Number(uluna_balance_b) - initial_uluna_balance_b) + 160_000_001
+    const actual_profit_sum_b = (Number(uluna_balance_b) - initial_uluna_balance_b)
     const expected_withdrawal_sum_a = await get_expected_sum_from_requests(querier, unbond_requests_a, "bluna")
-    const expected_withdrawal_sum_b = await get_expected_sum_from_requests(querier, unbond_requests_b, "stluna")
+    const expected_profit_sum_b = await get_expected_sum_from_requests(querier, unbond_requests_b, "stluna") - 160_000_001
 
     assert.ok(actual_withdrawal_sum_a < 150_000_001)
-    assert.ok(actual_withdrawal_sum_b < 160_000_001)
+    assert.ok(actual_profit_sum_b > 0)
     assert.ok(floateq(expected_withdrawal_sum_a, actual_withdrawal_sum_a, 1e-4))
-    assert.ok(floateq(expected_withdrawal_sum_b, actual_withdrawal_sum_b, 1e-4))
+    assert.ok(floateq(expected_profit_sum_b, actual_profit_sum_b, 1e-4))
 }
 
 if (require.main === module) {

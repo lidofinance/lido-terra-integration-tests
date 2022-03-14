@@ -3,11 +3,12 @@ import Anchor from "../helper/spawn";
 import AnchorbAsset from "../helper/basset_helper";
 import {setTestParams} from "../parameters/contract-tests-parameteres";
 import * as path from "path";
-import AnchorbAssetQueryHelper from "../helper/basset_queryhelper";
+import AnchorbAssetQueryHelper, {makeRestStoreQuery} from "../helper/basset_queryhelper";
 import {UnbondRequestsResponse} from "../helper/types/lido_terra_hub/unbond_requests_response";
 import {send_transaction} from "../helper/flow/execution";
 import {Pagination} from "@terra-money/terra.js/dist/client/lcd/APIRequester";
 import * as fs from "fs";
+import {floateq} from "../helper/flow/must";
 const {exec} = require('child_process');
 
 export const defaultSleepTime = 15_000;
@@ -280,4 +281,45 @@ export const get_expected_sum_from_requests = async (querier: AnchorbAssetQueryH
             }
         }
     }, Promise.resolve(0))
+}
+
+
+export const checkRewardDistribution = async (testState: TestStateLocalTestNet) => {
+
+
+    let state = await makeRestStoreQuery(
+        testState.basset.contractInfo["lido_terra_hub"].contractAddress,
+        {state: {}},
+        testState.lcdClient.config.URL
+    ).then((r) => r);
+
+
+    let result = await testState.basset.update_global_index_with_result(testState.wallets.ownerWallet);
+
+    const stLunaRewardsRegex = /stluna_rewards","value":"([\d]+)/gm;
+    const stLunaFeeAmountRegexp = /lido_stluna_fee","value":"([\d]+)uluna/gm;
+    const bLunaFeeAmountRegexp = /lido_bluna_fee","value":"([\d]+)uusd/gm;
+    const bLunaRewardsWithFeeRegex = /bluna_rewards","value":"([\d]+)/gm;
+    const xchgRateRegex = /luna_2_ust_rewards_xchg_rate","value":"([\d.]+)/gm;
+    const swapFeeRegex = /"swap_fee","value":"([\d]+)/gm;
+
+    let stLunaRewardswithFee = parseInt(stLunaRewardsRegex.exec(result.raw_log)[1]); // in uluna
+    let bLunaRewardswithFee = parseInt(bLunaRewardsWithFeeRegex.exec(result.raw_log)[1]); // in uusd
+    const stLunaFeeAmount = parseInt(stLunaFeeAmountRegexp.exec(result.raw_log)[1]);
+    const bLunaFeeAmount = parseInt(bLunaFeeAmountRegexp.exec(result.raw_log)[1]);
+    const uusdExhangeRate = parseFloat(xchgRateRegex.exec(result.raw_log)[1])
+    let swapFee = parseInt(swapFeeRegex.exec(result.raw_log)[1]) // swap fee for uusd to uluna convertion
+    const stLunaRewards = stLunaRewardswithFee +stLunaFeeAmount + swapFee
+    const bLunaRewards = bLunaRewardswithFee + bLunaFeeAmount
+    // check that bLuna/stLuna rewards (in uusd) ratio is the same as bLuna/stLuna bond ratio with some accuracy due to fees
+    // stLuna rewards are rebonded to validators and bLuna rewards are available as rewards for bLuna holders
+    if (!floateq(bLunaRewards / (stLunaRewards * uusdExhangeRate), (state.total_bond_bluna_amount / state.total_bond_stluna_amount), 0.003)) {
+    // if (true) {
+        throw new Error(`invalid rewards distribution: stLunaRewards=${stLunaRewards * uusdExhangeRate}, 
+                                                       bLunaRewards=${bLunaRewards}, 
+                                                       stLunaBonded=${state.total_bond_stluna_amount}, 
+                                                       bLunaBonded=${state.total_bond_bluna_amount},
+                                                       bluna/stLuna rewards ratio = ${bLunaRewards / (stLunaRewards * uusdExhangeRate)},
+                                                       blunaBonded/stLunaBonded ratio = ${(state.total_bond_bluna_amount / state.total_bond_stluna_amount)}`);
+    }
 }

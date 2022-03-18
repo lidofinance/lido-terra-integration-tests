@@ -907,7 +907,6 @@ export default class AnchorbAsset {
         sender: Wallet,
         token: string,
         aidrop: string,
-        pair: string
     ): Promise<void> {
         const execution = await execute(
             sender,
@@ -918,9 +917,6 @@ export default class AnchorbAsset {
                     airdrop_info: {
                         airdrop_token_contract: token,
                         airdrop_contract: aidrop,
-                        airdrop_swap_contract: pair,
-                        swap_belief_price: null,
-                        swap_max_spread: null,
                     },
                 },
             }

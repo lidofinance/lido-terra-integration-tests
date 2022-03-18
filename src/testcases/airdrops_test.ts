@@ -61,7 +61,7 @@ async function main() {
     await mustPass(anchor.airdrop_register_merkle_root(testState.wallets.ownerWallet, airdrop.getMerkleRoot()))
     await mustPass(testState.basset.transfer_cw20_token_to_addr(anchorTonenAddress, testState.wallets.ownerWallet, anchor.contractInfo.airdrop.contractAddress, 1_000_000_000))
 
-    await mustPass(testState.basset.add_airdrop_info(testState.wallets.ownerWallet, anchorTonenAddress, anchor.contractInfo.airdrop.contractAddress, "deprecated"))
+    await mustPass(testState.basset.add_airdrop_info(testState.wallets.ownerWallet, anchorTonenAddress, anchor.contractInfo.airdrop.contractAddress))
 
     assert.equal(await querier.balance_bluna(withdrawalAccount), 0)
 

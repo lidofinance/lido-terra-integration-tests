@@ -1,34 +1,5 @@
-# Testset for test columbus-5 bAsset contracts
+# Testset for test columbus-5 lido terra contracts
 
-# LocalTerra
-## To make it work:
-1) Clone repository and install or update dependencies with command
-```
-yarn install
-```
-2) Put lido bAsset artifacts in `./anchor-bAsset-contracts/artifacts` dir
-3) Clone locale terra `https://github.com/terra-money/LocalTerra`
-4) Update some params to speed up localterra network
-    1) file `./config/genesis.json` you could update `unbonding_time` to the same value, bAssetHubContract has, lets say - 20s
-    2) file `./config/config.toml` timeout parameters in `consensus` block
-    ```
-    + timeout_propose = "200ms"
-    + timeout_propose_delta = "200ms"
-    + timeout_prevote = "200ms"
-    + timeout_prevote_delta = "200ms"
-    + timeout_precommit_delta = "200ms"
-    + timeout_commit = "200ms"
-    ```
-5) run `docker-compose up`
-
-you are ready to run tests
-the only one is workong right now is `./src/testcases/bluna_short_test.ts`
-
-```
-npx ts-node ./src/testcases/bluna_short_test.ts
-```
-
-The main difference between mantle sdk testkit and localterra testkit is in mantle sdk we are injecting accounts and validators and their behavior in network, while in localterra we are using predefined accounts
 
 # Local TestNet - 4 validators set
 ## To make it work:
@@ -36,8 +7,11 @@ The main difference between mantle sdk testkit and localterra testkit is in mant
 ```shell
 yarn install
 ```
-2) Put lido bAsset artifacts in `./anchor-bAsset-contracts/artifacts` dir
-3) To start the 4-set validators environment - run `make start` in the `testkit` dir. Keep in mind, `http://192.168.10.2:1317/oracle/denoms/exchange_rates` starts work after 30-45 blocks(and the same amount of seconds), update_global_index needs the endpoint to work, for most of the testcases this does not matter, but if you want to call update_global_index soon after test starts, give some time to env get ready, to check oracles endpoint you can run 
+2) Put lido bAsset artifacts in `./lido-terra-contracts/artifacts` dir
+### Run all test in parallel
+Just run the command `npx ts-node ./src/testcases/testrunner.ts` and wait.
+### Run test individually (for now manual setup is required)
+1) To start the 4-set validators environment - run `make start` in the `testkit` dir. Keep in mind, `http://192.168.10.2:1317/oracle/denoms/exchange_rates` starts work after 30-45 blocks(and the same amount of seconds), update_global_index needs the endpoint to work, for most of the testcases this does not matter, but if you want to call update_global_index soon after test starts, give some time to env get ready, to check oracles endpoint you can run 
 ```shell
 $ make oracle_status
 ```
@@ -63,10 +37,5 @@ curl http://192.168.10.2:1317/oracle/denoms/exchange_rates
   }
 ]}
 ```
-4) run the tests
-    working now
-    `./src/testcases/bluna_short_test.ts`
-    `./src/testcases/bluna_longrun_test.ts`
-    `./src/testcases/stluna_longrun_test.ts`
-    `./src/testcases/stluna_short_test.ts`
-5) recommended to clear env with `make stop && make start` before each testrun
+2) run any test in the testcases directory
+3) recommended to clear env with `make stop && make start` before each testrun

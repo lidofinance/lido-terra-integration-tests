@@ -5,13 +5,13 @@ import {unjail} from "../helper/validator-operation/unjail";
 import {get_expected_sum_from_requests} from "./common_localterra";
 import AnchorbAssetQueryHelper from "../helper/basset_queryhelper";
 import {TestStateLocalTerra} from "./common_localterra";
-import {disconnectValidator, TestStateLocalTestNet, vals} from "./common_localtestnet";
+import {defaultSleepTime, disconnectValidator, sleep, TestStateLocalTestNet, vals} from "./common_localtestnet";
 var assert = require('assert');
 
 
 // let mantleState: MantleState;
 
-async function main() {
+export default async function main() {
     let j
     let i
     const testState = new TestStateLocalTestNet()
@@ -39,13 +39,13 @@ async function main() {
 
     //block 86 - 90
     // Oracle slashing happen at the block 89
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 20))
+    await sleep(defaultSleepTime)
 
     //block 92 - 94
     //bond
     await testState.basset.slashing(testState.wallets.a)
 
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 3))
+    await sleep(defaultSleepTime)
     // set really low xhg_rate for first iteration
     let bluna_exchange_rate = 0.5;
     for (j = 0; j < 3; j++) {
@@ -85,7 +85,7 @@ async function main() {
     }
 
     //block 95
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 50))
+    await sleep(defaultSleepTime)
 
     await mustPass(testState.basset.update_global_index(testState.wallets.a))
 
@@ -139,7 +139,7 @@ async function main() {
     const unbond_requests_b = await querier.unbond_requests(testState.wallets.b.key.accAddress)
     const unbond_requests_c = await querier.unbond_requests(testState.wallets.c.key.accAddress)
 
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 30))
+    await sleep(defaultSleepTime)
     const inital_uluna_balance_a = Number((await testState.wallets.a.lcd.bank.balance(testState.wallets.a.key.accAddress))[0].get("uluna").amount)
     const inital_uluna_balance_b = Number((await testState.wallets.b.lcd.bank.balance(testState.wallets.b.key.accAddress))[0].get("uluna").amount)
     const inital_uluna_balance_c = Number((await testState.wallets.c.lcd.bank.balance(testState.wallets.c.key.accAddress))[0].get("uluna").amount)
@@ -172,6 +172,8 @@ async function main() {
 
 }
 
-main()
-    .then(() => console.log("done"))
-    .catch(console.log);
+if (require.main === module) {
+    main()
+        .then(() => console.log("done"))
+        .catch(console.log);
+}

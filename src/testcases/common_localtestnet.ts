@@ -1,13 +1,17 @@
-import {LCDClient, LocalTerra, MnemonicKey, MsgSend, Fee, Validator, Wallet, LegacyAminoMultisigPublicKey, SimplePublicKey} from "@terra-money/terra.js";
+import {LCDClient, LocalTerra, MnemonicKey, MsgSend, Fee, Validator, Wallet, LegacyAminoMultisigPublicKey, SimplePublicKey, isTxError, MsgStoreCode, Key} from "@terra-money/terra.js";
 import Anchor from "../helper/spawn";
 import AnchorbAsset from "../helper/basset_helper";
 import {setTestParams} from "../parameters/contract-tests-parameteres";
 import * as path from "path";
-import AnchorbAssetQueryHelper from "../helper/basset_queryhelper";
+import AnchorbAssetQueryHelper, {makeRestStoreQuery} from "../helper/basset_queryhelper";
 import {UnbondRequestsResponse} from "../helper/types/lido_terra_hub/unbond_requests_response";
 import {send_transaction} from "../helper/flow/execution";
 import {Pagination} from "@terra-money/terra.js/dist/client/lcd/APIRequester";
+import * as fs from "fs";
+import {floateq} from "../helper/flow/must";
 const {exec} = require('child_process');
+
+export const defaultSleepTime = 15_000;
 
 export const ValidatorsKeys = [
     "gloom sad wear decorate afraid tooth can gossip tool group work kid home arm lend alone job strategy decide oyster stairs crazy thrive muscle",
@@ -35,14 +39,16 @@ export const vals = [
     },
 ]
 
-export const accKeys = [
+export const predefinedKeys = [
     "song wood skull unfair cute rude water dog convince summer sell comic flower enter proud scout orient alarm bulk jealous enable index tip wolf",
     "broccoli civil caution forum drum burst become frequent brother valley truly amazing eager strategy arrow snack vehicle turtle switch fiber pact story cruise bulb",
     "devote negative jacket recipe onion health that jungle stuff catch soft region this indoor tired erase fiber adjust nurse half develop issue often broccoli",
     "rose chalk climb drum innocent cruise rich soap brother barely human humble run coffee gadget symptom kit food hobby west pill harvest exile gap",
     "claw meat hockey day clay cave blossom toy calm rotate home huge tomato faint language gate life midnight slab session palm forum raw alien",
-    "whale aisle lemon entire uphold retreat couch avocado fork thank flee card blossom hockey universe rich slam spare amused slight pet bright bridge junk"
+    "whale aisle lemon entire uphold retreat couch avocado fork thank flee card blossom hockey universe rich slam spare amused slight pet bright bridge junk",
+    "gospel trap material fuel habit note album believe bonus color body axis ozone column improve boy day marine senior tobacco genre umbrella pact loan"
 ]
+export const faucetMnemonic = "common betray real priority silent someone tobacco increase sugar polar auction pony sport license rude feel swarm ill piece artist hidden silk submit travel"
 /* 
 Validators:
 terravaloper188p7d0w6948y8p4cg5p3m6zx8lzzg8r0vt47ms - node0 192.168.10.2
@@ -85,6 +91,13 @@ claw meat hockey day clay cave blossom toy calm rotate home huge tomato faint la
   address: terra1jtm9ga0zvgptd2jnv9fysuh82z4ajw2az3xr39
 whale aisle lemon entire uphold retreat couch avocado fork thank flee card blossom hockey universe rich slam spare amused slight pet bright bridge junk
 
+-name: acc6
+  addressa: terra133kkg0vfughrdmd5vjegjzuz436ehs0jsrs8t4
+gospel trap material fuel habit note album believe bonus color body axis ozone column improve boy day marine senior tobacco genre umbrella pact loan
+
+- name: faucetAcc
+  address: terra1nm4c55l3h4zzwlhe97hhwdlestm08ygkxnh75x
+common betray real priority silent someone tobacco increase sugar polar auction pony sport license rude feel swarm ill piece artist hidden silk submit travel
 
 - multisig accs
     'notice oak worry limit wrap speak medal online prefer cluster roof addict wrist behave treat actual wasp year salad speed social layer crew genius',
@@ -99,6 +112,42 @@ const {
     DOCKER_NETWORK = "testkit_localnet"
 } = process.env
 
+export let globalWalletPool: Wallet[] = []
+
+export const contracts = [
+    "lido_terra_airdrop_registry",
+    "lido_terra_hub",
+    "lido_terra_reward",
+    "lido_terra_token",
+    "lido_terra_token_stluna",
+    "lido_terra_rewards_dispatcher",
+    "lido_terra_validators_registry",
+];
+
+export const uploadCode = (location: string, sender: Wallet, fee?: Fee): Promise<Record<string, number>> => {
+    return contracts.reduce(
+        (t, c) =>
+            t.then(async (prev: Record<string, number>): Promise<Record<string, number>> => {
+                const bytecode = fs.readFileSync(`${location}/${c}.wasm`);
+                const storeCode = new MsgStoreCode(
+                    sender.key.accAddress,
+                    bytecode.toString("base64")
+                );
+
+                const result = await send_transaction(sender, [storeCode], fee);
+                if (isTxError(result)) {
+                    throw new Error(`Couldn't upload ${c}: ${result.raw_log}`);
+                }
+
+                const codeId = +result.logs[0].eventsByType.store_code.code_id[0];
+
+                prev[c] = codeId
+                console.log(prev)
+                return prev
+            }),
+        Promise.resolve({})
+    );
+}
 
 export function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -112,34 +161,43 @@ export const disconnectValidator = async (name: string): Promise<any> => {
 export class TestStateLocalTestNet {
     validators: Validator[]
     anchor: Anchor
-    gasStation: MnemonicKey
+    gasStation: Key
     lcdClient: LCDClient
     wallets: Record<string, Wallet>
     multisigKeys: Array<MnemonicKey>
     multisigPublikKey: LegacyAminoMultisigPublicKey
     basset: AnchorbAsset
     validators_addresses: Array<string>
-    constructor() {
+    contracts?: Record<string, number>
+    constructor(contracts?: Record<string, number>) {
         this.lcdClient = new LCDClient({
             chainID: "localnet",
             URL: "http://127.0.0.1:1317/"
         })
+        this.contracts = contracts
+        let wallets: Wallet[]
+        if (contracts != undefined) {
+            wallets = globalWalletPool.splice(0, 6)
+        } else {
+            wallets = predefinedKeys.map((keys => {return this.lcdClient.wallet(new MnemonicKey({mnemonic: keys}))}))
+        }
         this.wallets = {
             valAWallet: this.lcdClient.wallet(new MnemonicKey({mnemonic: ValidatorsKeys[0]})),
             valBWallet: this.lcdClient.wallet(new MnemonicKey({mnemonic: ValidatorsKeys[1]})),
             valCWallet: this.lcdClient.wallet(new MnemonicKey({mnemonic: ValidatorsKeys[2]})),
             valDWallet: this.lcdClient.wallet(new MnemonicKey({mnemonic: ValidatorsKeys[3]})),
 
-            ownerWallet: this.lcdClient.wallet(new MnemonicKey({mnemonic: accKeys[0]})),
-            a: this.lcdClient.wallet(new MnemonicKey({mnemonic: accKeys[0]})),
-            b: this.lcdClient.wallet(new MnemonicKey({mnemonic: accKeys[1]})),
-            c: this.lcdClient.wallet(new MnemonicKey({mnemonic: accKeys[2]})),
-            d: this.lcdClient.wallet(new MnemonicKey({mnemonic: accKeys[3]})),
+            faucetAccount: this.lcdClient.wallet(new MnemonicKey({mnemonic: faucetMnemonic})),
+            ownerWallet: wallets[0],
+            a: wallets[0],
+            b: wallets[1],
+            c: wallets[2],
+            d: wallets[3],
 
-            lido_fee: this.lcdClient.wallet(new MnemonicKey({mnemonic: accKeys[4]})),
-            gasStation: this.lcdClient.wallet(new MnemonicKey({mnemonic: accKeys[5]})),
+            lido_fee: wallets[4],
+            gasStation: wallets[5],
         }
-        this.gasStation = new MnemonicKey({mnemonic: accKeys[5]})
+        this.gasStation = wallets[5].key
         this.validators_addresses = [vals[0].address]
         this.anchor = new Anchor(this.wallets.ownerWallet);
 
@@ -156,19 +214,31 @@ export class TestStateLocalTestNet {
     async init() {
         let pagination: Pagination;
         [this.validators, pagination] = await this.lcdClient.staking.validators()
-        await this.anchor.store_contracts_localterra(
-            path.resolve(__dirname, "../../lido-terra-contracts/artifacts"),
-        );
         const fixedFeeForInit = new Fee(6000000, "2000000uusd");
-        await this.anchor.instantiate_localterra(
-            fixedFeeForInit,
-            setTestParams(
-                this.validators_addresses[0],
-                this.wallets.a.key.accAddress,
-                this.wallets.lido_fee.key.accAddress,
-            ),
-            this.validators_addresses
-        );
+        if (this.contracts != undefined) {
+            await this.anchor.instantiate_prepared_contracts(
+                this.contracts,
+                fixedFeeForInit,
+                setTestParams(
+                    this.validators_addresses[0],
+                    this.wallets.a.key.accAddress,
+                    this.wallets.lido_fee.key.accAddress,
+                ),
+                this.validators_addresses)
+        } else {
+            await this.anchor.store_contracts_localterra(
+                path.resolve(__dirname, "../../lido-terra-contracts/artifacts"),
+            );
+            await this.anchor.instantiate_localterra(
+                fixedFeeForInit,
+                setTestParams(
+                    this.validators_addresses[0],
+                    this.wallets.a.key.accAddress,
+                    this.wallets.lido_fee.key.accAddress,
+                ),
+                this.validators_addresses
+            );
+        }
         this.basset = this.anchor.bAsset;
     }
 
@@ -211,4 +281,45 @@ export const get_expected_sum_from_requests = async (querier: AnchorbAssetQueryH
             }
         }
     }, Promise.resolve(0))
+}
+
+
+export const checkRewardDistribution = async (testState: TestStateLocalTestNet) => {
+
+
+    let state = await makeRestStoreQuery(
+        testState.basset.contractInfo["lido_terra_hub"].contractAddress,
+        {state: {}},
+        testState.lcdClient.config.URL
+    ).then((r) => r);
+
+
+    let result = await testState.basset.update_global_index_with_result(testState.wallets.ownerWallet);
+
+    const stLunaRewardsRegex = /stluna_rewards","value":"([\d]+)/gm;
+    const stLunaFeeAmountRegexp = /lido_stluna_fee","value":"([\d]+)uluna/gm;
+    const bLunaFeeAmountRegexp = /lido_bluna_fee","value":"([\d]+)uusd/gm;
+    const bLunaRewardsWithFeeRegex = /bluna_rewards","value":"([\d]+)/gm;
+    const xchgRateRegex = /luna_2_ust_rewards_xchg_rate","value":"([\d.]+)/gm;
+    const swapFeeRegex = /"swap_fee","value":"([\d]+)/gm;
+
+    let stLunaRewardswithFee = parseInt(stLunaRewardsRegex.exec(result.raw_log)[1]); // in uluna
+    let bLunaRewardswithFee = parseInt(bLunaRewardsWithFeeRegex.exec(result.raw_log)[1]); // in uusd
+    const stLunaFeeAmount = parseInt(stLunaFeeAmountRegexp.exec(result.raw_log)[1]);
+    const bLunaFeeAmount = parseInt(bLunaFeeAmountRegexp.exec(result.raw_log)[1]);
+    const uusdExhangeRate = parseFloat(xchgRateRegex.exec(result.raw_log)[1])
+    let swapFee = parseInt(swapFeeRegex.exec(result.raw_log)[1]) // swap fee for uusd to uluna convertion
+    const stLunaRewards = stLunaRewardswithFee +stLunaFeeAmount + swapFee
+    const bLunaRewards = bLunaRewardswithFee + bLunaFeeAmount
+    // check that bLuna/stLuna rewards (in uusd) ratio is the same as bLuna/stLuna bond ratio with some accuracy due to fees
+    // stLuna rewards are rebonded to validators and bLuna rewards are available as rewards for bLuna holders
+    if (!floateq(bLunaRewards / (stLunaRewards * uusdExhangeRate), (state.total_bond_bluna_amount / state.total_bond_stluna_amount), 0.003)) {
+    // if (true) {
+        throw new Error(`invalid rewards distribution: stLunaRewards=${stLunaRewards * uusdExhangeRate}, 
+                                                       bLunaRewards=${bLunaRewards}, 
+                                                       stLunaBonded=${state.total_bond_stluna_amount}, 
+                                                       bLunaBonded=${state.total_bond_bluna_amount},
+                                                       bluna/stLuna rewards ratio = ${bLunaRewards / (stLunaRewards * uusdExhangeRate)},
+                                                       blunaBonded/stLunaBonded ratio = ${(state.total_bond_bluna_amount / state.total_bond_stluna_amount)}`);
+    }
 }

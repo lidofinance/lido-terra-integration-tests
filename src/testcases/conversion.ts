@@ -1,13 +1,14 @@
 import {Coins} from "@terra-money/terra.js";
 import AnchorbAssetQueryHelper from "../helper/basset_queryhelper";
 import {emptyBlockWithFixedGas} from "../helper/flow/gas-station";
-import {mustFail, mustPass} from "../helper/flow/must";
+import {floateq, mustFail, mustPass} from "../helper/flow/must";
 import {TestStateLocalTerra} from "./common_localterra";
+import {defaultSleepTime, sleep, TestStateLocalTestNet} from "./common_localtestnet";
 
 let assert = require('assert');
 
-async function main() {
-    const testState = new TestStateLocalTerra()
+export default async function main(contracts?: Record<string, number>) {
+    const testState = new TestStateLocalTestNet(contracts)
     await testState.init()
 
     const querier = new AnchorbAssetQueryHelper(
@@ -53,7 +54,7 @@ async function main() {
     const initial_uusd_balance = Number(coins1.get("uusd").amount)
     // tx - 1
     await mustPass(testState.basset.bond(testState.wallets.c, 100_000_000_000))
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 5))
+    await sleep(defaultSleepTime)
 
     // tx - 2
     await mustPass(testState.basset.update_global_index(testState.wallets.c))
@@ -70,16 +71,23 @@ async function main() {
     const tax_rate = await testState.lcdClient.treasury.taxRate()
     const tax_cap = await testState.lcdClient.treasury.taxCap("uusd")
 
-    const tax_amount = tax_rate.mul(accrued_reward).toNumber()
-    const tax_cap_amount = tax_cap.toIntCoin().amount.toNumber()
-    assert.equal(uusd_balance,
-        initial_uusd_balance
+    const tax_amount = Number(tax_rate.mul(accrued_reward).toInt())
+    const tax_cap_amount = Number(tax_cap.toIntCoin().amount)
+    console.log(uusd_balance, initial_uusd_balance, uusd_tx_fee, accrued_reward, tax_amount, tax_cap_amount)
+    let wantedBalance = initial_uusd_balance
         - 4 * uusd_tx_fee + // fee for 4 txs
         accrued_reward -  // the accrued rewards
-        (tax_amount > tax_cap_amount ? tax_cap_amount : tax_amount)) // deduct_tax (capped)
+        (tax_amount > tax_cap_amount ? tax_cap_amount : tax_amount) // deduct_tax (capped)
+    if (!floateq(uusd_balance,
+        wantedBalance,
+        0.06)) {
+        throw new Error(`got balance = ${uusd_balance}, want = ${wantedBalance}`);
+    }
 }
 
-main()
-    .then(() => console.log("done"))
-    .then(async () => {})
-    .catch(console.log);
+if (require.main === module) {
+    main()
+        .then(() => console.log("done"))
+        .catch(console.log);
+}
+

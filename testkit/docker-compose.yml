@@ -11,7 +11,7 @@ services:
     environment:
       - ID=0
     volumes:
-      - ./configs/node0/terrad/config/:/root/.terra/config
+      - ${CONF_DIR:-./configs/}/node0/:/root/.terra/config
     command: terrad start
     networks:
       localnet:
@@ -26,7 +26,7 @@ services:
     environment:
       - ID=1
     volumes:
-      - ./configs/node1/terrad/config/:/root/.terra/config
+      - ${CONF_DIR:-./configs/}/node1/:/root/.terra/config
     command: terrad start
     networks:
       localnet:
@@ -41,7 +41,7 @@ services:
       - "9092:9090"
       - "26661-26662:26656-26657"
     volumes:
-      - ./configs/node2/terrad/config/:/root/.terra/config
+      - ${CONF_DIR:-./configs/}/node2/:/root/.terra/config
     command: terrad start
     networks:
       localnet:
@@ -56,7 +56,7 @@ services:
       - "9093:9090"
       - "26663-26664:26656-26657"
     volumes:
-      - ./configs/node3/terrad/config/:/root/.terra/config
+      - ${CONF_DIR:-./configs/}/node3/:/root/.terra/config
     command: terrad start
     networks:
       localnet:

@@ -803,6 +803,23 @@ export default class AnchorbAsset {
     }
   }
 
+  public async transfer_cw20_token_to_addr(
+    contract: string,
+    sender: Wallet,
+    recipient: string,
+    amount: number,
+): Promise<void> {
+    const transferExecution = await execute(sender, contract, {
+        transfer: {
+            recipient: recipient,
+            amount: `${amount}`,
+        },
+    });
+    if (isTxError(transferExecution)) {
+        throw new Error(`Couldn't run: ${transferExecution.raw_log}`);
+    }
+}
+
   public async transfer_from_cw20_token(
     contract: string,
     sender: Wallet,
@@ -975,6 +992,30 @@ export default class AnchorbAsset {
       throw new Error(`Couldn't run: ${unpauseContracts.raw_log}`);
     }
   }
+
+  public async claim_airdrops(
+    sender: Wallet,
+    token:string,
+    stage: number,
+    proof: string[],
+    amount: number
+): Promise<void> {
+    const execution = await execute(
+        sender,
+        this.contractInfo.lido_terra_hub.contractAddress,
+        {
+            claim_airdrops: {
+                token: token,
+                stage: stage,
+                proof: proof,
+                amount: `${amount}`
+            },
+        }
+    );
+    if (isTxError(execution)) {
+        throw new Error(`Couldn't run: ${execution.raw_log}`);
+    }
+}
 
   public async fabricate_mir_claim(
     sender: Wallet,

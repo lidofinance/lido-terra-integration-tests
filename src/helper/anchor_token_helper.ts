@@ -32,12 +32,12 @@ type Mint = {
 };
 
 const contracts = [
-  "gov",
-  "faucet",
-  "collector",
-  "community",
-  "staking",
-  "token",
+  // "gov",
+  // "faucet",
+  // "collector",
+  // "community",
+  // "staking",
+  // "token",
   "airdrop",
 ];
 
@@ -853,5 +853,20 @@ export default class AnchorToken {
       }
     );
     return response;
+  }
+
+  public async airdrop_register_merkle_root(
+    sender: Wallet,
+    merkle_root: string
+  ): Promise<any> {
+    const contract = this.contractInfo.airdrop.contractAddress;
+    const merkleRegistrationExecuttion = await execute(sender, contract, {
+      register_merkle_root: {
+        merkle_root: merkle_root,
+      },
+    });
+    if (isTxError(merkleRegistrationExecuttion)) {
+      throw new Error(`Couldn't run: ${merkleRegistrationExecuttion.raw_log}`);
+    }
   }
 }

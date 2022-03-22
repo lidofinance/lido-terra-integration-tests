@@ -28,7 +28,7 @@ async function main() {
     await testState.init()
 
     // we will use cw20 compatible bluna token as anchor token
-    const anchorTonenAddress = testState.basset.contractInfo.lido_terra_token.contractAddress
+    const anchorTokenAddress = testState.basset.contractInfo.lido_terra_token.contractAddress
     const withdrawalAccount = testState.wallets.a.key.accAddress
 
     const querier = new AnchorbAssetQueryHelper(
@@ -40,11 +40,12 @@ async function main() {
     await mustPass(testState.basset.bond(testState.wallets.ownerWallet, 1_000_000_000))
 
     const anchor = new AnchorToken()
-    // https://github.com/Anchor-Protocol/anchor-token-contracts
+    // https://github.com/Anchor-Protocol/anchor-token-contracts/tree/v0.2.0
     // airdrop contract is required for the test
+    // artifacts can be downloaded here https://github.com/Anchor-Protocol/anchor-token-contracts/releases/download/v0.2.0/cosmwasm-artifacts.tar.gz
     await mustPass(anchor.storeCodes(testState.wallets.ownerWallet, path.resolve(__dirname, "../../anchor-token-contracts/artifacts"), new Fee(6000000, "2000000uusd")))
 
-    await mustPass(anchor.airdrop_instantiation(testState.wallets.ownerWallet, {anchor_token: anchorTonenAddress}, new Fee(6000000, "2000000uusd")))
+    await mustPass(anchor.airdrop_instantiation(testState.wallets.ownerWallet, {anchor_token: anchorTokenAddress}, new Fee(6000000, "2000000uusd")))
 
     let airdrops_amounts = [
         {"address": testState.basset.contractInfo.lido_terra_hub.contractAddress, "amount": "1000000"},
@@ -59,9 +60,9 @@ async function main() {
 
     const proof = airdrop.getMerkleProof(airdrops_amounts[0]);
     await mustPass(anchor.airdrop_register_merkle_root(testState.wallets.ownerWallet, airdrop.getMerkleRoot()))
-    await mustPass(testState.basset.transfer_cw20_token_to_addr(anchorTonenAddress, testState.wallets.ownerWallet, anchor.contractInfo.airdrop.contractAddress, 1_000_000_000))
+    await mustPass(testState.basset.transfer_cw20_token_to_addr(anchorTokenAddress, testState.wallets.ownerWallet, anchor.contractInfo.airdrop.contractAddress, 1_000_000_000))
 
-    await mustPass(testState.basset.add_airdrop_info(testState.wallets.ownerWallet, anchorTonenAddress, anchor.contractInfo.airdrop.contractAddress))
+    await mustPass(testState.basset.add_airdrop_info(testState.wallets.ownerWallet, anchorTokenAddress, anchor.contractInfo.airdrop.contractAddress))
 
     assert.equal(await querier.balance_bluna(withdrawalAccount), 0)
 

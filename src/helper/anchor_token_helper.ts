@@ -860,13 +860,13 @@ export default class AnchorToken {
     merkle_root: string
   ): Promise<any> {
     const contract = this.contractInfo.airdrop.contractAddress;
-    const merkleRegistrationExecuttion = await execute(sender, contract, {
+    const merkleRegistrationExecution = await execute(sender, contract, {
       register_merkle_root: {
         merkle_root: merkle_root,
       },
     });
-    if (isTxError(merkleRegistrationExecuttion)) {
-      throw new Error(`Couldn't run: ${merkleRegistrationExecuttion.raw_log}`);
+    if (isTxError(merkleRegistrationExecution)) {
+      throw new Error(`Couldn't run: ${merkleRegistrationExecution.raw_log}`);
     }
   }
 }

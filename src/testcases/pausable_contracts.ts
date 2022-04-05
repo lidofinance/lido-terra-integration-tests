@@ -25,11 +25,7 @@ async function main() {
     )
   );
   await mustPass(
-    emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 10)
-  );
-
-  await mustPass(
-    emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 5)
+    emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 15)
   );
   await mustPass(
     testState.basset.update_global_index(testState.wallets.ownerWallet)

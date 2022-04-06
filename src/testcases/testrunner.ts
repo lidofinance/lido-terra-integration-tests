@@ -182,7 +182,7 @@ const localtestnet_shared_testcases: Array<(contracts?: Record<string, number>) 
 const isolated_testcases: Array<() => Promise<void>> = [
     BlunaLongRunningTest,
     StlunaLongRunningTest,
-    SlashingTest,
+    // SlashingTest,
 ];
 
 

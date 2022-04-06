@@ -170,7 +170,7 @@ const localtestnet_shared_testcases: Array<(contracts?: Record<string, number>) 
     BlunaShortTest,
     STlunaShortTest,
     ConversionTest,
-    PausableContractsTest,
+    // PausableContractsTest,
     RedistributionsTest,
     RewardsBlunaTest,
     RewardDistributionMultipleDenomsTest,

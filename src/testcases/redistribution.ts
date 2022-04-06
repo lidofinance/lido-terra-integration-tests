@@ -5,8 +5,8 @@ import {redelegate_proxy_multisig, redistribute} from "../utils/redistribution";
 import {sleep, TestStateLocalTestNet, vals} from "./common_localtestnet"
 var assert = require('assert');
 
-async function main() {
-    const testState = new TestStateLocalTestNet()
+export default async function main(contracts?: Record<string, number>) {
+    const testState = new TestStateLocalTestNet(contracts)
     await testState.init()
 
     const querier = new AnchorbAssetQueryHelper(
@@ -48,9 +48,9 @@ async function main() {
         testState.lcdClient,
         testState.basset.contractInfo.lido_terra_hub.contractAddress,
         testState.multisigPublikKey,
-        testState.multisigKeys.slice(0,0),
+        testState.multisigKeys.slice(0, 0),
         vals[0].address,
-        [[vals[1].address, 
+        [[vals[1].address,
         new Coin("uluna", "4000")]]
     ))
 
@@ -58,8 +58,8 @@ async function main() {
         testState.lcdClient,
         testState.basset.contractInfo.lido_terra_hub.contractAddress,
         testState.multisigPublikKey,
-        testState.multisigKeys,vals[0].address,
-        [[vals[1].address, 
+        testState.multisigKeys, vals[0].address,
+        [[vals[1].address,
         new Coin("uluna", "4000")]]
     ))
 
@@ -145,6 +145,8 @@ async function main() {
     }
 }
 
-main()
-    .then(() => console.log("done"))
-    .catch(console.log);
+if (require.main === module) {
+    main()
+        .then(() => console.log("done"))
+        .catch(console.log);
+}

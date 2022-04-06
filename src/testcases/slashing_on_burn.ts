@@ -3,9 +3,8 @@ import {mustPass} from "../helper/flow/must"
 import {TestStateLocalTestNet} from "./common_localtestnet"
 var assert = require('assert');
 
-
-async function main() {
-    const testState = new TestStateLocalTestNet()
+export default async function main(contracts?: Record<string, number>) {
+    const testState = new TestStateLocalTestNet(contracts)
     await testState.init()
     const querier = new AnchorbAssetQueryHelper(
         testState.lcdClient,
@@ -38,4 +37,9 @@ async function main() {
     assert.ok(await querier.stluna_exchange_rate() == 4)
 }
 
-main().then(() => {console.log("done")})
+
+if (require.main === module) {
+    main()
+        .then(() => console.log("done"))
+        .catch(console.log);
+}

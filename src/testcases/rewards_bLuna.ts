@@ -1,15 +1,16 @@
-import { mustPass } from "../helper/flow/must";
+import {mustPass} from "../helper/flow/must";
 import {emptyBlockWithFixedGas} from "../helper/flow/gas-station";
 import {TestStateLocalTerra} from "./common_localterra";
 import {makeRestStoreQuery} from "../helper/basset_queryhelper";
+import {defaultSleepTime, sleep, TestStateLocalTestNet} from "./common_localtestnet";
 
-async function getLunaBalance(testState: TestStateLocalTerra, address) {
+async function getLunaBalance(testState: TestStateLocalTestNet, address) {
     let balance = await testState.lcdClient.bank.balance(address);
     return balance[0].get("uluna").amount
 }
 
-async function main() {
-    const testState = new TestStateLocalTerra()
+export default async function main(contracts?: Record<string, number>) {
+    const testState = new TestStateLocalTestNet(contracts)
     await testState.init()
 
     let bondAmount = 20_000_000_000_000;
@@ -29,7 +30,7 @@ async function main() {
 
     const bLunaBalance = await makeRestStoreQuery(
         testState.basset.contractInfo["lido_terra_token"].contractAddress,
-        { balance: { address: testState.wallets.a.key.accAddress } },
+        {balance: {address: testState.wallets.a.key.accAddress}},
         testState.lcdClient.config.URL
     ).then((r) => r.balance);
 
@@ -39,22 +40,22 @@ async function main() {
 
     let accruedRewards = await makeRestStoreQuery(
         testState.basset.contractInfo["lido_terra_reward"].contractAddress,
-        { accrued_rewards: { address: testState.wallets.a.key.accAddress } },
+        {accrued_rewards: {address: testState.wallets.a.key.accAddress}},
         testState.lcdClient.config.URL
     ).then((r) => r.rewards);
     if (accruedRewards <= 0) {
         throw new Error("accruedRewards must be more than zero");
     }
 
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 5));
+    await sleep(defaultSleepTime)
 
     let withdrawableUnbonded = await makeRestStoreQuery(
         testState.basset.contractInfo["lido_terra_hub"].contractAddress,
-        { withdrawable_unbonded: { address: testState.wallets.a.key.accAddress} },
+        {withdrawable_unbonded: {address: testState.wallets.a.key.accAddress}},
         testState.lcdClient.config.URL
     ).then((r) => r.withdrawable);
     if (withdrawableUnbonded != bondAmount) {
-        throw new Error("withdrawableUnbonded is not equal to bonded amount")
+        throw new Error(`withdrawableUnbonded(${withdrawableUnbonded}) is not equal to bonded(${bondAmount}) amount`)
     }
 
     let lunaBalanceBeforeWithdraw = await getLunaBalance(testState, testState.wallets.a.key.accAddress);
@@ -66,7 +67,7 @@ async function main() {
                                     ${BigInt(+lunaBalanceAfterWithdraw) - BigInt(+lunaBalanceBeforeWithdraw)} != ${withdrawableUnbonded}`)
     }
 
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 5));
+    await sleep(defaultSleepTime)
 
     await mustPass(testState.basset.update_global_index(testState.wallets.a))
 
@@ -80,25 +81,25 @@ async function main() {
 
     accruedRewards = await makeRestStoreQuery(
         testState.basset.contractInfo["lido_terra_reward"].contractAddress,
-        { accrued_rewards: { address: testState.wallets.b.key.accAddress } },
+        {accrued_rewards: {address: testState.wallets.b.key.accAddress}},
         testState.lcdClient.config.URL
     ).then((r) => r.rewards);
     if (accruedRewards <= 0) {
         throw new Error("accruedRewards must be more than zero");
     }
 
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 5));
+    await sleep(defaultSleepTime)
 
     withdrawableUnbonded = await makeRestStoreQuery(
         testState.basset.contractInfo["lido_terra_hub"].contractAddress,
-        { withdrawable_unbonded: { address: testState.wallets.b.key.accAddress} },
+        {withdrawable_unbonded: {address: testState.wallets.b.key.accAddress}},
         testState.lcdClient.config.URL
     ).then((r) => r.withdrawable);
     if (withdrawableUnbonded != bondAmount) {
         throw new Error(`withdrawableUnbonded is not equal to bonded amount: ${withdrawableUnbonded} != ${bondAmount}`)
     }
 
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 5));
+    await sleep(defaultSleepTime)
 
     lunaBalanceBeforeWithdraw = await getLunaBalance(testState, testState.wallets.b.key.accAddress);
     await mustPass(testState.basset.finish(testState.wallets.b));
@@ -111,6 +112,8 @@ async function main() {
 
 }
 
-main()
-    .then(() => console.log("done"))
-.catch(console.log);
+if (require.main === module) {
+    main()
+        .then(() => console.log("done"))
+        .catch(console.log);
+}

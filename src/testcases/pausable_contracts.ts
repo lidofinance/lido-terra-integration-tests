@@ -1,10 +1,11 @@
-import { mustPass, mustFail, mustFailWithErrorMsg } from "../helper/flow/must";
+import { mustPass, mustFailWithErrorMsg } from "../helper/flow/must";
 import { emptyBlockWithFixedGas } from "../helper/flow/gas-station";
-import { TestStateLocalTerra } from "./common_localterra";
+import { TestStateLocalTestNet } from "./common_localtestnet";
+
 import { ERROR_MESSAGES } from "../helper/errors";
 
-async function main() {
-  const testState = new TestStateLocalTerra();
+export default async function main(contracts?: Record<string, number>) {
+  const testState = new TestStateLocalTestNet(contracts);
   await testState.init();
 
   let stLunaBondAmount = 20_000_000_000;

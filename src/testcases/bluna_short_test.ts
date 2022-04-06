@@ -14,9 +14,9 @@ let mantleState: MantleState;
 
 
 
-async function main() {
+export default async function main(contracts?: Record<string, number>) {
 
-    const testState = new TestStateLocalTestNet()
+    const testState = new TestStateLocalTestNet(contracts)
     await testState.init()
 
     const blunaContractAddress = testState.basset.contractInfo.lido_terra_token.contractAddress
@@ -109,6 +109,8 @@ async function main() {
 
 }
 
-main()
-    .then(() => console.log("done"))
-    .catch(console.log);
+if (require.main === module) {
+    main()
+        .then(() => console.log("done"))
+        .catch(console.log);
+}

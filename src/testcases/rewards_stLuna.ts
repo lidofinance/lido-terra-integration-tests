@@ -2,18 +2,21 @@ import {mustPass} from "../helper/flow/must";
 import {emptyBlockWithFixedGas} from "../helper/flow/gas-station";
 import {TestStateLocalTerra} from "./common_localterra";
 import AnchorbAssetQueryHelper, {makeRestStoreQuery} from "../helper/basset_queryhelper";
+import {defaultSleepTime, sleep, TestStateLocalTestNet} from "./common_localtestnet";
 
 function approxeq(a, b, e) {
     return Math.abs(a - b) <= e;
 }
 
-async function getLunaBalance(testState: TestStateLocalTerra, address) {
+async function getLunaBalance(testState: TestStateLocalTestNet, address) {
     let balance = await testState.lcdClient.bank.balance(address);
     return balance[0].get("uluna").amount
 }
 
-async function main() {
-    const testState = new TestStateLocalTerra()
+const emptyBlocks = 10
+
+export default async function main(contracts?: Record<string, number>) {
+    const testState = new TestStateLocalTestNet(contracts)
     await testState.init()
     const querier = new AnchorbAssetQueryHelper(
         testState.lcdClient,
@@ -30,7 +33,7 @@ async function main() {
         throw new Error("invalid stLuna balance")
     }
 
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 20));
+    await sleep(defaultSleepTime)
     await mustPass(testState.basset.update_global_index(testState.wallets.a))
     await mustPass(testState.basset.bond_for_stluna(testState.wallets.b, bondAmount))
 
@@ -39,7 +42,7 @@ async function main() {
         throw new Error(`invalid stLuna balance: ${balanceB} > ${bondAmount}`)
     }
 
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 10));
+    await sleep(defaultSleepTime)
     await mustPass(testState.basset.update_global_index(testState.wallets.a))
 
     await mustPass(testState.basset.send_cw20_token(
@@ -55,7 +58,7 @@ async function main() {
         throw new Error("stLuna balance must be zero")
     }
 
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 10));
+    await sleep(defaultSleepTime)
 
     let withdrawableUnbonded = await makeRestStoreQuery(
         testState.basset.contractInfo["lido_terra_hub"].contractAddress,
@@ -74,11 +77,11 @@ async function main() {
                                     ${BigInt(+lunaBalanceAfterWithdraw) - BigInt(+lunaBalanceBeforeWithdraw)} != ${withdrawableUnbonded}`)
     }
 
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 5));
+    await sleep(defaultSleepTime)
 
     await mustPass(testState.basset.update_global_index(testState.wallets.a))
 
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 10));
+    await sleep(defaultSleepTime)
 
     await mustPass(testState.basset.update_global_index(testState.wallets.a))
 
@@ -95,7 +98,7 @@ async function main() {
         throw new Error("stLuna balance must be zero")
     }
 
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 10));
+    await sleep(defaultSleepTime)
 
     withdrawableUnbonded = await makeRestStoreQuery(
         testState.basset.contractInfo["lido_terra_hub"].contractAddress,
@@ -106,7 +109,7 @@ async function main() {
         throw new Error("withdrawableUnbonded must be more than bond amount")
     }
 
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 10));
+    await sleep(defaultSleepTime)
 
     lunaBalanceBeforeWithdraw = await getLunaBalance(testState, testState.wallets.b.key.accAddress);
     await mustPass(testState.basset.finish(testState.wallets.b));
@@ -118,6 +121,8 @@ async function main() {
     }
 }
 
-main()
-    .then(() => console.log("done"))
-.catch(console.log);
+if (require.main === module) {
+    main()
+        .then(() => console.log("done"))
+        .catch(console.log);
+}

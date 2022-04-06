@@ -2,13 +2,13 @@ import AnchorbAssetQueryHelper from "../helper/basset_queryhelper";
 import {emptyBlockWithFixedGas} from "../helper/flow/gas-station";
 import {floateq, mustFail, mustPass} from "../helper/flow/must";
 import {MantleState} from "../mantle-querier/MantleState";
-import {TestStateLocalTestNet} from "./common_localtestnet";
+import {defaultSleepTime, sleep, TestStateLocalTestNet} from "./common_localtestnet";
 var assert = require('assert');
 
 
 
-async function main() {
-    const testState = new TestStateLocalTestNet()
+export default async function main(contracts?: Record<string, number>) {
+    const testState = new TestStateLocalTestNet(contracts)
     await testState.init()
 
     const querier = new AnchorbAssetQueryHelper(
@@ -50,9 +50,9 @@ async function main() {
         {unbond: {}},
         testState.basset.contractInfo["lido_terra_hub"].contractAddress
     ))
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 50))
+    await sleep(defaultSleepTime)
     await mustPass(testState.basset.finish(testState.wallets.a))
-    assert.equal(await querier.total_bond_stluna_amount(), 8_750_000_000 )
+    assert.equal(await querier.total_bond_stluna_amount(), 8_750_000_000)
     assert.equal((await querier.token_info_stluna()).total_supply, 7_000_000_000)
     assert.equal(await querier.balance_stluna(testState.wallets.a.key.accAddress), 7_000_000_000)
     const uluna_balance = Number((await testState.wallets.a.lcd.bank.balance(testState.wallets.a.key.accAddress))[0].get("uluna").amount)
@@ -102,7 +102,7 @@ async function main() {
         1_000_000_000,
         {unbond: {}},
         testState.basset.contractInfo["lido_terra_hub"].contractAddress))
-    await mustPass(emptyBlockWithFixedGas(testState.lcdClient, testState.gasStation, 50))
+        await sleep(defaultSleepTime)
     await mustPass(testState.basset.finish(testState.wallets.b))
     const uluna_balance_b = Number((await testState.wallets.a.lcd.bank.balance(testState.wallets.b.key.accAddress))[0].get("uluna").amount)
     history = (await querier.all_history()).history
@@ -125,6 +125,8 @@ async function main() {
 
 }
 
-main()
-    .then(() => console.log("done"))
-    .catch(console.log);
+if (require.main === module) {
+    main()
+        .then(() => console.log("done"))
+        .catch(console.log);
+}

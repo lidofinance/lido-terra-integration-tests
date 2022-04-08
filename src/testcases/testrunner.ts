@@ -15,6 +15,7 @@ import RewardDistributionMultipleDenomsTest from "./rewards_distribution_multipl
 import RewardDistributionSIngleDenomTest from "./rewards_distribution_single_denom"
 import RewardStlunaTest from "./rewards_stLuna"
 import SlashingOnBurnTest from "./slashing_on_burn"
+import AirDrops from "./airdrops_test"
 import axios from "axios";
 
 import BlunaLongRunningTest from "./bluna_longrun_test"
@@ -111,7 +112,6 @@ export const start_testnet = async () => {
         default:
             break;
     }
-
     const confDir = createNodesConfigs(conf)
     const stdout = execSync(`CONF_DIR=${confDir} docker-compose -f ${docker_config} up -d`);
     console.log(`${stdout}`)
@@ -176,7 +176,8 @@ const localtestnet_shared_testcases: Array<(contracts?: Record<string, number>) 
     RewardDistributionMultipleDenomsTest,
     RewardDistributionSIngleDenomTest,
     RewardStlunaTest,
-    SlashingOnBurnTest
+    SlashingOnBurnTest,
+    AirDrops,
 ]
 
 const isolated_testcases: Array<() => Promise<void>> = [

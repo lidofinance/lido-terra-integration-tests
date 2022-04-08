@@ -583,7 +583,8 @@ export default class AnchorbAsset {
     sender: Wallet,
     owner?: string,
     reward_contract?: string,
-    token_contract?: string
+    token_contract?: string,
+    withdrawal_account?: string
   ): Promise<void> {
     const contract = this.contractInfo.lido_terra_hub.contractAddress;
     const paramsExecution = await execute(sender, contract, {
@@ -591,6 +592,7 @@ export default class AnchorbAsset {
         owner: owner,
         reward_contract: reward_contract,
         token_contract: token_contract,
+        airdrop_withdrawal_account: withdrawal_account,
       },
     });
     if (isTxError(paramsExecution)) {
@@ -807,18 +809,18 @@ export default class AnchorbAsset {
     contract: string,
     sender: Wallet,
     recipient: string,
-    amount: number,
-): Promise<void> {
+    amount: number
+  ): Promise<void> {
     const transferExecution = await execute(sender, contract, {
-        transfer: {
-            recipient: recipient,
-            amount: `${amount}`,
-        },
+      transfer: {
+        recipient: recipient,
+        amount: `${amount}`,
+      },
     });
     if (isTxError(transferExecution)) {
-        throw new Error(`Couldn't run: ${transferExecution.raw_log}`);
+      throw new Error(`Couldn't run: ${transferExecution.raw_log}`);
     }
-}
+  }
 
   public async transfer_from_cw20_token(
     contract: string,
@@ -913,7 +915,7 @@ export default class AnchorbAsset {
     sender: Wallet,
     token: string,
     aidrop: string,
-    pair: string
+    pair?: string
   ): Promise<void> {
     const execution = await execute(
       sender,
@@ -924,7 +926,7 @@ export default class AnchorbAsset {
           airdrop_info: {
             airdrop_token_contract: token,
             airdrop_contract: aidrop,
-            airdrop_swap_contract: pair,
+            airdrop_swap_contract: pair || "dummy",
             swap_belief_price: null,
             swap_max_spread: null,
           },
@@ -995,27 +997,29 @@ export default class AnchorbAsset {
 
   public async claim_airdrops(
     sender: Wallet,
-    token:string,
+    airdrop_token_contract: string,
+    airdrop_contract: string,
     stage: number,
     proof: string[],
     amount: number
-): Promise<void> {
+  ): Promise<void> {
     const execution = await execute(
-        sender,
-        this.contractInfo.lido_terra_hub.contractAddress,
-        {
-            claim_airdrops: {
-                token: token,
-                stage: stage,
-                proof: proof,
-                amount: `${amount}`
-            },
-        }
+      sender,
+      this.contractInfo.lido_terra_hub.contractAddress,
+      {
+        claim_airdrops: {
+          airdrop_token_contract: airdrop_token_contract,
+          airdrop_contract: airdrop_contract,
+          stage: stage,
+          proof: proof,
+          amount: `${amount}`,
+        },
+      }
     );
     if (isTxError(execution)) {
-        throw new Error(`Couldn't run: ${execution.raw_log}`);
+      throw new Error(`Couldn't run: ${execution.raw_log}`);
     }
-}
+  }
 
   public async fabricate_mir_claim(
     sender: Wallet,

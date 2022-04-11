@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "ts-node ./src/testcases/testrunner.ts",
     "lint": "tsc -p . --noEmit && tslint -p . && prettier 'src/**/*.{ts, json}' -l",
     "fmt": "tslint -p . --fix && prettier 'src/**/*.{ts, json}' --write",
     "deploy-tequila": "ts-node src/ops/index.ts https://tequila-lcd.terra.dev tequila-0004 \"genre dynamic jacket hair earn enlist dad already airport train car thunder use forum ball novel series tribe label kit walk boy spare stadium\""

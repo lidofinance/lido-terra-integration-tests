@@ -22,8 +22,8 @@ async function reverse_simulation_query(url, converterContractAddress, askTokenA
     return queryResp.offer_amount
 }
 
-async function main() {
-    const testState = new TestStateLocalTestNet()
+export default async function main(contracts?: Record<string, number>) {
+    const testState = new TestStateLocalTestNet(contracts)
     await testState.init()
     const querier = new AnchorbAssetQueryHelper(
         testState.lcdClient,
@@ -111,6 +111,8 @@ async function main() {
 
 }
 
-main()
-    .then(() => console.log('done'))
-    .catch(console.log)
+if (require.main === module) {
+    main()
+        .then(() => console.log("done"))
+        .catch(console.log);
+}

@@ -94,6 +94,21 @@ export default class Anchor {
         await this.converterPool.storeCodes(this.owner, converterLocation, fee);
     }
 
+    public async instantiate_prepared_contracts(
+        contracts: Record<string, number>,
+        fee?: Fee,
+        params?: CustomInstantiationParam,
+        validators_addresses?: Array<string>
+    ): Promise<void> {
+        console.log(contracts)
+        Object.keys(contracts).reduce((acc, key) => {
+            this.bAsset.contractInfo[key] = {codeId: contracts[key], contractAddress: ""}
+            return ""
+        }, "");
+        this.converterPool.contractInfo["lido_terra_stluna_bluna_converter_contract"] = {codeId: contracts["lido_terra_stluna_bluna_converter_contract"], contractAddress: ""}
+        await this.instantiate_localterra(fee, params, validators_addresses)
+    }
+
     public async instantiate_localterra(
         fee?: Fee,
         params?: CustomInstantiationParam,

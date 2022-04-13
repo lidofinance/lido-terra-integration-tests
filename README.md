@@ -1,5 +1,9 @@
 # Testset for test columbus-5 lido terra contracts
 
+## Using integration tests in terra contracts github actions
+Contracts https://github.com/lidofinance/lido-terra-contracts uses the tests in the github worflow and there is a requirements - merging pr in the test repo before before merging in contracts.
+
+After contracts PR merged, gh is looking for a target merge branch name in the test repo. In other words, in case you implemented specific test in branch tests/A for specific update contracts/A you have to first merge tests RP and only after that your merge in contracts branch will be successful
 
 # Local TestNet - 4 validators set
 ## To make it work:

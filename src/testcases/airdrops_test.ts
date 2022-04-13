@@ -87,35 +87,13 @@ export default async function main() {
 
   assert.equal(await querier.balance_bluna(withdrawalAccount), 0);
 
-  // no withdrawal account configured
-  await mustFail(
-    testState.basset.claim_airdrops(
-      testState.wallets.ownerWallet,
-      anchorTokenAddress,
-      anchor.contractInfo.airdrop.contractAddress,
-      1,
-      proof,
-      1_000_000
-    )
-  );
-  assert.equal(await querier.balance_bluna(withdrawalAccount), 0);
-
-  await mustPass(
-    testState.basset.update_config(
-      testState.wallets.ownerWallet,
-      null,
-      null,
-      null,
-      withdrawalAccount
-    )
-  );
-
   // auth error
   await mustFail(
     testState.basset.claim_airdrops(
       testState.wallets.b,
       anchorTokenAddress,
       anchor.contractInfo.airdrop.contractAddress,
+      withdrawalAccount,
       1,
       proof,
       1_000_000
@@ -129,6 +107,7 @@ export default async function main() {
       testState.wallets.ownerWallet,
       anchorTokenAddress,
       anchor.contractInfo.airdrop.contractAddress,
+      withdrawalAccount,
       1,
       proof,
       1_000_001
@@ -141,6 +120,7 @@ export default async function main() {
       testState.wallets.ownerWallet,
       anchorTokenAddress,
       anchor.contractInfo.airdrop.contractAddress,
+      withdrawalAccount,
       1,
       proof,
       1_000_000
@@ -155,6 +135,7 @@ export default async function main() {
       testState.wallets.ownerWallet,
       anchorTokenAddress,
       anchor.contractInfo.airdrop.contractAddress,
+      withdrawalAccount,
       1,
       proof,
       1_000_000

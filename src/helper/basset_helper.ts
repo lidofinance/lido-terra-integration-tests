@@ -999,6 +999,7 @@ export default class AnchorbAsset {
     sender: Wallet,
     airdrop_token_contract: string,
     airdrop_contract: string,
+    withdrawal_account: string,
     stage: number,
     proof: string[],
     amount: number
@@ -1010,6 +1011,7 @@ export default class AnchorbAsset {
         claim_airdrops: {
           airdrop_token_contract: airdrop_token_contract,
           airdrop_contract: airdrop_contract,
+          withdrawal_account: withdrawal_account,
           stage: stage,
           proof: proof,
           amount: `${amount}`,

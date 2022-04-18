@@ -12,6 +12,7 @@
   "author": "MSNTCS",
   "license": "ISC",
   "dependencies": {
+    "@mirror-protocol/mirror-airdrop": "^1.1.0",
     "@terra-money/terra.js": "^2.1.8",
     "axios": "^0.21.1",
     "date-fns": "^2.16.1",

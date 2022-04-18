@@ -334,7 +334,6 @@ export default class Anchor {
             this.owner,
             this.ANC.contractInfo["token"].contractAddress,
             this.ANC.contractInfo["airdrop"].contractAddress,
-            this.terraswap.contractInfo["terraswap_pair"].contractAddress
         );
 
         await this.terraswap.transfer_cw20_token(

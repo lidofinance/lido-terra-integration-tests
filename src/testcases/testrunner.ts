@@ -21,6 +21,7 @@ import BlunaLongRunningTest from "./bluna_longrun_test"
 import StlunaLongRunningTest from "./stluna_longrun_test"
 import SlashingTest from "./slashing"
 import {createNodesConfigs, defaultProjConf, ghProjConf, fastProjConf} from "../utils/node_configurator";
+import ConverterPool from "./converter_pool";
 
 
 
@@ -176,7 +177,8 @@ const localtestnet_shared_testcases: Array<(contracts?: Record<string, number>) 
     RewardDistributionMultipleDenomsTest,
     RewardDistributionSIngleDenomTest,
     RewardStlunaTest,
-    SlashingOnBurnTest
+    SlashingOnBurnTest,
+    ConverterPool
 ]
 
 const isolated_testcases: Array<() => Promise<void>> = [

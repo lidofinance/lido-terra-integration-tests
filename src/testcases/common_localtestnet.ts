@@ -7,6 +7,7 @@ import AnchorbAssetQueryHelper, {makeRestStoreQuery} from "../helper/basset_quer
 import {UnbondRequestsResponse} from "../helper/types/lido_terra_hub/unbond_requests_response";
 import {send_transaction} from "../helper/flow/execution";
 import {Pagination} from "@terra-money/terra.js/dist/client/lcd/APIRequester";
+import ConverterPool from "../helper/stluna_bluna_converter_helper";
 import * as fs from "fs";
 import {floateq} from "../helper/flow/must";
 const {exec} = require('child_process');
@@ -122,6 +123,7 @@ export const contracts = [
     "lido_terra_token_stluna",
     "lido_terra_rewards_dispatcher",
     "lido_terra_validators_registry",
+    "lido_terra_stluna_bluna_converter_contract"
 ];
 
 export const uploadCode = (location: string, sender: Wallet, fee?: Fee): Promise<Record<string, number>> => {
@@ -167,6 +169,7 @@ export class TestStateLocalTestNet {
     multisigKeys: Array<MnemonicKey>
     multisigPublikKey: LegacyAminoMultisigPublicKey
     basset: AnchorbAsset
+    converter: ConverterPool
     validators_addresses: Array<string>
     contracts?: Record<string, number>
     constructor(contracts?: Record<string, number>) {
@@ -228,6 +231,7 @@ export class TestStateLocalTestNet {
         } else {
             await this.anchor.store_contracts_localterra(
                 path.resolve(__dirname, "../../lido-terra-contracts/artifacts"),
+                path.resolve(__dirname, "../../converter/artifacts")
             );
             await this.anchor.instantiate_localterra(
                 fixedFeeForInit,
@@ -240,6 +244,7 @@ export class TestStateLocalTestNet {
             );
         }
         this.basset = this.anchor.bAsset;
+        this.converter = this.anchor.converterPool;
     }
 
     async waitForJailed(name: string, threshold?: number): Promise<void> {

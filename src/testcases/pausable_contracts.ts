@@ -184,6 +184,8 @@ export default async function main(contracts?: Record<string, number>) {
   await mustPass(testState.basset.pauseContracts(testState.wallets.b));
 }
 
-main()
-  .then(() => console.log("done"))
-  .catch(console.log);
+if (require.main === module) {
+  main()
+      .then(() => console.log("done"))
+      .catch(console.log);
+}

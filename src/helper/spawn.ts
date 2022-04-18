@@ -5,6 +5,7 @@ import {Fee, Validator, Wallet} from "@terra-money/terra.js";
 import {execute} from "./flow/execution";
 import AnchorToken from "./anchor_token_helper";
 import {Testkit, TestkitInit} from "../testkit/testkit";
+import ConverterPool from "./stluna_bluna_converter_helper";
 
 // https://terra-money.quip.com/lR4sAHcX3yiB/WebApp-Dev-Page-Deployment#UKCACAa6MDK
 export interface CustomInstantiationParam {
@@ -57,6 +58,7 @@ export default class Anchor {
     public moneyMarket: mMarket;
     public terraswap: terraswap;
     public ANC: AnchorToken;
+    public converterPool: ConverterPool;
     private owner: Wallet;
 
     constructor(owner: Wallet) {
@@ -65,13 +67,16 @@ export default class Anchor {
         this.moneyMarket = new mMarket();
         this.terraswap = new terraswap();
         this.ANC = new AnchorToken();
+        this.converterPool = new ConverterPool();
     }
 
     public async store_contracts_localterra(
         bassetLocation: string,
+        converterLocation: string,
         fee?: Fee
     ): Promise<void> {
         await this.bAsset.storeCodes(this.owner, bassetLocation, fee);
+        await this.converterPool.storeCodes(this.owner, converterLocation, fee);
     }
 
     public async store_contracts(
@@ -79,12 +84,14 @@ export default class Anchor {
         mmLocation: string,
         terraswapLocation: string,
         ancLocation: string,
+        converterLocation: string,
         fee?: Fee
     ): Promise<void> {
         await this.bAsset.storeCodes(this.owner, bassetLocation, fee);
         await this.moneyMarket.storeCodes(this.owner, mmLocation, fee);
         await this.terraswap.storeCodes(this.owner, terraswapLocation, fee);
         await this.ANC.storeCodes(this.owner, ancLocation, fee);
+        await this.converterPool.storeCodes(this.owner, converterLocation, fee);
     }
 
     public async instantiate_prepared_contracts(
@@ -98,6 +105,7 @@ export default class Anchor {
             this.bAsset.contractInfo[key] = {codeId: contracts[key], contractAddress: ""}
             return ""
         }, "");
+        this.converterPool.contractInfo["lido_terra_stluna_bluna_converter_contract"] = {codeId: contracts["lido_terra_stluna_bluna_converter_contract"], contractAddress: ""}
         await this.instantiate_localterra(fee, params, validators_addresses)
     }
 
@@ -122,6 +130,7 @@ export default class Anchor {
         }, fee)
 
         await this.bAsset.register_contracts(this.owner, {}, fee);
+        await this.converterPool.instantiate_converter_pool(this.owner, this.bAsset.contractInfo.lido_terra_hub.contractAddress, this.bAsset.contractInfo.lido_terra_token_stluna.contractAddress, this.bAsset.contractInfo.lido_terra_token.contractAddress);
     }
 
     public async instantiate(
@@ -146,6 +155,7 @@ export default class Anchor {
         }, fee)
 
         await this.bAsset.register_contracts(this.owner, {}, fee);
+        await this.converterPool.instantiate_converter_pool(this.owner, this.bAsset.contractInfo.lido_terra_hub.contractAddress, this.bAsset.contractInfo.lido_terra_token_stluna.contractAddress, this.bAsset.contractInfo.lido_terra_token.contractAddress);
 
         await this.terraswap.instantiate_terraswap(this.owner, fee);
 
